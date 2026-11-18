@@ -115,6 +115,43 @@
             z-index: 12;
             pointer-events: none;
         }
+        #lab-ui-top, #bottom-mode-dock, #lab-drawer, #step-hint-wrap {
+            transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1), transform 0.3s ease;
+        }
+        body.cutscene-playing #lab-ui-top,
+        body.cutscene-playing #bottom-mode-dock,
+        body.cutscene-playing #lab-drawer,
+        body.cutscene-playing #step-hint-wrap,
+        body.cutscene-playing #boot-loading-pill {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        .cutscene-letterbox {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: clamp(28px, 7.2vh, 66px);
+            background: #040814;
+            z-index: 2;
+            pointer-events: none;
+            transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        #cutscene-bar-top {
+            top: 0;
+            border-bottom: 1px solid rgba(248, 220, 59, 0.20);
+            box-shadow: 0 12px 32px rgba(2, 5, 15, 0.88);
+        }
+        #cutscene-bar-bottom {
+            bottom: 0;
+            border-top: 1px solid rgba(248, 220, 59, 0.20);
+            box-shadow: 0 -12px 32px rgba(2, 5, 15, 0.88);
+        }
+        #vincent-cutscene-overlay.bars-open #cutscene-bar-top {
+            transform: translateY(-105%);
+        }
+        #vincent-cutscene-overlay.bars-open #cutscene-bar-bottom {
+            transform: translateY(105%);
+        }
         #moma-frame-bevel {
             position: fixed;
             z-index: 13;
@@ -176,7 +213,29 @@
         }
     </style>
 </head>
-<body class="text-amber-50">
+<body class="text-amber-50 cutscene-playing">
+
+    <!-- Authentic Vincent van Gogh Signature Source Asset (inlined to data URI in output build) -->
+    <img id="vincent-sig-asset" src="data:image/webp;base64,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" alt="Vincent signature" class="hidden" />
+
+    <!-- Opening Cinematic Cutscene Overlay ("Vincent" Signature Impasto Prologue) -->
+    <div id="vincent-cutscene-overlay" class="fixed inset-0 z-[45] select-none overflow-hidden cursor-pointer">
+        <div id="cutscene-bar-top" class="cutscene-letterbox"></div>
+        <canvas id="vincent-cutscene-canvas" class="w-full h-full block"></canvas>
+        <div id="cutscene-bar-bottom" class="cutscene-letterbox"></div>
+
+        <!-- Discrete Sound Unlock Hint (bottom-left) -->
+        <div id="cutscene-sound-hint" class="absolute bottom-3 sm:bottom-4 left-3.5 sm:left-5 z-10 pointer-events-none flex items-center gap-2 text-[10px] sm:text-[11px] text-amber-200/75 tracking-wider uppercase font-semibold transition-opacity duration-500">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse"></span>
+            <span>Click anywhere for 1889 music</span>
+        </div>
+
+        <!-- Sleek Skip Cutscene Pill (bottom-right) -->
+        <button id="btn-skip-cutscene" type="button" class="absolute bottom-2.5 sm:bottom-3.5 right-3.5 sm:right-5 z-10 studio-glass hover:border-amber-300 active:scale-95 transition rounded-full px-3.5 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-amber-100 flex items-center gap-1.5">
+            <span>Skip Intro</span>
+            <span class="text-[10px] font-mono text-cyan-200/80 hidden sm:inline">&middot; Esc</span>
+        </button>
+    </div>
 
     <!-- WebGL Viewport -->
     <div id="viewport"></div>
@@ -421,6 +480,13 @@
                     <button data-easel="3" class="easel-jump-btn mode-pill rounded-lg px-2 py-1.5 text-left font-semibold text-cyan-100 truncate">Olive Trees</button>
                 </div>
             </div>
+
+            <div class="pt-1 border-t border-amber-200/15">
+                <button id="btn-replay-cutscene" type="button" class="w-full mode-pill rounded-xl px-2.5 py-1.5 text-[11px] font-semibold text-amber-200 flex items-center justify-between">
+                    <span>&#9733; Replay &ldquo;Vincent&rdquo; Opening Cutscene</span>
+                    <span class="text-[10px] font-mono text-cyan-200/80">Key I</span>
+                </button>
+            </div>
         </div>
 
         <!-- Tab 2: 1889 Classical Nocturne Music & Soundscape -->
@@ -561,10 +627,10 @@
                     <button data-qual="auto" class="qual-btn active rounded-lg py-1.5 font-semibold">Auto FPS</button>
                     <button data-qual="high" title="Ultra 2x Desktop Profile" class="qual-btn rounded-lg py-1.5 font-semibold">High (2x)</button>
                     <button data-qual="balanced" title="Balanced Laptop Profile" class="qual-btn rounded-lg py-1.5 font-semibold">Balanced</button>
-                    <button data-qual="low" title="Lite &amp; School PC Safe Profile" class="qual-btn rounded-lg py-1.5 font-semibold">Low (1x)</button>
+                    <button data-qual="low" title="Lite &amp; Safe Shaders Profile" class="qual-btn rounded-lg py-1.5 font-semibold">Low (1x)</button>
                 </div>
-                <button id="btn-safe-shaders" title="Toggle lightweight pre-compiled Safe Mode shader loops for School PCs &amp; integrated GPUs" class="mt-1.5 w-full mode-pill rounded-xl px-3 py-1.5 text-[11px] font-semibold text-cyan-100 flex items-center justify-between">
-                    <span>School PC Safe Shaders</span>
+                <button id="btn-safe-shaders" title="Toggle lightweight pre-compiled Safe Shaders for integrated &amp; low-power GPUs" class="mt-1.5 w-full mode-pill rounded-xl px-3 py-1.5 text-[11px] font-semibold text-cyan-100 flex items-center justify-between">
+                    <span>Safe Shaders</span>
                     <span id="safe-shaders-badge" class="text-[10px] font-mono text-amber-300">Auto</span>
                 </button>
                 <div id="gpu-detect-readout" class="mt-1 text-[10px] font-mono text-cyan-200/75 truncate">GPU: Probing hardware&hellip;</div>
@@ -583,6 +649,899 @@
     // ============================================================================
     // CRASH-PROOF THREE.JS r128 BOOTLOADER WITH AUTOMATIC FALLBACK CDN
     // ============================================================================
+
+    // ============================================================================
+    // OPENING CINEMATIC CUTSCENE ENGINE — "Vincent" (Museum-Grade 2x HiDPI Polish)
+    //   1. 2x Supersampled (1920x746) SDF-smoothed contour reconstruction + C2
+    //      3-pass B-spline Gaussian 3D oil impasto dome (zero contour rings or moire)
+    //   2. Native physical-pixel nocturnal oil-glaze gallery backdrop (zero grid artifacts)
+    //   3. Live calligraphy stroke-by-stroke painting + starlight brushstroke dissolve
+    // ============================================================================
+    (function initVincentOpeningCutscene() {
+        var overlay = document.getElementById('vincent-cutscene-overlay');
+        var canvas  = document.getElementById('vincent-cutscene-canvas');
+        var skipBtn = document.getElementById('btn-skip-cutscene');
+        var sndHint = document.getElementById('cutscene-sound-hint');
+        var sigImg  = document.getElementById('vincent-sig-asset');
+        if (!overlay || !canvas || !sigImg) {
+            document.body.classList.remove('cutscene-playing');
+            return;
+        }
+
+        var ctx = canvas.getContext('2d');
+        var SRC_W = 960, SRC_H = 373;
+        var SS = 2; // 2x supersampling -> 1920 x 746 crisp Retina oil-impasto buffers!
+        var SIG_W = SRC_W * SS, SIG_H = SRC_H * SS;
+
+        // Disjoint per-letter calligraphy stroke trajectories (in 960x373 base space; scaled by SS during mask draw)
+        var STROKES = [
+            {
+                name: 'V', t0: 0.38, t1: 1.34, rad: 54, clip: [0, 0, 268, 373],
+                pts: [[26, 18], [24, 155], [26, 275], [68, 322], [118, 314], [166, 252], [188, 152], [176, 82], [144, 24], [126, 28], [138, 86], [178, 118], [222, 112], [256, 72]]
+            },
+            {
+                name: 'i_stem', t0: 1.40, t1: 1.62, rad: 34, clip: [275, 160, 336, 373],
+                pts: [[306, 194], [305, 255], [306, 308], [324, 304]]
+            },
+            {
+                name: 'i_dot', t0: 1.69, t1: 1.81, rad: 30, clip: [275, 70, 336, 155],
+                pts: [[296, 104], [314, 105]]
+            },
+            {
+                name: 'n1', t0: 1.87, t1: 2.38, rad: 39, clip: [336, 175, 521, 373],
+                pts: [[344, 218], [382, 212], [408, 248], [409, 312], [409, 252], [446, 242], [468, 282], [482, 348], [512, 330]]
+            },
+            {
+                name: 'c', t0: 2.42, t1: 2.72, rad: 39, clip: [521, 195, 624, 373],
+                pts: [[582, 226], [552, 232], [538, 272], [558, 328], [614, 342]]
+            },
+            {
+                name: 'e', t0: 2.76, t1: 3.10, rad: 37, clip: [624, 200, 725, 373],
+                pts: [[676, 278], [702, 258], [678, 228], [646, 258], [648, 312], [678, 342], [716, 338]]
+            },
+            {
+                name: 'n2', t0: 3.14, t1: 3.50, rad: 37, clip: [725, 235, 842, 373],
+                pts: [[734, 258], [762, 276], [766, 352], [768, 294], [804, 286], [818, 326], [830, 364]]
+            },
+            {
+                name: 't_stem', t0: 3.54, t1: 3.78, rad: 23, clip: [842, 200, 960, 373],
+                pts: [[860, 218], [865, 268], [875, 315], [898, 344], [955, 349]]
+            },
+            {
+                name: 't_bar', t0: 3.83, t1: 4.00, rad: 25, clip: [842, 246, 946, 300],
+                pts: [[866, 269], [935, 277]]
+            }
+        ];
+
+        STROKES.forEach(function (st) {
+            var dists = [0];
+            var total = 0;
+            for (var i = 1; i < st.pts.length; i++) {
+                var dx = st.pts[i][0] - st.pts[i - 1][0];
+                var dy = st.pts[i][1] - st.pts[i - 1][1];
+                total += Math.hypot(dx, dy);
+                dists.push(total);
+            }
+            st.dists = dists;
+            st.totalLen = Math.max(1, total);
+        });
+
+        var sigBaked = false;
+        var impastoSigCanvas = document.createElement('canvas');
+        impastoSigCanvas.width = SIG_W; impastoSigCanvas.height = SIG_H;
+        var shadowSigCanvas = document.createElement('canvas');
+        shadowSigCanvas.width = SIG_W; shadowSigCanvas.height = SIG_H;
+        var revealMaskCanvas = document.createElement('canvas');
+        revealMaskCanvas.width = SIG_W; revealMaskCanvas.height = SIG_H;
+        var compositeSigCanvas = document.createElement('canvas');
+        compositeSigCanvas.width = SIG_W; compositeSigCanvas.height = SIG_H;
+
+        var bgCanvas = document.createElement('canvas');
+        var bgCachedW = 0, bgCachedH = 0;
+        var dissolveRibbons = [];
+
+        function smoothstep(e0, e1, x) {
+            var t = Math.max(0.0, Math.min(1.0, (x - e0) / (e1 - e0)));
+            return t * t * (3.0 - 2.0 * t);
+        }
+
+        // Fast O(N) 3-pass separable sliding-window B-spline Gaussian blur (C2 smooth -> zero Mach bands or creases!)
+        function blurFloatField3Pass(src, w, h, radius) {
+            var a = new Float32Array(src);
+            var b = new Float32Array(w * h);
+            var diam = 2 * radius + 1;
+            var invD = 1.0 / diam;
+            for (var pass = 0; pass < 3; pass++) {
+                // Horizontal pass: a -> b
+                for (var y = 0; y < h; y++) {
+                    var row = y * w;
+                    var sum = 0.0;
+                    for (var ix = -radius; ix <= radius; ix++) {
+                        sum += a[row + (ix < 0 ? 0 : (ix >= w ? w - 1 : ix))];
+                    }
+                    for (var x = 0; x < w; x++) {
+                        b[row + x] = sum * invD;
+                        var xOut = x - radius;
+                        var xIn  = x + radius + 1;
+                        sum += a[row + (xIn >= w ? w - 1 : xIn)] - a[row + (xOut < 0 ? 0 : xOut)];
+                    }
+                }
+                // Vertical pass: b -> a
+                for (var x2 = 0; x2 < w; x2++) {
+                    var sumY = 0.0;
+                    for (var iy = -radius; iy <= radius; iy++) {
+                        sumY += b[(iy < 0 ? 0 : (iy >= h ? h - 1 : iy)) * w + x2];
+                    }
+                    for (var y2 = 0; y2 < h; y2++) {
+                        a[y2 * w + x2] = sumY * invD;
+                        var yOut = y2 - radius;
+                        var yIn  = y2 + radius + 1;
+                        sumY += b[(yIn >= h ? h - 1 : yIn) * w + x2] - b[(yOut < 0 ? 0 : yOut) * w + x2];
+                    }
+                }
+            }
+            return a;
+        }
+
+        // Bake a sumptuous, high-resolution nocturnal oil-painted gallery backdrop at exact physical pixel size (cw x ch)
+        function ensurePolishedBackdrop(cw, ch) {
+            if (bgCachedW === cw && bgCachedH === ch) return;
+            bgCachedW = cw;
+            bgCachedH = ch;
+            bgCanvas.width = cw;
+            bgCanvas.height = ch;
+            var bctx = bgCanvas.getContext('2d');
+            bctx.imageSmoothingEnabled = true;
+            bctx.imageSmoothingQuality = 'high';
+
+            // 1. Deep velvety Prussian-ultramarine base sky gradient
+            var lin = bctx.createLinearGradient(0, 0, cw * 0.25, ch);
+            lin.addColorStop(0.0, '#050d21');
+            lin.addColorStop(0.48, '#09193c');
+            lin.addColorStop(1.0, '#040a1a');
+            bctx.fillStyle = lin;
+            bctx.fillRect(0, 0, cw, ch);
+
+            // 2. Soft luminous nocturnal indigo aura centered behind "Vincent"
+            var cx = cw * 0.5, cy = ch * 0.465;
+            var maxR = Math.hypot(cw, ch) * 0.64;
+            var rad = bctx.createRadialGradient(cx, cy, Math.min(cw, ch) * 0.03, cx, cy, maxR);
+            rad.addColorStop(0.0, 'rgba(30, 66, 138, 0.52)');
+            rad.addColorStop(0.38, 'rgba(17, 40, 92, 0.34)');
+            rad.addColorStop(0.74, 'rgba(7, 17, 42, 0.18)');
+            rad.addColorStop(1.0, 'rgba(2, 6, 16, 0.0)');
+            bctx.fillStyle = rad;
+            bctx.fillRect(0, 0, cw, ch);
+
+            // 3. Silky, feathered Van Gogh nocturnal oil-glaze flow (tapered multi-layer curved washes, zero capsule edges!)
+            var washC = document.createElement('canvas');
+            washC.width = Math.max(320, Math.round(cw * 0.5));
+            washC.height = Math.max(180, Math.round(ch * 0.5));
+            var wctx = washC.getContext('2d');
+            var ww = washC.width, wh = washC.height;
+            var scaleRef = Math.max(ww, wh) / 900.0;
+            var seed = 188906;
+            function nextRand() {
+                seed = (seed * 1664525 + 1013904223) >>> 0;
+                return seed / 4294967296.0;
+            }
+            var glazePalette = [
+                'rgba(28, 64, 138, 0.065)',
+                'rgba(16, 42, 98, 0.075)',
+                'rgba(44, 88, 172, 0.048)',
+                'rgba(6, 16, 44, 0.085)',
+                'rgba(62, 110, 194, 0.035)'
+            ];
+            for (var gi = 0; gi < 680; gi++) {
+                var gx = nextRand() * ww;
+                var gy = nextRand() * wh;
+                var nx = gx / ww - 0.5;
+                var ny = gy / wh - 0.47;
+                var swirlAng = Math.sin(nx * 3.6 + ny * 2.2) * 0.52 + Math.cos(ny * 4.0 - nx * 1.9) * 0.28 - 0.06;
+                var sLen = (36 + nextRand() * 88) * scaleRef;
+                var sWid = (3.5 + nextRand() * 9.5) * scaleRef;
+                wctx.save();
+                wctx.translate(gx, gy);
+                wctx.rotate(swirlAng);
+                wctx.fillStyle = glazePalette[gi % glazePalette.length];
+                // Tapered pointed bristle-ellipses so strokes blend seamlessly with zero blunt caps!
+                wctx.beginPath();
+                wctx.ellipse(0, 0, sLen * 0.5, sWid * 0.5, 0, 0, Math.PI * 2);
+                wctx.fill();
+                wctx.restore();
+            }
+            bctx.save();
+            try { bctx.filter = 'blur(' + Math.max(2, Math.round(cw / 320)) + 'px)'; } catch (e) {}
+            bctx.drawImage(washC, 0, 0, cw, ch);
+            bctx.filter = 'none';
+            bctx.restore();
+
+            // 4. Museum gallery vignette framing the center stage
+            var vig = bctx.createRadialGradient(cx, cy, Math.min(cw, ch) * 0.18, cx, ch * 0.5, Math.hypot(cw, ch) * 0.62);
+            vig.addColorStop(0.0, 'rgba(0, 0, 0, 0.0)');
+            vig.addColorStop(0.65, 'rgba(3, 7, 19, 0.28)');
+            vig.addColorStop(1.0, 'rgba(2, 5, 14, 0.78)');
+            bctx.fillStyle = vig;
+            bctx.fillRect(0, 0, cw, ch);
+
+            // 5. Micro-fine organic museum canvas tooth + anti-banding dither (zero visible grid!)
+            var grainTile = document.createElement('canvas');
+            grainTile.width = 256; grainTile.height = 256;
+            var gctx = grainTile.getContext('2d');
+            var gImg = gctx.createImageData(256, 256);
+            var gd = gImg.data;
+            var gSeed = 90210;
+            for (var py = 0; py < 256; py++) {
+                for (var px = 0; px < 256; px++) {
+                    gSeed = (gSeed * 1664525 + 1013904223) >>> 0;
+                    var rnd = (gSeed / 4294967296.0) - 0.5;
+                    // Ultra-subtle fine linen micro-weave at 2px physical period + organic noise so zero grid ever appears
+                    var fineWeave = Math.sin(px * Math.PI * 0.6667 + rnd * 0.9) * Math.sin(py * Math.PI * 0.6667 - rnd * 0.9);
+                    var v = 128 + rnd * 18.0 + fineWeave * 7.0;
+                    var idx = (py * 256 + px) * 4;
+                    gd[idx] = gd[idx + 1] = gd[idx + 2] = Math.max(0, Math.min(255, Math.round(v)));
+                    gd[idx + 3] = 16; // ~6% soft overlay blend -> kills 8-bit gradient banding & feels like fine museum paper/linen!
+                }
+            }
+            gctx.putImageData(gImg, 0, 0);
+            bctx.save();
+            bctx.globalCompositeOperation = 'overlay';
+            bctx.fillStyle = bctx.createPattern(grainTile, 'repeat');
+            bctx.fillRect(0, 0, cw, ch);
+            bctx.restore();
+        }
+
+        function bakeImpastoFromSignatureImage() {
+            if (sigBaked || !sigImg.complete || !sigImg.naturalWidth) return;
+            sigBaked = true;
+
+            // 1. Render uploaded WebP at 2x supersampled resolution (1920 x 746) and reconstruct silky-smooth contour!
+            var rawC = document.createElement('canvas');
+            rawC.width = SIG_W; rawC.height = SIG_H;
+            var rctx = rawC.getContext('2d');
+            rctx.imageSmoothingEnabled = true;
+            rctx.imageSmoothingQuality = 'high';
+            rctx.drawImage(sigImg, 0, 0, SIG_W, SIG_H);
+            var srcData = rctx.getImageData(0, 0, SIG_W, SIG_H).data;
+
+            var rawAlpha = new Float32Array(SIG_W * SIG_H);
+            for (var p = 0; p < SIG_W * SIG_H; p++) {
+                rawAlpha[p] = srcData[p * 4 + 3] / 255.0;
+            }
+
+            // Smooth out 1x WebP rasterization stair-steps into a razor-crisp anti-aliased 2x contour
+            var aaBlur = blurFloatField3Pass(rawAlpha, SIG_W, SIG_H, 2);
+            var alphaF = new Float32Array(SIG_W * SIG_H);
+            for (var p2 = 0; p2 < SIG_W * SIG_H; p2++) {
+                alphaF[p2] = smoothstep(0.31, 0.67, aaBlur[p2]);
+            }
+
+            // 2. Compute dual-scale C2-smooth B-spline Gaussian thickness fields at 960x373 & upsample bilinearly
+            //    (Ultra-fast <12ms AND guaranteed C2 smooth with zero plateaus, creases, or contour rings!)
+            var halfAlpha = new Float32Array(SRC_W * SRC_H);
+            for (var hy = 0; hy < SRC_H; hy++) {
+                var r0 = (hy * 2) * SIG_W;
+                var r1 = (hy * 2 + 1) * SIG_W;
+                var dstR = hy * SRC_W;
+                for (var hx = 0; hx < SRC_W; hx++) {
+                    var x2 = hx * 2;
+                    halfAlpha[dstR + hx] = 0.25 * (alphaF[r0 + x2] + alphaF[r0 + x2 + 1] + alphaF[r1 + x2] + alphaF[r1 + x2 + 1]);
+                }
+            }
+
+            var domeBevel = blurFloatField3Pass(halfAlpha, SRC_W, SRC_H, 6);
+            var domeBroad = blurFloatField3Pass(halfAlpha, SRC_W, SRC_H, 16);
+            var softShadowHalf = blurFloatField3Pass(halfAlpha, SRC_W, SRC_H, 7);
+
+            var domeHalf = new Float32Array(SRC_W * SRC_H);
+            for (var di = 0; di < SRC_W * SRC_H; di++) {
+                // Smooth rounded impasto cushion from bevel edge all the way to the thickest stroke spine
+                var b1 = Math.pow(Math.max(0.0, domeBevel[di]), 0.78);
+                var b2 = Math.pow(Math.max(0.0, domeBroad[di]), 0.88);
+                domeHalf[di] = 0.62 * b1 + 0.38 * b2;
+            }
+
+            function sampleHalfBilinear(field, fx, fy) {
+                var cx = Math.max(0.0, Math.min(SRC_W - 1.001, fx));
+                var cy = Math.max(0.0, Math.min(SRC_H - 1.001, fy));
+                var x0 = cx | 0, y0 = cy | 0;
+                var tx = cx - x0, ty = cy - y0;
+                var row0 = y0 * SRC_W, row1 = (y0 + 1) * SRC_W;
+                var v00 = field[row0 + x0], v10 = field[row0 + x0 + 1];
+                var v01 = field[row1 + x0], v11 = field[row1 + x0 + 1];
+                return (v00 + (v10 - v00) * tx) * (1.0 - ty) + (v01 + (v11 - v01) * tx) * ty;
+            }
+
+            var ictx = impastoSigCanvas.getContext('2d');
+            var outImg = ictx.createImageData(SIG_W, SIG_H);
+            var od = outImg.data;
+
+            var sctx = shadowSigCanvas.getContext('2d');
+            var shImg = sctx.createImageData(SIG_W, SIG_H);
+            var sd = shImg.data;
+
+            var inkCandidates = [];
+
+            for (var py = 0; py < SIG_H; py++) {
+                var fy = (py + 0.5) * 0.5 - 0.5;
+                var rowOff = py * SIG_W;
+                for (var px = 0; px < SIG_W; px++) {
+                    var fx = (px + 0.5) * 0.5 - 0.5;
+                    var i = rowOff + px;
+
+                    // Plush Gaussian cast shadow (extends softly outside ink edge too!)
+                    var shA = sampleHalfBilinear(softShadowHalf, fx, fy);
+                    if (shA > 0.004) {
+                        var s4 = i * 4;
+                        sd[s4]     = 2;
+                        sd[s4 + 1] = 6;
+                        sd[s4 + 2] = 20;
+                        sd[s4 + 3] = Math.round(Math.min(1.0, shA * 0.92) * 210);
+                    }
+
+                    var a = alphaF[i];
+                    if (a < 0.004) continue;
+
+                    var hC = sampleHalfBilinear(domeHalf, fx, fy);
+                    var hR = sampleHalfBilinear(domeHalf, fx + 0.85, fy);
+                    var hL = sampleHalfBilinear(domeHalf, fx - 0.85, fy);
+                    var hD = sampleHalfBilinear(domeHalf, fx, fy + 0.85);
+                    var hU = sampleHalfBilinear(domeHalf, fx, fy - 0.85);
+
+                    var dhx = (hR - hL) * 3.10;
+                    var dhy = (hD - hU) * 3.10;
+                    var gradMag = Math.hypot(dhx, dhy);
+
+                    // Silky contour-parallel hog-bristle ridges (C2 smooth, zero moire & zero spine seams!)
+                    var spineFade = smoothstep(0.025, 0.30, gradMag) * smoothstep(0.02, 0.20, hC);
+                    var organicMod = Math.sin(fx * 0.042 + fy * 0.032) * 1.1 + Math.cos(fx * 0.021 - fy * 0.048) * 0.85;
+                    var bristle = Math.sin(hC * 38.0 + organicMod) * 0.68 + Math.sin(hC * 76.0 - organicMod * 0.65) * 0.32;
+                    var bAmt = bristle * spineFade * 0.135;
+
+                    var invG = gradMag > 1e-4 ? (1.0 / gradMag) : 0.0;
+                    var nx = -dhx - dhx * invG * bAmt;
+                    var ny = -dhy - dhy * invG * bAmt;
+                    var nz = 1.0;
+                    var nl = Math.hypot(nx, ny, nz) || 1.0;
+                    nx /= nl; ny /= nl; nz /= nl;
+
+                    // Sculptural gallery key light from upper-left + subtle cool cobalt rim bounce on lower-right bevel
+                    var keyNdl    = Math.max(0.0, nx * -0.46 + ny * -0.60 + nz * 0.654);
+                    var rimFill   = Math.max(0.0, nx *  0.48 + ny *  0.54 + nz * 0.691);
+                    var specBroad = Math.pow(Math.max(0.0, nx * -0.28 + ny * -0.42 + nz * 0.863), 18.0);
+                    var specGlint = Math.pow(Math.max(0.0, nx * -0.22 + ny * -0.35 + nz * 0.910), 58.0);
+
+                    var dome = Math.min(1.0, hC * 1.15);
+                    var tone = Math.max(0.0, Math.min(1.0,
+                        0.04 + dome * 0.38 + keyNdl * 0.56 + bristle * spineFade * 0.042
+                    ));
+
+                    // Rich museum 1889 Chrome-Yellow / Golden-Ochre / Naples-Gold curve (warm amber bevel -> saturated gold -> sunlit ivory ridge)
+                    var t2 = tone * tone;
+                    var t3 = t2 * tone;
+                    var r = 132.0 + 216.0 * tone - 104.0 * t2 + 10.0 * t3;
+                    var g = 74.0  + 202.0 * tone -  48.0 * t2 +  4.0 * t3;
+                    var b = 12.0  +  16.0 * tone +  34.0 * t2 + 46.0 * t3;
+
+                    r += rimFill * 6.0  + specBroad * 32.0 + specGlint * 52.0;
+                    g += rimFill * 11.0 + specBroad * 30.0 + specGlint * 50.0;
+                    b += rimFill * 22.0 + specBroad * 34.0 + specGlint * 64.0;
+
+                    var o4 = i * 4;
+                    od[o4]     = Math.max(0, Math.min(255, Math.round(r)));
+                    od[o4 + 1] = Math.max(0, Math.min(255, Math.round(g)));
+                    od[o4 + 2] = Math.max(0, Math.min(255, Math.round(b)));
+                    od[o4 + 3] = Math.round(a * 255);
+
+                    if ((px & 1) === 0 && (py & 1) === 0 && a > 0.68 && (((px >> 1) + (py >> 1) * 7) % 19 === 0)) {
+                        inkCandidates.push([px / SIG_W, py / SIG_H, tone]);
+                    }
+                }
+            }
+            ictx.putImageData(outImg, 0, 0);
+            sctx.putImageData(shImg, 0, 0);
+
+            // Sample ~260 swirling impasto dissolve ribbons directly from signature ink pixels!
+            dissolveRibbons = [];
+            var stepC = Math.max(1, Math.floor(inkCandidates.length / 260));
+            for (var k = 0; k < inkCandidates.length && dissolveRibbons.length < 260; k += stepC) {
+                var ic = inkCandidates[k];
+                var riIdx = dissolveRibbons.length;
+                var ang0 = Math.atan2(ic[1] - 0.5, ic[0] - 0.5) + (((riIdx * 37) % 100) / 100 - 0.5) * 0.95;
+                var palettePick = riIdx % 12;
+                var colHex = '#f8dc3b';
+                if (palettePick === 0) colHex = '#4b8bf4';
+                else if (palettePick === 3 || palettePick === 8 || ic[2] > 0.76) colHex = '#fff6bf';
+                else if (palettePick === 5 || palettePick === 10) colHex = '#eab308';
+                dissolveRibbons.push({
+                    u: ic[0],
+                    v: ic[1],
+                    ang: ang0,
+                    speed: 0.45 + ((riIdx * 53) % 100) / 100 * 0.95,
+                    spin: (((riIdx % 2) === 0) ? 1 : -1) * (1.2 + ((riIdx * 17) % 100) / 100 * 1.8),
+                    delay: ic[0] * 0.28 + (((riIdx * 41) % 100) / 100) * 0.18,
+                    len: 14 + ((riIdx * 7) % 18),
+                    wid: 3.6 + ((riIdx * 3) % 5),
+                    col: colHex
+                });
+            }
+        }
+
+        if (sigImg.complete && sigImg.naturalWidth > 0) {
+            bakeImpastoFromSignatureImage();
+        } else {
+            sigImg.addEventListener('load', bakeImpastoFromSignatureImage);
+        }
+
+        // Ambient floating golden pigment dust motes + live brush-tip sparks
+        var dustMotes = [];
+        for (var mi = 0; mi < 42; mi++) {
+            dustMotes.push({
+                x: ((mi * 73) % 100) / 100,
+                y: ((mi * 41) % 100) / 100,
+                r: 0.85 + (mi % 4) * 0.55,
+                vx: (((mi * 19) % 100) / 100 - 0.5) * 0.016,
+                vy: -0.007 - ((mi * 31) % 100) / 100 * 0.014,
+                ph: mi * 1.3
+            });
+        }
+        var tipSparks = [];
+
+        var state = {
+            active: true,
+            skipping: false,
+            skipFade: 0.0,
+            elapsed: 0.0,
+            holdWait: 0.0,
+            lastTs: 0,
+            craneTriggered: false,
+            barsOpened: false,
+            rafId: 0
+        };
+
+        var T_WRITE_END    = 4.02;
+        var T_HOLD_GATE    = 4.62;
+        var T_DISSOLVE_END = 7.95;
+
+        function sampleStrokePointAt(st, frac) {
+            var targetD = Math.max(0, Math.min(1, frac)) * st.totalLen;
+            for (var i = 1; i < st.pts.length; i++) {
+                if (targetD <= st.dists[i] || i === st.pts.length - 1) {
+                    var segLen = Math.max(0.001, st.dists[i] - st.dists[i - 1]);
+                    var u = (targetD - st.dists[i - 1]) / segLen;
+                    return [
+                        st.pts[i - 1][0] + (st.pts[i][0] - st.pts[i - 1][0]) * u,
+                        st.pts[i - 1][1] + (st.pts[i][1] - st.pts[i - 1][1]) * u,
+                        i
+                    ];
+                }
+            }
+            return [st.pts[0][0], st.pts[0][1], 1];
+        }
+
+        function easeCalligraphy(u) {
+            return u < 0.5 ? 2.0 * u * u : 1.0 - Math.pow(-2.0 * u + 2.0, 2.0) * 0.5;
+        }
+
+        function finishCutscene() {
+            if (!state.active) return;
+            state.active = false;
+            if (state.rafId) {
+                cancelAnimationFrame(state.rafId);
+                state.rafId = 0;
+            }
+            overlay.classList.add('bars-open');
+            overlay.style.display = 'none';
+            document.body.classList.remove('cutscene-playing');
+            if (window.__finishIntro3DCameraSweep) {
+                window.__finishIntro3DCameraSweep();
+            }
+        }
+
+        function triggerSkipCutscene() {
+            if (!state.active || state.skipping) return;
+            state.skipping = true;
+            state.skipFade = 0.0;
+            overlay.classList.add('bars-open');
+            document.body.classList.remove('cutscene-playing');
+            if (window.__finishIntro3DCameraSweep) {
+                window.__finishIntro3DCameraSweep();
+            }
+        }
+
+        function replayCutscene() {
+            bakeImpastoFromSignatureImage();
+            tipSparks.length = 0;
+            state.active = true;
+            state.skipping = false;
+            state.skipFade = 0.0;
+            state.elapsed = 0.0;
+            state.holdWait = 0.0;
+            state.lastTs = performance.now();
+            state.craneTriggered = false;
+            state.barsOpened = false;
+            overlay.style.display = 'block';
+            overlay.classList.remove('bars-open');
+            document.body.classList.add('cutscene-playing');
+            if (sndHint) {
+                sndHint.style.opacity = (window.__isAudioActive && window.__isAudioActive()) ? '0' : '1';
+            }
+            if (window.__primeIntro3DCameraStart) {
+                window.__primeIntro3DCameraStart();
+            }
+            if (!state.rafId) {
+                state.rafId = requestAnimationFrame(renderCutsceneFrame);
+            }
+        }
+
+        skipBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            triggerSkipCutscene();
+        });
+
+        overlay.addEventListener('click', function (e) {
+            if (e.target === skipBtn || (skipBtn && skipBtn.contains(e.target))) return;
+            if (window.__unlockIntroAudio) {
+                window.__unlockIntroAudio();
+            }
+            if (sndHint) sndHint.style.opacity = '0';
+        });
+
+        window.addEventListener('keydown', function (e) {
+            if (!state.active) return;
+            if (e.code === 'Escape' || e.code === 'Space' || e.code === 'Enter') {
+                e.preventDefault();
+                e.stopPropagation();
+                triggerSkipCutscene();
+            }
+        }, true);
+
+        function renderCutsceneFrame(nowTs) {
+            if (!state.active) return;
+            state.rafId = requestAnimationFrame(renderCutsceneFrame);
+
+            if (!state.lastTs) state.lastTs = nowTs;
+            var dt = Math.min(0.05, Math.max(0.001, (nowTs - state.lastTs) / 1000.0));
+            state.lastTs = nowTs;
+
+            if (!sigBaked && sigImg.complete && sigImg.naturalWidth > 0) {
+                bakeImpastoFromSignatureImage();
+            }
+
+            if (state.skipping) {
+                state.skipFade += dt / 0.42;
+                if (state.skipFade >= 1.0) {
+                    finishCutscene();
+                    return;
+                }
+            } else {
+                var worldReady = !!window.__vgWorldReady;
+                if (state.elapsed < T_HOLD_GATE || worldReady || state.holdWait > 4.2) {
+                    state.elapsed += dt;
+                } else {
+                    state.holdWait += dt;
+                }
+            }
+
+            var t = state.elapsed;
+            if (!state.craneTriggered && t >= T_HOLD_GATE - 0.08) {
+                state.craneTriggered = true;
+                if (window.__startIntro3DCameraSweep) {
+                    window.__startIntro3DCameraSweep(T_DISSOLVE_END - T_HOLD_GATE);
+                }
+            }
+            if (!state.barsOpened && t >= T_DISSOLVE_END - 0.85) {
+                state.barsOpened = true;
+                overlay.classList.add('bars-open');
+                document.body.classList.remove('cutscene-playing');
+            }
+            if (t >= T_DISSOLVE_END) {
+                finishCutscene();
+                return;
+            }
+
+            var dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+            var vw = Math.max(320, window.innerWidth || 1280);
+            var vh = Math.max(240, window.innerHeight || 720);
+            var cw = Math.round(vw * dpr), ch = Math.round(vh * dpr);
+            if (canvas.width !== cw || canvas.height !== ch) {
+                canvas.width = cw;
+                canvas.height = ch;
+            }
+            ensurePolishedBackdrop(cw, ch);
+
+            ctx.save();
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.clearRect(0, 0, cw, ch);
+
+            var dissolveT = Math.max(0.0, Math.min(1.0, (t - T_HOLD_GATE) / (T_DISSOLVE_END - T_HOLD_GATE)));
+            var dissolveEase = dissolveT * dissolveT * (3.0 - 2.0 * dissolveT);
+            var masterAlpha = state.skipping ? (1.0 - state.skipFade) : 1.0;
+
+            // 1. Native Physical-Pixel Polished Nocturnal Oil-Glaze Backdrop (zero upscaling blur or grid!)
+            var bgAlpha = masterAlpha * (1.0 - Math.pow(dissolveT, 1.35));
+            if (bgAlpha > 0.005) {
+                ctx.save();
+                ctx.globalAlpha = bgAlpha;
+                ctx.drawImage(bgCanvas, 0, 0, cw, ch);
+
+                // Radial starlight iris cut-out as the 3D painting opens behind "Vincent"
+                if (dissolveT > 0.01) {
+                    ctx.globalCompositeOperation = 'destination-out';
+                    var irisR = Math.hypot(cw, ch) * 0.72 * Math.pow(dissolveT, 1.15);
+                    var irisG = ctx.createRadialGradient(cw * 0.5, ch * 0.48, irisR * 0.18, cw * 0.5, ch * 0.48, Math.max(12, irisR));
+                    irisG.addColorStop(0.0, 'rgba(0,0,0,0.96)');
+                    irisG.addColorStop(0.65, 'rgba(0,0,0,0.55)');
+                    irisG.addColorStop(1.0, 'rgba(0,0,0,0.0)');
+                    ctx.fillStyle = irisG;
+                    ctx.fillRect(0, 0, cw, ch);
+                    ctx.globalCompositeOperation = 'source-over';
+                }
+                ctx.restore();
+            }
+
+            // Switch to logical CSS coordinates (scaled by dpr) for crisp resolution-independent layout
+            ctx.scale(dpr, dpr);
+
+            // 2. Drifting Soft Starlight Pigment Motes
+            var moteAlpha = masterAlpha * (1.0 - dissolveEase * 0.85) * Math.min(1.0, t / 0.5);
+            if (moteAlpha > 0.01) {
+                ctx.save();
+                for (var dm = 0; dm < dustMotes.length; dm++) {
+                    var m = dustMotes[dm];
+                    m.x = (m.x + m.vx * dt + 1.0) % 1.0;
+                    m.y = (m.y + m.vy * dt + 1.0) % 1.0;
+                    var tw = 0.45 + 0.55 * Math.sin(t * 2.4 + m.ph);
+                    var mx = m.x * vw, my = m.y * vh;
+                    var mg = ctx.createRadialGradient(mx, my, 0, mx, my, m.r * 2.8);
+                    mg.addColorStop(0.0, (dm % 3 === 0) ? 'rgba(255, 248, 200, 0.92)' : 'rgba(248, 220, 59, 0.85)');
+                    mg.addColorStop(0.45, 'rgba(248, 220, 59, 0.28)');
+                    mg.addColorStop(1.0, 'rgba(248, 220, 59, 0.0)');
+                    ctx.globalAlpha = moteAlpha * tw * 0.65;
+                    ctx.fillStyle = mg;
+                    ctx.beginPath();
+                    ctx.arc(mx, my, m.r * 2.8, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            // 3. BIG CENTERED 2X-SUPERSAMPLED "Vincent" SIGNATURE — Live Impasto Calligraphy + Specular Gleam!
+            var zoomDrift = 1.0 + 0.042 * Math.min(1.0, t / T_HOLD_GATE) + dissolveEase * 0.088;
+            var baseSigW = Math.min(vw * 0.74, vh * 1.44, 860) * zoomDrift;
+            var baseSigH = baseSigW * (SRC_H / SRC_W);
+            var sigX = (vw - baseSigW) * 0.5;
+            var sigY = (vh - baseSigH) * 0.465;
+
+            var activeNib = null;
+            if (sigBaked) {
+                var mctx = revealMaskCanvas.getContext('2d');
+                mctx.clearRect(0, 0, SIG_W, SIG_H);
+                mctx.save();
+                mctx.scale(SS, SS);
+                mctx.lineCap = 'round';
+                mctx.lineJoin = 'round';
+                mctx.strokeStyle = '#ffffff';
+                mctx.fillStyle = '#ffffff';
+
+                for (var si = 0; si < STROKES.length; si++) {
+                    var st = STROKES[si];
+                    if (t < st.t0) continue;
+                    var rawU = Math.min(1.0, (t - st.t0) / Math.max(0.01, st.t1 - st.t0));
+                    var uE = easeCalligraphy(rawU);
+
+                    mctx.save();
+                    mctx.beginPath();
+                    mctx.rect(st.clip[0], st.clip[1], st.clip[2] - st.clip[0], st.clip[3] - st.clip[1]);
+                    mctx.clip();
+
+                    mctx.lineWidth = st.rad * 2.0;
+                    mctx.beginPath();
+                    mctx.moveTo(st.pts[0][0], st.pts[0][1]);
+                    if (rawU >= 0.999) {
+                        for (var pk = 1; pk < st.pts.length; pk++) {
+                            mctx.lineTo(st.pts[pk][0], st.pts[pk][1]);
+                        }
+                    } else {
+                        var tip = sampleStrokePointAt(st, uE);
+                        for (var pk2 = 1; pk2 < tip[2]; pk2++) {
+                            mctx.lineTo(st.pts[pk2][0], st.pts[pk2][1]);
+                        }
+                        mctx.lineTo(tip[0], tip[1]);
+                        activeNib = {
+                            x: sigX + (tip[0] / SRC_W) * baseSigW,
+                            y: sigY + (tip[1] / SRC_H) * baseSigH
+                        };
+                    }
+                    mctx.stroke();
+                    mctx.restore();
+                }
+                mctx.restore();
+
+                var sigAlpha = masterAlpha * (1.0 - Math.pow(Math.min(1.0, dissolveT * 1.28), 1.55));
+                if (sigAlpha > 0.006) {
+                    var cctx = compositeSigCanvas.getContext('2d');
+                    cctx.imageSmoothingEnabled = true;
+                    cctx.imageSmoothingQuality = 'high';
+
+                    // A) Plush Gaussian-blurred Prussian relief shadow beneath the sculpted impasto
+                    cctx.clearRect(0, 0, SIG_W, SIG_H);
+                    cctx.globalCompositeOperation = 'source-over';
+                    cctx.drawImage(shadowSigCanvas, 0, 0);
+                    cctx.globalCompositeOperation = 'destination-in';
+                    cctx.drawImage(revealMaskCanvas, 0, 0);
+
+                    ctx.save();
+                    ctx.globalAlpha = sigAlpha * 0.82;
+                    ctx.drawImage(compositeSigCanvas, sigX + baseSigW * 0.006, sigY + baseSigH * 0.020, baseSigW, baseSigH);
+                    ctx.restore();
+
+                    // B) 2x Supersampled 3D Sculpted Chrome-Gold & Ivory Impasto Signature + Travelling Gallery Gleam
+                    cctx.clearRect(0, 0, SIG_W, SIG_H);
+                    cctx.globalCompositeOperation = 'source-over';
+                    cctx.drawImage(impastoSigCanvas, 0, 0);
+                    cctx.globalCompositeOperation = 'destination-in';
+                    cctx.drawImage(revealMaskCanvas, 0, 0);
+
+                    if (t > 3.25) {
+                        var sheenU = (t - 3.25) / 1.55;
+                        if (sheenU >= 0.0 && sheenU <= 1.25) {
+                            cctx.globalCompositeOperation = 'source-atop';
+                            var gx0 = (sheenU * 1.35 - 0.25) * SIG_W;
+                            var sg = cctx.createLinearGradient(gx0 - 260, 0, gx0 + 260, 190);
+                            sg.addColorStop(0.0, 'rgba(255, 250, 210, 0.0)');
+                            sg.addColorStop(0.5, 'rgba(255, 253, 236, 0.36)');
+                            sg.addColorStop(1.0, 'rgba(255, 250, 210, 0.0)');
+                            cctx.fillStyle = sg;
+                            cctx.fillRect(0, 0, SIG_W, SIG_H);
+                        }
+                    }
+                    cctx.globalCompositeOperation = 'source-over';
+
+                    ctx.save();
+                    ctx.globalAlpha = sigAlpha;
+                    ctx.shadowColor = 'rgba(248, 210, 56, 0.28)';
+                    ctx.shadowBlur = 22;
+                    ctx.drawImage(compositeSigCanvas, sigX, sigY, baseSigW, baseSigH);
+                    ctx.restore();
+                }
+            }
+
+            // 4. Live Glowing Bristle Nib + Trailing Wet-Paint Sparks while signing "Vincent"
+            if (activeNib && !state.skipping) {
+                for (var sp = 0; sp < 3; sp++) {
+                    var aSp = Math.random() * Math.PI * 2.0;
+                    var vSp = 18 + Math.random() * 54;
+                    tipSparks.push({
+                        x: activeNib.x + (Math.random() - 0.5) * 5,
+                        y: activeNib.y + (Math.random() - 0.5) * 5,
+                        vx: Math.cos(aSp) * vSp,
+                        vy: Math.sin(aSp) * vSp - 14,
+                        life: 0.0,
+                        maxLife: 0.36 + Math.random() * 0.34,
+                        r: 1.3 + Math.random() * 2.1,
+                        col: (sp === 0) ? '#fff9d6' : ((sp === 1) ? '#f8dc3b' : '#e89b24')
+                    });
+                }
+                ctx.save();
+                ctx.globalAlpha = masterAlpha * 0.92;
+                var nibG = ctx.createRadialGradient(activeNib.x, activeNib.y, 1, activeNib.x, activeNib.y, 26);
+                nibG.addColorStop(0.0, 'rgba(255, 252, 224, 0.95)');
+                nibG.addColorStop(0.38, 'rgba(248, 220, 59, 0.48)');
+                nibG.addColorStop(1.0, 'rgba(248, 220, 59, 0.0)');
+                ctx.fillStyle = nibG;
+                ctx.beginPath();
+                ctx.arc(activeNib.x, activeNib.y, 26, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            if (tipSparks.length > 0) {
+                ctx.save();
+                for (var ti = tipSparks.length - 1; ti >= 0; ti--) {
+                    var ts = tipSparks[ti];
+                    ts.life += dt;
+                    if (ts.life >= ts.maxLife) {
+                        tipSparks.splice(ti, 1);
+                        continue;
+                    }
+                    ts.x += ts.vx * dt;
+                    ts.y += ts.vy * dt;
+                    ts.vy += 32 * dt;
+                    var lFrac = 1.0 - ts.life / ts.maxLife;
+                    ctx.globalAlpha = masterAlpha * lFrac * 0.88;
+                    ctx.fillStyle = ts.col;
+                    ctx.beginPath();
+                    ctx.arc(ts.x, ts.y, ts.r * lFrac, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            // 5. Refined Epigraph Beneath "Vincent": SAINT-RÉMY-DE-PROVENCE · JUNE 1889
+            var epiIn  = Math.max(0.0, Math.min(1.0, (t - 3.15) / 0.75));
+            var epiOut = 1.0 - Math.pow(Math.min(1.0, dissolveT * 1.35), 1.4);
+            var epiAlpha = masterAlpha * epiIn * epiOut;
+            if (epiAlpha > 0.01) {
+                ctx.save();
+                ctx.globalAlpha = epiAlpha;
+                var epiY = Math.min(vh - 78, sigY + baseSigH + Math.max(22, vh * 0.042));
+                var fontPx = Math.max(11, Math.min(16, Math.round(vw * 0.0135)));
+                ctx.font = '600 ' + fontPx + 'px Cinzel, Georgia, serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#fef08a';
+                ctx.shadowColor = 'rgba(3, 8, 22, 0.95)';
+                ctx.shadowBlur = 12;
+                var epiText = 'SAINT-R\u00C9MY-DE-PROVENCE   \u00B7   JUNE 1889';
+                ctx.fillText(epiText, vw * 0.5, epiY);
+
+                var ruleW = Math.min(vw * 0.28, 210) * epiIn;
+                var rg = ctx.createLinearGradient(vw * 0.5 - ruleW, epiY - fontPx * 1.15, vw * 0.5 + ruleW, epiY - fontPx * 1.15);
+                rg.addColorStop(0.0, 'rgba(248, 220, 59, 0.0)');
+                rg.addColorStop(0.5, 'rgba(248, 220, 59, 0.52)');
+                rg.addColorStop(1.0, 'rgba(248, 220, 59, 0.0)');
+                ctx.strokeStyle = rg;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(vw * 0.5 - ruleW, epiY - fontPx * 1.15);
+                ctx.lineTo(vw * 0.5 + ruleW, epiY - fontPx * 1.15);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // 6. Swirling Starlight Impasto Ribbons lifting off "Vincent" into the 3D Starry Night!
+            if (dissolveT > 0.005 && dissolveRibbons.length > 0) {
+                ctx.save();
+                for (var ri = 0; ri < dissolveRibbons.length; ri++) {
+                    var rb = dissolveRibbons[ri];
+                    var localT = (dissolveT - rb.delay * 0.55) / (1.0 - rb.delay * 0.55);
+                    if (localT <= 0.0 || localT >= 1.0) continue;
+                    var env = Math.sin(localT * Math.PI);
+                    var travel = Math.pow(localT, 1.35) * Math.min(vw, vh) * 0.52 * rb.speed;
+                    var curAng = rb.ang + localT * rb.spin;
+                    var pxR = sigX + rb.u * baseSigW + Math.cos(curAng) * travel;
+                    var pyR = sigY + rb.v * baseSigH + Math.sin(curAng) * travel * 0.78 - localT * 28.0;
+
+                    ctx.save();
+                    ctx.translate(pxR, pyR);
+                    ctx.rotate(curAng + Math.PI * 0.5);
+                    ctx.globalAlpha = masterAlpha * env * 0.92;
+                    ctx.fillStyle = rb.col;
+                    var rw = rb.len * (0.68 + 0.55 * env);
+                    var rh = rb.wid * (1.0 - 0.32 * localT);
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, rw * 0.5, rh * 0.5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = 'rgba(255, 253, 230, 0.45)';
+                    ctx.beginPath();
+                    ctx.ellipse(0, -rh * 0.16, rw * 0.36, rh * 0.18, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+                ctx.restore();
+            }
+
+            ctx.restore();
+        }
+
+        window.__vincentCutscene = {
+            replay: replayCutscene,
+            skip: triggerSkipCutscene,
+            isActive: function () { return state.active; },
+            seekForTest: function (sec) {
+                bakeImpastoFromSignatureImage();
+                if (sec > T_WRITE_END) tipSparks.length = 0;
+                state.elapsed = sec;
+                state.lastTs = performance.now();
+                renderCutsceneFrame(state.lastTs + 16);
+            }
+        };
+
+        state.rafId = requestAnimationFrame(renderCutsceneFrame);
+    })();
+
     (function () {
         function reportError(msg) {
             var banner = document.getElementById('diag-banner');
@@ -716,7 +1675,7 @@
         var glCanvas = document.createElement('canvas');
         glCanvas.addEventListener('webglcontextcreationerror', function (ev) {
             var msg = (ev && ev.statusMessage) ? ev.statusMessage : 'Hardware acceleration unavailable';
-            reportError('WebGL context creation note: ' + msg + ' — enabling School PC Safe Mode.');
+            reportError('WebGL context creation note: ' + msg + ' — enabling Safe Shaders.');
         }, false);
 
         var renderer = new THREE.WebGLRenderer({
@@ -822,7 +1781,7 @@
         (function updateBootBannerForGpu() {
             var bootSub = document.getElementById('boot-loading-sub');
             if (bootSub && initialSafeShaders) {
-                bootSub.textContent = 'School PC Safe Mode active (' + detectedGpuLabel + ') — compiling lightweight shaders';
+                bootSub.textContent = 'Safe Shaders active (' + detectedGpuLabel + ') — compiling lightweight shaders';
             }
         })();
 
@@ -1322,7 +2281,7 @@
             var gpuEl = document.getElementById('gpu-detect-readout');
             if (badge) {
                 badge.textContent = params.safeShaders
-                    ? (isSchoolPcGpu ? 'ON · School PC' : 'ON · Safe')
+                    ? (isSchoolPcGpu ? 'ON · Auto' : 'ON · Safe')
                     : 'OFF · Full';
             }
             if (btn) {
@@ -8950,7 +9909,7 @@
             });
             setContextLostBannerState(
                 true,
-                'GPU driver reset (webglcontextlost) detected — render loop is safely paused and School PC Safe Mode shaders are armed. Waiting for automatic WebGL recovery, or click "Resume in Safe Mode".'
+                'GPU driver reset (webglcontextlost) detected — render loop is safely paused and Safe Shaders are armed. Waiting for automatic WebGL recovery, or click "Resume in Safe Mode".'
             );
         }
 
@@ -11842,6 +12801,28 @@
         }
 
         function stepCamera(dt) {
+            if (introCrane.active) {
+                introCrane.t += dt;
+                var uC = THREE.MathUtils.clamp(introCrane.t / introCrane.dur, 0.0, 1.0);
+                var eC = uC * uC * uC * (uC * (uC * 6.0 - 15.0) + 10.0);
+                camCtrl.pos.lerpVectors(introCrane.startPos, PRESETS[0].pos, eC);
+                camCtrl.pos.x += Math.sin(uC * Math.PI) * -2.8;
+                camCtrl.pos.y += Math.sin(uC * Math.PI) * 1.6;
+                camCtrl.target.lerpVectors(introCrane.startTarget, PRESETS[0].target, eC);
+                camCtrl.fov = introCrane.startFov + (PRESETS[0].fov - introCrane.startFov) * eC;
+                camera.fov = camCtrl.fov;
+                camera.updateProjectionMatrix();
+                camera.position.copy(camCtrl.pos);
+                camera.lookAt(camCtrl.target);
+                if (uC >= 1.0) {
+                    introCrane.active = false;
+                    camCtrl.desiredPos.copy(PRESETS[0].pos);
+                    camCtrl.desiredTarget.copy(PRESETS[0].target);
+                    camCtrl.desiredFov = PRESETS[0].fov;
+                    syncYawPitchFromLook();
+                }
+                return;
+            }
             if (params.tourActive) {
                 camCtrl.tourTime = (camCtrl.tourTime + dt * 0.030) % 1.0;
                 tourPosCurve.getPointAt(camCtrl.tourTime, camCtrl.desiredPos);
@@ -12134,6 +13115,12 @@
                 })(easelJumpBtns[ej]);
             }
             document.getElementById('btn-sky-brush').addEventListener('click', toggleSkyBrushMode);
+            var replayCutBtn = document.getElementById('btn-replay-cutscene');
+            if (replayCutBtn) {
+                replayCutBtn.addEventListener('click', function () {
+                    if (window.__vincentCutscene) window.__vincentCutscene.replay();
+                });
+            }
             document.getElementById('btn-matte').addEventListener('click', function () {
                 params.matteActive = !params.matteActive;
                 syncModePills();
@@ -12535,6 +13522,7 @@
                         }
                         break;
                     case 'ShiftLeft': case 'ShiftRight': keys.shift = true; break;
+                    case 'KeyI': if (window.__vincentCutscene) window.__vincentCutscene.replay(); break;
                     case 'KeyH': toggleCleanUI(); break;
                     case 'KeyF':
                     case 'Space':
@@ -12581,7 +13569,69 @@
         var warmupStage = 0; // 0 = sky warmup, 1 = terrain/cypress warmup, 2 = village/stamps warmup, 3 = live
         var fpsEl = document.getElementById('fps-readout');
 
+        var introCrane = {
+            active: false,
+            t: 0.0,
+            dur: 3.3,
+            startPos: new THREE.Vector3(-10.5, 26.2, 58.0),
+            startTarget: new THREE.Vector3(4.2, 23.0, -46.0),
+            startFov: 51.0
+        };
+
+        window.__primeIntro3DCameraStart = function () {
+            params.tourActive = false;
+            params.walkActive = false;
+            params.inStudio   = false;
+            params.onWallSpot = true;
+            introCrane.active = false;
+            introCrane.t = 0.0;
+            camCtrl.pos.copy(introCrane.startPos);
+            camCtrl.target.copy(introCrane.startTarget);
+            camCtrl.desiredPos.copy(introCrane.startPos);
+            camCtrl.desiredTarget.copy(introCrane.startTarget);
+            camCtrl.fov = introCrane.startFov;
+            camCtrl.desiredFov = introCrane.startFov;
+            camera.fov = introCrane.startFov;
+            camera.updateProjectionMatrix();
+            camera.position.copy(camCtrl.pos);
+            camera.lookAt(camCtrl.target);
+            syncYawPitchFromLook();
+            syncModePills();
+        };
+
+        window.__startIntro3DCameraSweep = function (durSec) {
+            introCrane.active = true;
+            introCrane.t = 0.0;
+            introCrane.dur = Math.max(1.2, durSec || 3.3);
+            camCtrl.pos.copy(introCrane.startPos);
+            camCtrl.target.copy(introCrane.startTarget);
+            camCtrl.desiredPos.copy(PRESETS[0].pos);
+            camCtrl.desiredTarget.copy(PRESETS[0].target);
+            camCtrl.desiredFov = PRESETS[0].fov;
+        };
+
+        window.__finishIntro3DCameraSweep = function () {
+            introCrane.active = false;
+            selectPreset(0);
+            camCtrl.pos.copy(PRESETS[0].pos);
+            camCtrl.target.copy(PRESETS[0].target);
+            camCtrl.fov = PRESETS[0].fov;
+            camera.fov = PRESETS[0].fov;
+            camera.updateProjectionMatrix();
+            camera.position.copy(camCtrl.pos);
+            camera.lookAt(camCtrl.target);
+            syncYawPitchFromLook();
+        };
+
+        window.__isAudioActive = function () { return !!params.audioOn; };
+        window.__unlockIntroAudio = function () {
+            if (!params.audioOn) {
+                toggleAudioSoundscape(true);
+            }
+        };
+
         function hideBootLoadingPill() {
+            window.__vgWorldReady = true;
             var pill = document.getElementById('boot-loading-pill');
             if (pill) {
                 pill.style.opacity = '0';
@@ -12879,8 +13929,12 @@
                     }
                     updateBrushLockUI();
                     updateMoMAMatteLayout();
-                    camera.position.copy(camCtrl.pos);
-                    camera.lookAt(camCtrl.target);
+                    if (window.__vincentCutscene && window.__vincentCutscene.isActive()) {
+                        window.__primeIntro3DCameraStart();
+                    } else {
+                        camera.position.copy(camCtrl.pos);
+                        camera.lookAt(camCtrl.target);
+                    }
                     syncModePills();
                     clock.start();
                     scheduleNextAnimationFrame();
