@@ -5565,17 +5565,11 @@
                 cPad.rotation.y = baseYaw;
                 scene.add(cPad);
 
+                // Preserve exact deterministic PRNG stride without spawning detached straight-cylinder bark billboards
+                // (the S-curved 3D `addGnarledOliveLimb` mesh already carries full sculptural Van Gogh bark impasto!)
                 for (var bkO = 0; bkO < 10; bkO++) {
-                    var aBkO = oRand() * Math.PI * 2.0;
-                    var yBkO = gy + (0.25 + oRand() * 1.65) * scaleT;
-                    pushBristleStamp(
-                        cx + Math.cos(aBkO) * 0.32 * scaleT, yBkO, cz + Math.sin(aBkO) * 0.32 * scaleT,
-                        0.0, 0.68 * scaleT, 0.0,
-                        Math.cos(aBkO) * 0.22 * scaleT, 0.0, Math.sin(aBkO) * 0.22 * scaleT,
-                        bkO % 8, 0.0, 0.0, 3.0,
-                        bkO % 2 === 0 ? 0xc9ab52 : 0x5c7862,
-                        0x1a283d
-                    );
+                    oRand();
+                    oRand();
                 }
             }
 
@@ -8226,22 +8220,51 @@
                 stGrp.add(backWall);
 
                 // North-facing Iron-Barred Window Bay (z = 119.5): sill + left/right piers + lintel
+                // + Full 4-sided Van Gogh Provençal timber & emerald-sage casement lining + Prussian-ink brush contours!
                 var winZ = stCz - stD * 0.5;
-                var sillMesh = new THREE.Mesh(makeWobblyBoxGeometry(stW, 0.88, 0.36, 4, 1, 1, 0.03, 706.6), stoneWallMat);
-                sillMesh.position.set(stCx, studioFloorY + 0.44, winZ);
+                var sillMesh = new THREE.Mesh(makeWobblyBoxGeometry(stW, 0.82, 0.36, 4, 1, 1, 0.024, 706.6), stoneWallMat);
+                sillMesh.position.set(stCx, studioFloorY + 0.41, winZ);
                 stGrp.add(sillMesh);
 
-                var lintelMesh = new THREE.Mesh(makeWobblyBoxGeometry(stW, 0.45, 0.36, 4, 1, 1, 0.03, 707.7), stoneWallMat);
-                lintelMesh.position.set(stCx, studioFloorY + stH - 0.22, winZ);
+                var lintelMesh = new THREE.Mesh(makeWobblyBoxGeometry(stW, 0.42, 0.36, 4, 1, 1, 0.024, 707.7), stoneWallMat);
+                lintelMesh.position.set(stCx, studioFloorY + stH - 0.20, winZ);
                 stGrp.add(lintelMesh);
 
-                var pierL = new THREE.Mesh(makeWobblyBoxGeometry(1.45, 1.80, 0.34, 2, 2, 1, 0.03, 708.8), studioWallMat);
-                pierL.position.set(stCx - 1.98, studioFloorY + 1.78, winZ);
+                var pierL = new THREE.Mesh(makeWobblyBoxGeometry(1.38, 1.94, 0.34, 2, 2, 1, 0.024, 708.8), studioWallMat);
+                pierL.position.set(stCx - 2.02, studioFloorY + 1.76, winZ);
                 stGrp.add(pierL);
 
-                var pierR = new THREE.Mesh(makeWobblyBoxGeometry(1.45, 1.80, 0.34, 2, 2, 1, 0.03, 709.9), studioWallMat);
-                pierR.position.set(stCx + 1.98, studioFloorY + 1.78, winZ);
+                var pierR = new THREE.Mesh(makeWobblyBoxGeometry(1.38, 1.94, 0.34, 2, 2, 1, 0.024, 709.9), studioWallMat);
+                pierR.position.set(stCx + 2.02, studioFloorY + 1.76, winZ);
                 stGrp.add(pierR);
+
+                // Van Gogh Saint-Rémy Window Casement Lining Materials (warm walnut-ochre timber + Provençal emerald-sage sash)
+                var winWoodHorizMat = createPainterlyArchMaterial(0x1f1308, 0x734920, 0xd99e40, 0.02,   2.8, false, false);
+                var winWoodVertMat  = createPainterlyArchMaterial(0x1f1308, 0x734920, 0xd99e40, 1.5708, 2.8, false, false);
+                var winSageHorizMat = createPainterlyArchMaterial(0x0c241d, 0x26634a, 0x80bd6b, 0.03,   3.1, false, false);
+                var winSageVertMat  = createPainterlyArchMaterial(0x0c241d, 0x26634a, 0x80bd6b, 1.5708, 3.1, false, false);
+
+                // 1) Outer Provençal Timber Box Architrave & Projecting Interior Sill Board (wraps all 4 sides cleanly!)
+                var wSillBoard = new THREE.Mesh(makeWobblyBoxGeometry(2.82, 0.068, 0.45, 5, 1, 2, 0.008, 731.1), winWoodHorizMat);
+                wSillBoard.position.set(stCx, studioFloorY + 0.844, winZ + 0.018);
+                var wHeadBoard = new THREE.Mesh(makeWobblyBoxGeometry(2.76, 0.068, 0.41, 5, 1, 2, 0.008, 731.6), winWoodHorizMat);
+                wHeadBoard.position.set(stCx, studioFloorY + 2.696, winZ);
+                var wJambWoodL = new THREE.Mesh(makeWobblyBoxGeometry(0.068, 1.86, 0.41, 1, 4, 2, 0.008, 732.1), winWoodVertMat);
+                wJambWoodL.position.set(stCx - 1.312, studioFloorY + 1.77, winZ);
+                var wJambWoodR = new THREE.Mesh(makeWobblyBoxGeometry(0.068, 1.86, 0.41, 1, 4, 2, 0.008, 732.6), winWoodVertMat);
+                wJambWoodR.position.set(stCx + 1.312, studioFloorY + 1.77, winZ);
+                stGrp.add(wSillBoard, wHeadBoard, wJambWoodL, wJambWoodR);
+
+                // 2) Inner Van Gogh Emerald-Sage Casement Sash Lining on all 4 sides ("The Bedroom", Saint-Rémy Sept 1889)
+                var wSageBot = new THREE.Mesh(makeWobblyBoxGeometry(2.58, 0.054, 0.34, 5, 1, 2, 0.006, 733.1), winSageHorizMat);
+                wSageBot.position.set(stCx, studioFloorY + 0.892, winZ + 0.005);
+                var wSageTop = new THREE.Mesh(makeWobblyBoxGeometry(2.58, 0.054, 0.34, 5, 1, 2, 0.006, 733.6), winSageHorizMat);
+                wSageTop.position.set(stCx, studioFloorY + 2.648, winZ + 0.005);
+                var wSageL = new THREE.Mesh(makeWobblyBoxGeometry(0.054, 1.78, 0.34, 1, 4, 2, 0.006, 734.1), winSageVertMat);
+                wSageL.position.set(stCx - 1.262, studioFloorY + 1.77, winZ + 0.005);
+                var wSageR = new THREE.Mesh(makeWobblyBoxGeometry(0.054, 1.78, 0.34, 1, 4, 2, 0.006, 734.6), winSageVertMat);
+                wSageR.position.set(stCx + 1.262, studioFloorY + 1.77, winZ + 0.005);
+                stGrp.add(wSageBot, wSageTop, wSageL, wSageR);
 
                 var stX0 = stCx - stW * 0.5 - 0.05, stX1 = stCx + stW * 0.5 + 0.05;
                 var stZ0 = stCz - stD * 0.5 - 0.06, stZ1 = stCz + stD * 0.5 + 0.05;
@@ -8253,8 +8276,26 @@
                 addThickLoadedOutlineStroke(stGrp, [stX0, stY0, stZ0], [stX0, stY1, stZ0], 0.31, sketchInkMat, 708.6, false);
                 addThickLoadedOutlineStroke(stGrp, [stX1, stY0, stZ0], [stX1, stY1, stZ0], 0.31, sketchInkMat, 708.7, false);
                 addThickLoadedOutlineStroke(stGrp, [stX0, stY0, stZ0], [stX1, stY0, stZ0], 0.26, sketchInkMat, 708.9, false);
-                addThickLoadedOutlineStroke(stGrp, [-1.25, studioFloorY + 0.88, winZ - 0.14], [1.25, studioFloorY + 0.88, winZ - 0.14], 0.16, sketchInkMat, 709.1, true);
-                addThickLoadedOutlineStroke(stGrp, [-1.25, studioFloorY + 2.66, winZ - 0.14], [1.25, studioFloorY + 2.66, winZ - 0.14], 0.16, sketchInkMat, 709.2, true);
+
+                // 3) Loaded Van Gogh Prussian-Charcoal Brush Contour Lining on ALL 4 Sides (both interior room & exterior facade!)
+                var yInBot = studioFloorY + 0.916, yInTop = studioFloorY + 2.624;
+                var yOutBot = studioFloorY + 0.816, yOutTop = studioFloorY + 2.724;
+                // Inner sight-edge contours framing the Starry Night sky (interior + exterior)
+                [winZ + 0.172, winZ - 0.162].forEach(function (zInk, zIdx) {
+                    var sdZ = 736.0 + zIdx * 6.0;
+                    addThickLoadedOutlineStroke(stGrp, [-1.24, yInBot, zInk], [ 1.24, yInBot, zInk], 0.045, sketchInkMat, sdZ + 0.1, true);
+                    addThickLoadedOutlineStroke(stGrp, [-1.24, yInTop, zInk], [ 1.24, yInTop, zInk], 0.045, sketchInkMat, sdZ + 0.2, true);
+                    addThickLoadedOutlineStroke(stGrp, [-1.24, yInBot, zInk], [-1.24, yInTop, zInk], 0.045, sketchInkMat, sdZ + 0.3, true);
+                    addThickLoadedOutlineStroke(stGrp, [ 1.24, yInBot, zInk], [ 1.24, yInTop, zInk], 0.045, sketchInkMat, sdZ + 0.4, true);
+                });
+                // Outer timber architrave contours against the yellow-ochre plaster & exterior limestone
+                [winZ + 0.212, winZ - 0.198].forEach(function (zOuter, zIdx) {
+                    var sdO = 748.0 + zIdx * 6.0;
+                    addThickLoadedOutlineStroke(stGrp, [-1.35, yOutBot, zOuter], [ 1.35, yOutBot, zOuter], 0.055, sketchInkMat, sdO + 0.1, true);
+                    addThickLoadedOutlineStroke(stGrp, [-1.35, yOutTop, zOuter], [ 1.35, yOutTop, zOuter], 0.055, sketchInkMat, sdO + 0.2, true);
+                    addThickLoadedOutlineStroke(stGrp, [-1.35, yOutBot, zOuter], [-1.35, yOutTop, zOuter], 0.055, sketchInkMat, sdO + 0.3, true);
+                    addThickLoadedOutlineStroke(stGrp, [ 1.35, yOutBot, zOuter], [ 1.35, yOutTop, zOuter], 0.055, sketchInkMat, sdO + 0.4, true);
+                });
 
                 // 3 Carved Limestone Corbel Brackets supporting the overhanging upstairs studio bay!
                 [-2.32, 0.0, 2.32].forEach(function (cbX, cbIdx) {
@@ -8407,14 +8448,18 @@
                 studioLanternOrb.position.set(lanX, lanY - 0.04, lanZ);
                 scene.add(studioLanternOrb);
 
-                // 5 vertical + 2 horizontal hand-forged iron bars across the 2.5m window opening
+                // 5 vertical + 2 horizontal hand-forged iron bars seated flush inside the 4-sided window sash + perimeter iron collar
                 var vBarXs = [-1.0, -0.5, 0.0, 0.5, 1.0];
                 vBarXs.forEach(function (bx, bi) {
-                    addThickLoadedOutlineStroke(stGrp, [bx, studioFloorY + 0.88, winZ], [bx, studioFloorY + 2.68, winZ], 0.038, ironMat, 710.0 + bi);
+                    addThickLoadedOutlineStroke(stGrp, [bx, studioFloorY + 0.90, winZ], [bx, studioFloorY + 2.64, winZ], 0.038, ironMat, 710.0 + bi);
                 });
                 [studioFloorY + 1.48, studioFloorY + 2.08].forEach(function (by, hi) {
-                    addThickLoadedOutlineStroke(stGrp, [-1.25, by, winZ], [1.25, by, winZ], 0.036, ironMat, 716.0 + hi);
+                    addThickLoadedOutlineStroke(stGrp, [-1.24, by, winZ], [1.24, by, winZ], 0.036, ironMat, 716.0 + hi);
                 });
+                addThickLoadedOutlineStroke(stGrp, [-1.24, studioFloorY + 0.91, winZ], [ 1.24, studioFloorY + 0.91, winZ], 0.032, ironMat, 718.1, true);
+                addThickLoadedOutlineStroke(stGrp, [-1.24, studioFloorY + 2.63, winZ], [ 1.24, studioFloorY + 2.63, winZ], 0.032, ironMat, 718.3, true);
+                addThickLoadedOutlineStroke(stGrp, [-1.24, studioFloorY + 0.91, winZ], [-1.24, studioFloorY + 2.63, winZ], 0.032, ironMat, 718.5, true);
+                addThickLoadedOutlineStroke(stGrp, [ 1.24, studioFloorY + 0.91, winZ], [ 1.24, studioFloorY + 2.63, winZ], 0.032, ironMat, 718.7, true);
 
                 // Plein-Air & Studio Easel Builder: Front painted impasto canvas faces local `+Z`!
                 function buildImpastoEasel(px, py, pz, rotY, canvasColorA, canvasColorB, canvasColorC, seedBase) {
@@ -8559,8 +8604,8 @@
                 window.__vgFloatingFrameList = [];
 
                 // Dedicated Van Gogh Hog-Bristle Gilded Impasto Shader for Floating Gallery Frames
-                // (Directional oil brushstrokes + 3D paint-height alpha for specular relief + daylight/midnight auto-exposure!)
-                function createGildedImpastoFrameMaterial(colDarkHex, colMidHex, colLightHex, strokeAngle, scaleFreq, glowLift) {
+                // (Object-space triplanar UV projection keeps horizontal & vertical rails 100% seamless at ANY 360° frame rotation!)
+                function createGildedImpastoFrameMaterial(colDarkHex, colMidHex, colLightHex, strokeAngle, scaleFreq, glowLift, isBlueSlip) {
                     return createSafeAwareShaderMaterial({
                         uniforms: {
                             uDark: { value: new THREE.Color(colDarkHex) },
@@ -8569,6 +8614,7 @@
                             uAng: { value: strokeAngle || 0.0 },
                             uFreq: { value: scaleFreq || 5.4 },
                             uGlowLift: { value: (typeof glowLift === 'number') ? glowLift : 0.16 },
+                            uIsSlip: { value: isBlueSlip ? 1.0 : 0.0 },
                             uThinness: uThinness,
                             uChaos: uChaos,
                             uYellowBoost: uYellowBoost,
@@ -8581,11 +8627,13 @@
                             'precision highp float;',
                             'varying vec2 vUv;',
                             'varying vec3 vLocalPos;',
+                            'varying vec3 vLocalNormal;',
                             'varying vec3 vWorldPos;',
                             'varying vec3 vNormal;',
                             'void main() {',
                             '    vUv = uv;',
                             '    vLocalPos = position;',
+                            '    vLocalNormal = normalize(normal);',
                             '    vec4 wp = modelMatrix * vec4(position, 1.0);',
                             '    vWorldPos = wp.xyz;',
                             '    vNormal = normalize(mat3(modelMatrix) * normal);',
@@ -8600,6 +8648,7 @@
                             'uniform float uAng;',
                             'uniform float uFreq;',
                             'uniform float uGlowLift;',
+                            'uniform float uIsSlip;',
                             'uniform float uThinness;',
                             'uniform float uChaos;',
                             'uniform float uYellowBoost;',
@@ -8609,6 +8658,7 @@
                             'uniform vec3 uLightDir;',
                             'varying vec2 vUv;',
                             'varying vec3 vLocalPos;',
+                            'varying vec3 vLocalNormal;',
                             'varying vec3 vWorldPos;',
                             'varying vec3 vNormal;',
                             '',
@@ -8616,12 +8666,14 @@
                             '',
                             'void main() {',
                             '    vec3 N = normalize(vNormal);',
+                            '    vec3 LN = normalize(vLocalNormal);',
                             '    vec3 V = normalize(cameraPosition - vWorldPos);',
                             '    float ndl = dot(N, uLightDir) * 0.5 + 0.5;',
                             '    float rim = pow(clamp(1.0 - abs(dot(N, V)), 0.0, 1.0), 1.65);',
-                            '    vec2 base = (abs(N.z) > 0.35) ? vLocalPos.xy : (abs(N.y) > 0.48 ? vLocalPos.xz : vLocalPos.zy);',
-                            '    vec3 col = mix(uDark, uMid, clamp(ndl * 0.72 + 0.14, 0.0, 1.0));',
-                            '    float hgt = 0.44;',
+                            '    // Use local-space normal LN so frame rotation around Y never flips front/back faces onto ZY side UVs!',
+                            '    vec2 base = (abs(LN.z) > 0.48) ? vLocalPos.xy : (abs(LN.y) > 0.48 ? vec2(vLocalPos.x, vLocalPos.z) : vec2(vLocalPos.z, vLocalPos.y));',
+                            '    vec3 col = mix(uDark, uMid, clamp(ndl * 0.72 + 0.16, 0.0, 1.0));',
+                            '    float hgt = 0.46;',
                             '',
                             '#ifdef SAFE_MODE',
                             '    for (int k = 0; k < 2; k++) {',
@@ -8630,25 +8682,26 @@
                             '        if (k < 2 || uQuality >= 0.45) {',
                             '#endif',
                             '        float fk = float(k);',
-                            '        vec2 g = base * uFreq * mix(1.0, uThinness, 0.42) * (1.0 + fk * 0.28) + vec2(fk * 0.37, fk * 0.63);',
+                            '        vec2 g = base * uFreq * mix(1.0, uThinness, 0.36) * (1.0 + fk * 0.26) + vec2(fk * 0.37, fk * 0.63);',
                             '        vec2 bCell = floor(g);',
                             '        vec2 qStart = bCell + step(vec2(0.5), fract(g)) - vec2(1.0);',
                             '        for (int dy = 0; dy <= 1; dy++) {',
                             '            for (int dx = 0; dx <= 1; dx++) {',
                             '                vec2 cid = qStart + vec2(float(dx), float(dy));',
                             '                vec3 rnd = hash23(cid + vec2(fk * 9.3, 21.7));',
-                            '                vec2 center = cid + vec2(0.5) + (rnd.xy - 0.5) * (0.48 + 0.22 * uChaos);',
-                            '                float a = uAng + (rnd.z - 0.5) * 0.20 * uChaos;',
+                            '                vec2 center = cid + vec2(0.5) + (rnd.xy - 0.5) * (0.42 + 0.18 * uChaos);',
+                            '                float a = uAng + (rnd.z - 0.5) * 0.14 * uChaos;',
                             '                vec2 loc = mat2(cos(a), -sin(a), sin(a), cos(a)) * (g - center);',
-                            '                loc.y -= 0.10 * loc.x * loc.x * (rnd.x > 0.5 ? 1.0 : -1.0);',
-                            '                vec4 st = evalSlenderBristleStroke(loc.x / (0.88 + rnd.x * 0.38), loc.y / 0.24, rnd.y + fk);',
+                            '                loc.y -= 0.08 * loc.x * loc.x * (rnd.x > 0.5 ? 1.0 : -1.0);',
+                            '                vec4 st = evalSlenderBristleStroke(loc.x / (0.96 + rnd.x * 0.40), loc.y / 0.25, rnd.y + fk);',
                             '                if (st.x > 0.01) {',
                             '                    float sc = ndl * 0.56 + rnd.y * 0.44;',
-                            '                    vec3 pigA = (rnd.z < 0.075 * uBlackInk) ? vec3(0.055, 0.095, 0.215)',
-                            '                              : ((sc > 0.62) ? uLight : ((sc > 0.30) ? uMid : uDark));',
-                            '                    vec3 pig = mix(pigA, uLight, st.w * 0.34) * (1.0 + st.y * 0.92);',
+                            '                    vec3 shadowAccent = (uIsSlip > 0.5) ? vec3(0.045, 0.088, 0.225) : (uDark * 0.78);',
+                            '                    vec3 pigA = (rnd.z < 0.065 * uBlackInk) ? shadowAccent',
+                            '                              : ((sc > 0.60) ? uLight : ((sc > 0.28) ? uMid : uDark));',
+                            '                    vec3 pig = mix(pigA, uLight, st.w * 0.36) * (1.0 + st.y * 0.85);',
                             '                    col = mix(col, pig, st.x);',
-                            '                    hgt = mix(hgt, clamp(0.46 + st.z * 0.50, 0.28, 0.98), st.x * 0.88);',
+                            '                    hgt = mix(hgt, clamp(0.48 + st.z * 0.48, 0.30, 0.98), st.x * 0.88);',
                             '                }',
                             '            }',
                             '        }',
@@ -8657,26 +8710,42 @@
                             '#endif',
                             '    }',
                             '',
-                            '    float yGain = mix(0.92, 1.08, clamp(uYellowBoost - 0.5, 0.0, 1.0));',
+                            '    float yGain = mix(0.94, 1.08, clamp(uYellowBoost - 0.5, 0.0, 1.0));',
                             '    col *= yGain;',
-                            '    col += uLight * (rim * 0.18 + uGlowLift * (1.0 - smoothstep(0.15, 0.85, uDaylight) * 0.55));',
-                            '    // Balance daylight post-lift so gilded impasto keeps rich 3D tonal relief under noon Provençal sun',
-                            '    float dayTemper = mix(1.0, 0.72, smoothstep(0.22, 1.0, uDaylight));',
+                            '    col += uLight * (rim * 0.18 + uGlowLift * (1.0 - smoothstep(0.15, 0.85, uDaylight) * 0.58));',
+                            '    // Balance daylight post-lift so gilded impasto keeps rich warm 3D tonal relief under noon Provençal sun',
+                            '    float dayTemper = mix(1.0, 0.68, smoothstep(0.20, 1.0, uDaylight));',
                             '    col *= dayTemper;',
-                            '    gl_FragColor = vec4(clamp(col, 0.0, 1.0), clamp(hgt, 0.25, 0.98));',
+                            '    gl_FragColor = vec4(clamp(col, 0.0, 1.0), clamp(hgt, 0.28, 0.98));',
                             '}'
                         ].join('\n')
                     });
                 }
 
-                var frameGoldHorizMat = createGildedImpastoFrameMaterial(0x6e450d, 0xdf9f1c, 0xfce062, 0.0, 5.2, 0.13);
-                var frameGoldVertMat  = createGildedImpastoFrameMaterial(0x6e450d, 0xdf9f1c, 0xfce062, 1.5708, 5.2, 0.13);
-                var frameCrestHorizMat = createGildedImpastoFrameMaterial(0x8c5b12, 0xf2be2e, 0xfff6a1, 0.0, 6.4, 0.20);
-                var frameCrestVertMat  = createGildedImpastoFrameMaterial(0x8c5b12, 0xf2be2e, 0xfff6a1, 1.5708, 6.4, 0.20);
-                var frameCornerGoldMat = createGildedImpastoFrameMaterial(0x784c0e, 0xebb126, 0xfff394, 0.7854, 6.0, 0.18);
-                var frameSlipBlueMat   = createGildedImpastoFrameMaterial(0x091638, 0x1c3f7a, 0xd8cfa6, 0.0, 5.8, 0.05);
+                var frameGoldHorizMat     = createGildedImpastoFrameMaterial(0x784b0e, 0xe3a41e, 0xfde468, 0.0,    5.2, 0.13, false);
+                var frameGoldVertMat      = createGildedImpastoFrameMaterial(0x784b0e, 0xe3a41e, 0xfde468, 1.5708, 5.2, 0.13, false);
+                var frameCrestHorizMat    = createGildedImpastoFrameMaterial(0x915f14, 0xf4c232, 0xfff7a6, 0.0,    6.2, 0.19, false);
+                var frameCrestVertMat     = createGildedImpastoFrameMaterial(0x915f14, 0xf4c232, 0xfff7a6, 1.5708, 6.2, 0.19, false);
+                var frameCornerGoldMat    = createGildedImpastoFrameMaterial(0x805110, 0xedb528, 0xfff498, 0.7854, 5.8, 0.17, false);
+                var frameSlipBlueHorizMat = createGildedImpastoFrameMaterial(0x091638, 0x1e4382, 0xd8cfa6, 0.0,    5.8, 0.05, true);
+                var frameSlipBlueVertMat  = createGildedImpastoFrameMaterial(0x091638, 0x1e4382, 0xd8cfa6, 1.5708, 5.8, 0.05, true);
 
                 var pendingWordingDraws = [];
+                function drawRoundedCapsulePath(ctx, x, y, w, h, r) {
+                    var rr = Math.min(r, w * 0.5, h * 0.5);
+                    ctx.beginPath();
+                    ctx.moveTo(x + rr, y);
+                    ctx.lineTo(x + w - rr, y);
+                    ctx.arcTo(x + w, y, x + w, y + rr, rr);
+                    ctx.lineTo(x + w, y + h - rr);
+                    ctx.arcTo(x + w, y + h, x + w - rr, y + h, rr);
+                    ctx.lineTo(x + rr, y + h);
+                    ctx.arcTo(x, y + h, x, y + h - rr, rr);
+                    ctx.lineTo(x, y + rr);
+                    ctx.arcTo(x, y, x + rr, y, rr);
+                    ctx.closePath();
+                }
+
                 function drawFloatingWordingCanvas(c, titleText, subText) {
                     var W = c.width, H = c.height;
                     var g = c.getContext('2d');
@@ -8684,86 +8753,140 @@
                     g.textAlign = 'center';
                     g.textBaseline = 'middle';
 
-                    // Multi-pass nocturnal Prussian halo (100% frameless — zero rectangular plaque box!)
-                    g.save();
-                    g.font = 'italic 600 66px "Cormorant Garamond", Georgia, serif';
-                    var halos = [
-                        [0, 3, 22, 'rgba(3, 8, 24, 0.96)'],
-                        [0, 2, 11, 'rgba(5, 13, 38, 0.96)'],
-                        [0, 1, 4,  'rgba(2, 6, 18, 0.98)']
-                    ];
-                    for (var hi = 0; hi < halos.length; hi++) {
-                        g.shadowOffsetX = halos[hi][0];
-                        g.shadowOffsetY = halos[hi][1];
-                        g.shadowBlur    = halos[hi][2];
-                        g.shadowColor   = halos[hi][3];
-                        g.fillStyle     = 'rgba(4, 10, 28, 0.55)';
-                        g.fillText(titleText, W * 0.5, 98);
+                    var titlePx = 68;
+                    g.font = 'italic 700 ' + titlePx + 'px "Cormorant Garamond", Georgia, serif';
+                    var measuredTitleW = g.measureText(titleText).width;
+                    if (measuredTitleW > 850) {
+                        titlePx = Math.max(50, Math.floor(titlePx * (850 / measuredTitleW)));
+                        g.font = 'italic 700 ' + titlePx + 'px "Cormorant Garamond", Georgia, serif';
+                        measuredTitleW = g.measureText(titleText).width;
                     }
-                    g.shadowBlur = 0;
-                    g.shadowOffsetY = 0;
-                    var titleGrad = g.createLinearGradient(0, 58, 0, 136);
-                    titleGrad.addColorStop(0.0, '#fffef2');
-                    titleGrad.addColorStop(0.55, '#fef08a');
-                    titleGrad.addColorStop(1.0, '#f4be37');
-                    g.fillStyle = titleGrad;
-                    g.fillText(titleText, W * 0.5, 98);
+
+                    var subPx = 24;
+                    g.font = '700 ' + subPx + 'px "Cinzel", Georgia, serif';
+                    var measuredSubW = g.measureText(subText).width;
+                    if (measuredSubW > 860) {
+                        subPx = Math.max(19, Math.floor(subPx * (860 / measuredSubW)));
+                        g.font = '700 ' + subPx + 'px "Cinzel", Georgia, serif';
+                        measuredSubW = g.measureText(subText).width;
+                    }
+
+                    // 1. Tailored Nocturnal Prussian-Blue Painterly Capsule Cartouche + Gilded Filigree Rim
+                    //    (Ensures effortless contrast against blazing white clouds, sunlit olive trees, or starry skies!)
+                    var pillW = Math.min(984, Math.max(540, Math.max(measuredTitleW, measuredSubW) + 124));
+                    var pillH = 228;
+                    var pillX = (W - pillW) * 0.5;
+                    var pillY = (H - pillH) * 0.5;
+
+                    g.save();
+                    g.shadowColor = 'rgba(2, 6, 18, 0.72)';
+                    g.shadowBlur = 18;
+                    g.shadowOffsetY = 5;
+                    var bgGrad = g.createLinearGradient(0, pillY, 0, pillY + pillH);
+                    bgGrad.addColorStop(0.0, 'rgba(6, 15, 38, 0.92)');
+                    bgGrad.addColorStop(0.5, 'rgba(10, 24, 58, 0.90)');
+                    bgGrad.addColorStop(1.0, 'rgba(4, 11, 29, 0.94)');
+                    drawRoundedCapsulePath(g, pillX, pillY, pillW, pillH, pillH * 0.5);
+                    g.fillStyle = bgGrad;
+                    g.fill();
                     g.restore();
 
-                    // Hand-painted tapered golden impasto flourish stroke + 4-point star diamond
+                    // Subtle painterly oil-stroke sheen & warm golden gallery border inside capsule
                     g.save();
-                    g.shadowColor = 'rgba(3, 8, 24, 0.95)';
-                    g.shadowBlur = 10;
-                    g.shadowOffsetY = 2;
-                    var lineGrad = g.createLinearGradient(W * 0.5 - 185, 0, W * 0.5 + 185, 0);
-                    lineGrad.addColorStop(0.0, 'rgba(248, 220, 59, 0.0)');
-                    lineGrad.addColorStop(0.22, 'rgba(250, 224, 90, 0.85)');
-                    lineGrad.addColorStop(0.5, '#fffbeb');
-                    lineGrad.addColorStop(0.78, 'rgba(250, 224, 90, 0.85)');
-                    lineGrad.addColorStop(1.0, 'rgba(248, 220, 59, 0.0)');
-                    g.strokeStyle = lineGrad;
-                    g.lineWidth = 3.2;
-                    g.beginPath();
-                    g.moveTo(W * 0.5 - 180, 154);
-                    g.quadraticCurveTo(W * 0.5, 148, W * 0.5 + 180, 154);
+                    drawRoundedCapsulePath(g, pillX + 3, pillY + 3, pillW - 6, pillH - 6, (pillH - 6) * 0.5);
+                    var rimGrad = g.createLinearGradient(pillX, pillY, pillX + pillW, pillY + pillH);
+                    rimGrad.addColorStop(0.0,  'rgba(217, 158, 43, 0.52)');
+                    rimGrad.addColorStop(0.28, 'rgba(253, 230, 138, 0.85)');
+                    rimGrad.addColorStop(0.50, 'rgba(255, 251, 235, 0.92)');
+                    rimGrad.addColorStop(0.72, 'rgba(253, 230, 138, 0.85)');
+                    rimGrad.addColorStop(1.0,  'rgba(217, 158, 43, 0.52)');
+                    g.strokeStyle = rimGrad;
+                    g.lineWidth = 2.8;
                     g.stroke();
 
-                    g.fillStyle = '#fff9db';
+                    // Left & right golden star-diamond finials inside the capsule ends
+                    [-1, 1].forEach(function (sgn) {
+                        var dxF = W * 0.5 + sgn * (pillW * 0.5 - 24);
+                        var dyF = H * 0.5;
+                        g.fillStyle = 'rgba(253, 230, 138, 0.88)';
+                        g.beginPath();
+                        g.moveTo(dxF, dyF - 6);
+                        g.lineTo(dxF + 6, dyF);
+                        g.lineTo(dxF, dyF + 6);
+                        g.lineTo(dxF - 6, dyF);
+                        g.closePath();
+                        g.fill();
+                    });
+                    g.restore();
+
+                    // 2. Crisp Outlined Ivory-Gold Title Script
+                    g.save();
+                    g.font = 'italic 700 ' + titlePx + 'px "Cormorant Garamond", Georgia, serif';
+                    g.lineJoin = 'round';
+                    g.miterLimit = 2;
+                    g.shadowColor = 'rgba(1, 4, 14, 0.95)';
+                    g.shadowBlur = 8;
+                    g.shadowOffsetY = 2;
+                    g.strokeStyle = 'rgba(2, 6, 18, 0.96)';
+                    g.lineWidth = 9.0;
+                    g.strokeText(titleText, W * 0.5, 104);
+
+                    var titleGrad = g.createLinearGradient(0, 64, 0, 142);
+                    titleGrad.addColorStop(0.0, '#ffffff');
+                    titleGrad.addColorStop(0.58, '#fef08a');
+                    titleGrad.addColorStop(1.0, '#f5c23e');
+                    g.fillStyle = titleGrad;
+                    g.fillText(titleText, W * 0.5, 104);
+                    g.restore();
+
+                    // 3. Hand-painted tapered golden impasto flourish stroke + center 4-point star diamond
+                    g.save();
+                    var ruleHalf = Math.min(220, pillW * 0.34);
+                    var lineGrad = g.createLinearGradient(W * 0.5 - ruleHalf, 0, W * 0.5 + ruleHalf, 0);
+                    lineGrad.addColorStop(0.0, 'rgba(248, 220, 59, 0.0)');
+                    lineGrad.addColorStop(0.22, 'rgba(250, 224, 90, 0.88)');
+                    lineGrad.addColorStop(0.5, '#fffbeb');
+                    lineGrad.addColorStop(0.78, 'rgba(250, 224, 90, 0.88)');
+                    lineGrad.addColorStop(1.0, 'rgba(248, 220, 59, 0.0)');
+                    g.strokeStyle = lineGrad;
+                    g.lineWidth = 3.0;
                     g.beginPath();
-                    g.moveTo(W * 0.5, 143);
-                    g.lineTo(W * 0.5 + 7, 151);
-                    g.lineTo(W * 0.5, 159);
-                    g.lineTo(W * 0.5 - 7, 151);
+                    g.moveTo(W * 0.5 - ruleHalf, 158);
+                    g.quadraticCurveTo(W * 0.5, 153, W * 0.5 + ruleHalf, 158);
+                    g.stroke();
+
+                    g.fillStyle = '#fffbeb';
+                    g.beginPath();
+                    g.moveTo(W * 0.5, 148);
+                    g.lineTo(W * 0.5 + 6.5, 155.5);
+                    g.lineTo(W * 0.5, 163);
+                    g.lineTo(W * 0.5 - 6.5, 155.5);
                     g.closePath();
                     g.fill();
                     g.restore();
 
-                    // Crisp museum provenance line beneath flourish
+                    // 4. Crisp High-Contrast Museum Provenance Line
                     g.save();
-                    g.font = '700 22px "Cinzel", Georgia, serif';
-                    for (var sj = 0; sj < halos.length; sj++) {
-                        g.shadowOffsetX = halos[sj][0];
-                        g.shadowOffsetY = halos[sj][1];
-                        g.shadowBlur    = halos[sj][2];
-                        g.shadowColor   = halos[sj][3];
-                        g.fillStyle     = 'rgba(4, 10, 28, 0.62)';
-                        g.fillText(subText, W * 0.5, 198);
-                    }
-                    g.shadowBlur = 0;
-                    g.shadowOffsetY = 0;
-                    g.fillStyle = '#fef3c7';
-                    g.fillText(subText, W * 0.5, 198);
+                    g.font = '700 ' + subPx + 'px "Cinzel", Georgia, serif';
+                    g.lineJoin = 'round';
+                    g.miterLimit = 2;
+                    g.strokeStyle = 'rgba(2, 6, 18, 0.96)';
+                    g.lineWidth = 5.5;
+                    g.strokeText(subText, W * 0.5, 204);
+                    g.fillStyle = '#fffbeb';
+                    g.fillText(subText, W * 0.5, 204);
                     g.restore();
                 }
 
                 function makeFloatingWordingTexture(titleText, subText) {
                     var c = document.createElement('canvas');
                     c.width = 1024;
-                    c.height = 256;
+                    c.height = 288;
                     drawFloatingWordingCanvas(c, titleText, subText);
                     var tex = new THREE.CanvasTexture(c);
                     tex.minFilter = THREE.LinearFilter;
                     tex.magFilter = THREE.LinearFilter;
+                    trackRecoverableTexture(tex);
                     pendingWordingDraws.push({ canvas: c, tex: tex, title: titleText, sub: subText });
                     return tex;
                 }
@@ -8849,14 +8972,14 @@
                     var slipThick = 0.026;
                     var slipDepth = depth + 0.012;
                     var slipGeoH = new THREE.BoxGeometry(apW + slipThick * 2.0, slipThick, slipDepth);
-                    var slipT = new THREE.Mesh(slipGeoH, frameSlipBlueMat);
+                    var slipT = new THREE.Mesh(slipGeoH, frameSlipBlueHorizMat);
                     slipT.position.set(0, yTop + slipThick * 0.32, 0);
-                    var slipB = new THREE.Mesh(slipGeoH, frameSlipBlueMat);
+                    var slipB = new THREE.Mesh(slipGeoH, frameSlipBlueHorizMat);
                     slipB.position.set(0, yBot - slipThick * 0.32, 0);
                     var slipGeoV = new THREE.BoxGeometry(slipThick, apH + slipThick * 0.64, slipDepth);
-                    var slipL = new THREE.Mesh(slipGeoV, frameSlipBlueMat);
+                    var slipL = new THREE.Mesh(slipGeoV, frameSlipBlueVertMat);
                     slipL.position.set(-xHalf - slipThick * 0.32, yMid, 0);
-                    var slipR = new THREE.Mesh(slipGeoV, frameSlipBlueMat);
+                    var slipR = new THREE.Mesh(slipGeoV, frameSlipBlueVertMat);
                     slipR.position.set( xHalf + slipThick * 0.32, yMid, 0);
                     g.add(slipT, slipB, slipL, slipR);
 
@@ -8887,7 +9010,7 @@
                         cBevel.rotation.z = Math.PI * 0.25;
                         var cRosette = new THREE.Mesh(rosetteCylGeo, frameCrestHorizMat);
                         cRosette.position.set(cx, cy, 0);
-                        var cJewel = new THREE.Mesh(jewelCylGeo, frameSlipBlueMat);
+                        var cJewel = new THREE.Mesh(jewelCylGeo, frameSlipBlueHorizMat);
                         cJewel.position.set(cx, cy, 0);
                         g.add(cBlock, cBevel, cRosette, cJewel);
                     }
@@ -8926,11 +9049,14 @@
                     addThickLoadedOutlineStroke(g, [-ox, oyB,  iz], [-ox, oyT,  iz], 0.014, sketchInkMat, seedBase + 24.7, true);
                     addThickLoadedOutlineStroke(g, [ ox, oyB,  iz], [ ox, oyT,  iz], 0.014, sketchInkMat, seedBase + 25.0, true);
 
-                    // 7. Frameless high-DPI floating wordings suspended in the air above the frame
-                    //    (Alpha-preserving CustomBlending keeps background sky impasto relief 100% clean!)
+                    // 7. High-contrast Prussian-and-gold painterly title cartouche suspended cleanly above the frame
+                    //    (Smooth alpha flattens underlying cloud/foliage impasto ridges & pre-tempers daylight sunLift!)
                     var wordTex = makeFloatingWordingTexture(titleText, subText);
-                    var wordMat = new THREE.MeshBasicMaterial({
-                        map: wordTex,
+                    var wordMat = new THREE.ShaderMaterial({
+                        uniforms: {
+                            tMap: { value: wordTex },
+                            uDaylight: uDaylight
+                        },
                         transparent: true,
                         depthWrite: false,
                         side: THREE.FrontSide,
@@ -8939,18 +9065,44 @@
                         blendSrc: THREE.SrcAlphaFactor,
                         blendDst: THREE.OneMinusSrcAlphaFactor,
                         blendEquationAlpha: THREE.AddEquation,
-                        blendSrcAlpha: THREE.ZeroFactor,
-                        blendDstAlpha: THREE.OneFactor
+                        blendSrcAlpha: THREE.SrcAlphaFactor,
+                        blendDstAlpha: THREE.OneMinusSrcAlphaFactor,
+                        vertexShader: [
+                            'precision highp float;',
+                            'varying vec2 vUv;',
+                            'void main() {',
+                            '    vUv = uv;',
+                            '    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
+                            '}'
+                        ].join('\n'),
+                        fragmentShader: [
+                            'precision highp float;',
+                            'uniform sampler2D tMap;',
+                            'uniform float uDaylight;',
+                            'varying vec2 vUv;',
+                            'void main() {',
+                            '    vec4 s = texture2D(tMap, vUv);',
+                            '    if (s.a < 0.015) discard;',
+                            '    vec3 c = s.rgb;',
+                            '    float lum = dot(c, vec3(0.299, 0.587, 0.114));',
+                            '    // Pre-counter post-process sunLift on the nocturnal Prussian backing so noon sun never washes it out',
+                            '    float darkBacking = 1.0 - smoothstep(0.06, 0.48, lum);',
+                            '    float dAmt = smoothstep(0.12, 1.0, uDaylight);',
+                            '    c = mix(c, c * 0.42, darkBacking * dAmt);',
+                            '    c = mix(c, c * 0.82, (1.0 - darkBacking) * dAmt * 0.65);',
+                            '    gl_FragColor = vec4(clamp(c, 0.0, 1.0), s.a);',
+                            '}'
+                        ].join('\n')
                     });
-                    var wordW = Math.min(apW * 0.98, 2.52);
-                    var wordH = wordW * (256.0 / 1024.0);
+                    var wordW = Math.min(apW * 1.00, 2.48);
+                    var wordH = wordW * (288.0 / 1024.0);
                     var wordGeo = new THREE.PlaneGeometry(wordW, wordH);
-                    var wordY = yTop + border + 0.055 + wordH * 0.50;
+                    var wordY = yTop + border + 0.052 + wordH * 0.46;
 
                     var wordFront = new THREE.Mesh(wordGeo, wordMat);
-                    wordFront.position.set(0, wordY, 0.006);
+                    wordFront.position.set(0, wordY, 0.008);
                     var wordBack = new THREE.Mesh(wordGeo, wordMat);
-                    wordBack.position.set(0, wordY, -0.006);
+                    wordBack.position.set(0, wordY, -0.008);
                     wordBack.rotation.y = Math.PI;
                     g.add(wordFront, wordBack);
 
@@ -8995,12 +9147,15 @@
                     portalGroup.add(fMesh);
                     window.__vgFloatingFrameList.push({ group: fMesh, baseY: frameY });
 
-                    var fStandX = frameX + ux * 3.15;
-                    var fStandZ = frameZ + uz * 3.15;
+                    var fStandDist = 3.56;
+                    var fStandX = frameX + ux * fStandDist;
+                    var fStandZ = frameZ + uz * fStandDist;
                     var fStandY = getGroundY(fStandX, fStandZ);
+                    var fCamEyeY = fStandY + FP_EYE_HEIGHT;
+                    var fMidAtPlaneY = frameY + 1.72;
                     var fLookX  = frameX - ux * 8.5;
                     var fLookZ  = frameZ - uz * 8.5;
-                    var fLookY  = frameY + 1.48;
+                    var fLookY  = fCamEyeY + (fMidAtPlaneY - fCamEyeY) * ((fStandDist + 8.5) / fStandDist);
 
                     window.__vgEasels.push({
                         idx: idx,
