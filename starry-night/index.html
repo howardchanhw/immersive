@@ -7816,7 +7816,8 @@
             // 6B. "The Road Menders" (Dec 1889, Phillips Collection / Letter to Theo 7 Dec 1889):
             //     Stacked Provençal limestone paving blocks & golden-ochre sand heaps beneath the Boulevard plane trees!
             (function () {
-                var sandHeapMat = createPainterlyArchMaterial(0x261d10, 0xa88332, 0xf2d15b, 0.18, 2.55, false, false);
+                var sandHeapMat        = createPainterlyArchMaterial(0x261d10, 0xa88332, 0xf2d15b, 0.18, 2.55, false, false);
+                var pavingLimestoneMat = createPainterlyArchMaterial(0x1b263d, 0x757862, 0xd8dec0, 0.06, 2.35, false, false);
                 [
                     [-10.55, -2.42, 0.94, 0.72, 0.56, 371.3],
                     [ -8.35, -2.48, 0.68, 0.56, 0.42, 377.9]
@@ -7859,7 +7860,7 @@
                     blkGrp.rotation.y = rotB;
                     var blkMesh = new THREE.Mesh(
                         makeWobblyBoxGeometry(bw, fullH, bd, 3, 2, 2, 0.018, 382.0 + bkIdx * 5.3),
-                        (bkIdx % 2 === 0) ? wallCream : curbStoneMat
+                        (bkIdx % 2 === 0) ? wallCream : pavingLimestoneMat
                     );
                     blkMesh.position.y = (bh - sink) * 0.5;
                     blkGrp.add(blkMesh);
