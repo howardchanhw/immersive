@@ -3057,7 +3057,7 @@
                 var cxDisk = (cdxS / dDen) / DOME_DISK_EXTENT;
                 var cyDisk = (cdzS / dDen) / DOME_DISK_EXTENT;
                 // Bounding radius in normalized [-1,1] dome-disk coords (generous margin near horizon & zenith)
-                var diskRad = (srad0 * 1.85) / Math.max(0.32, dDen * 0.72);
+                var diskRad = (srad0 * 2.22) / Math.max(0.32, dDen * 0.72);
                 var ix0 = Math.max(0, Math.floor(((cxDisk - diskRad) * 0.5 + 0.5) * SG_W) - 2);
                 var ix1 = Math.min(SG_W - 1, Math.ceil(((cxDisk + diskRad) * 0.5 + 0.5) * SG_W) + 2);
                 var iy0 = Math.max(0, Math.floor(((cyDisk - diskRad) * 0.5 + 0.5) * SG_H) - 2);
@@ -3075,11 +3075,11 @@
                         rx /= rl3; ry /= rl3; rz /= rl3;
 
                         var dotC = rx * cdxS + ry * cdyS + rz * cdzS;
-                        if (dotC > 0.940) {
+                        if (dotC > 0.912) {
                             var tx = rx * starRgtX[si] + ry * starRgtY[si] + rz * starRgtZ[si];
                             var ty = rx * starUpX[si]  + ry * starUpY[si]  + rz * starUpZ[si];
                             var rNorm = hypot2(tx, ty) / (srad0 * 1.045);
-                            if (rNorm < 1.60) {
+                            if (rNorm < 1.85) {
                                 var cellIdx = iy * SG_W + ix;
                                 var bo = cellIdx * 4;
                                 if (sgBytes[bo] === si || sgBytes[bo + 1] === si) continue;
@@ -3356,24 +3356,33 @@
                         var rls = hypot3(rxs, rys, rzs) || 1.0;
                         rxs /= rls; rys /= rls; rzs /= rls;
 
-                        if (rxs * cdx0 + rys * cdy0 + rzs * cdz0 > 0.94) {
+                        if (rxs * cdx0 + rys * cdy0 + rzs * cdz0 > 0.92) {
                             var locX = rxs * starRgtX[stIdx] + rys * starRgtY[stIdx] + rzs * starRgtZ[stIdx];
                             var locY = rxs * starUpX[stIdx]  + rys * starUpY[stIdx]  + rzs * starUpZ[stIdx];
                             var dist = hypot2(locX, locY);
-                            if (dist < maxR) {
-                                var sTx = (dist > 0.003) ? (-locY / dist) : 1.0;
-                                var sTy = (dist > 0.003) ? ( locX / dist) : 0.0;
-                                // 3D whirlpool tangent = sTx * cRight + sTy * cUp
+                            if (dist < maxR && dist > 0.003) {
+                                var sRx = locX / dist, sRy = locY / dist;
+                                var sTx = -sRy, sTy = sRx;
+                                var r3x = sRx * starRgtX[stIdx] + sRy * starUpX[stIdx];
+                                var r3y = sRx * starRgtY[stIdx] + sRy * starUpY[stIdx];
+                                var r3z = sRx * starRgtZ[stIdx] + sRy * starUpZ[stIdx];
                                 var w3x = sTx * starRgtX[stIdx] + sTy * starUpX[stIdx];
                                 var w3y = sTx * starRgtY[stIdx] + sTy * starUpY[stIdx];
                                 var w3z = sTx * starRgtZ[stIdx] + sTy * starUpZ[stIdx];
-                                var denom = Math.max(0.01, stR * 1.46);
-                                var falloff = Math.exp(-(dist / denom) * (dist / denom));
-                                var wSt = smoothstepJS(0.008, 0.025, dist) * falloff * 0.91;
                                 var fiS = rOffS + sx;
-                                var nxS = flowVX[fiS] + (w3x - flowVX[fiS]) * wSt;
-                                var nyS = flowVY[fiS] + (w3y - flowVY[fiS]) * wSt;
-                                var nzS = flowVZ[fiS] + (w3z - flowVZ[fiS]) * wSt;
+                                var curVx = flowVX[fiS], curVy = flowVY[fiS], curVz = flowVZ[fiS];
+                                var alignS = (curVx * w3x + curVy * w3y + curVz * w3z >= 0.0) ? 1.0 : -1.0;
+                                w3x *= alignS; w3y *= alignS; w3z *= alignS;
+                                var denom = Math.max(0.01, stR * 1.58);
+                                var falloff = Math.exp(-(dist / denom) * (dist / denom));
+                                var radComp = curVx * r3x + curVy * r3y + curVz * r3z;
+                                var nxS = curVx - radComp * r3x * falloff * 0.95;
+                                var nyS = curVy - radComp * r3y * falloff * 0.95;
+                                var nzS = curVz - radComp * r3z * falloff * 0.95;
+                                var wSt = smoothstepJS(0.008, 0.025, dist) * falloff * 0.88;
+                                nxS = nxS + (w3x - nxS) * wSt;
+                                nyS = nyS + (w3y - nyS) * wSt;
+                                nzS = nzS + (w3z - nzS) * wSt;
                                 var dotR = nxS * rxs + nyS * rys + nzS * rzs;
                                 nxS -= dotR * rxs; nyS -= dotR * rys; nzS -= dotR * rzs;
                                 var nlS = hypot3(nxS, nyS, nzS) || 1.0;
@@ -3909,7 +3918,11 @@
                 '    }',
                 '}',
                 '',
-                'void paintPolarCoronaRings(vec2 d, float r, vec2 center, float outerR, float baseRingPitch, float minPolarRadius, float isMoon, float starType, vec2 streamTan, float brushExcite, float yBoost, inout vec3 canvasCol, inout float heightAccum) {',
+                '// Chunky Short-Dash Polar-Arc Concentric Ring Renderer (MoMA 1889 Starry Night):',
+                '//   - Short, thick Van Gogh curved dabs (~2.2:1 aspect ratio) arranged in nested concentric circles',
+                '//   - Zero unpainted inner gap around the bullseye & zero outward spikes',
+                '//   - collarPass > 0.5 paints concentric cerulean/cobalt/ultramarine/Prussian sky collar cradling each star!',
+                'void paintPolarCoronaRings(vec2 d, float r, vec2 center, float outerR, float ringPitch, float minPolarRadius, float maxPolarRadius, float isMoon, float starType, float collarPass, float brushExcite, float yBoost, inout vec3 canvasCol, inout float heightAccum) {',
                 '    vec3 indianYellow   = vec3(0.972, 0.695, 0.125);',
                 '    vec3 zincYellow     = vec3(0.985, 0.895, 0.265);',
                 '    vec3 sulfurCream    = vec3(0.992, 0.948, 0.555);',
@@ -3918,100 +3931,101 @@
                 '    vec3 warmIvory      = vec3(0.985, 0.968, 0.835);',
                 '    vec3 venusWhiteGold = vec3(1.000, 0.988, 0.905);',
                 '    vec3 celadonTurq    = vec3(0.505, 0.725, 0.795);',
-                '    vec3 lumCerulean    = vec3(0.239, 0.451, 0.722);',
+                '    vec3 lumCerulean    = vec3(0.275, 0.515, 0.755);',
+                '    vec3 skyCobalt      = vec3(0.145, 0.310, 0.610);',
+                '    vec3 skyUltramarine = vec3(0.086, 0.188, 0.465);',
+                '    vec3 skyPrussian    = vec3(0.048, 0.106, 0.275);',
+                '    vec3 skyInk         = vec3(0.024, 0.038, 0.088);',
                 '',
-                '    float targetArcLen = baseRingPitch * 4.35;',
-                '    float maxBands = floor((outerR * 1.25) / baseRingPitch);',
+                '    float targetArcLen = ringPitch * ((collarPass > 0.5) ? 2.15 : 1.72);',
                 '    float ang = atan(d.y, d.x + 0.00001);',
                 '',
                 '#ifdef SAFE_MODE',
                 '    for (int passIdx = 0; passIdx < 2; passIdx++) {',
-                '        if (true) {',
                 '#else',
-                '    for (int passIdx = 0; passIdx < 5; passIdx++) {',
-                '        if (passIdx < 3 || uQuality >= 0.45) {',
+                '    for (int passIdx = 0; passIdx < 3; passIdx++) {',
                 '#endif',
-                '            float pf = float(passIdx);',
-                '            float rCoord = (r / baseRingPitch) + pf * 0.23;',
-                '            float rBand = floor(rCoord);',
-                '            if (rBand >= 0.0 && rBand <= maxBands) {',
-                '                float rRingWorld = max((rBand + 0.5 - pf * 0.23) * baseRingPitch, 0.015);',
-                '                if (rRingWorld >= minPolarRadius) {',
-                '                    float rFracNorm = rRingWorld / outerR;',
-                '                    float ringCircum = 6.2831853 * max(rRingWorld, 0.020);',
-                '                    float arcCount = max(8.0, floor(ringCircum / targetArcLen + 0.5));',
-                '                    float spin = (mod(rBand + pf, 2.0) < 0.5 ? 1.0 : -1.0) * (uFlowPhase * 0.24 + brushExcite * 0.95);',
-                '                    float aRaw  = ((ang + 3.14159265 + pf * 1.61803 + rBand * 1.3247 + spin) / 6.2831853) * arcCount;',
-                '                    float aBase = floor(aRaw);',
+                '        float pf = float(passIdx);',
+                '        // Half-band radial brick-interleaving across 2-3 passes fills 100% of radial gaps with chunky discrete dabs!',
+                '        float rShift = pf * 0.46 + collarPass * 0.18;',
+                '        float rCoord = (r / ringPitch) + rShift;',
+                '        float baseBand = floor(rCoord);',
+                '        float bStart = baseBand + step(0.5, fract(rCoord)) - 1.0;',
+                '        for (int db = 0; db <= 1; db++) {',
+                '            float rBand = bStart + float(db);',
+                '            float rRingWorld = max((rBand + 0.5 - rShift) * ringPitch, 0.005);',
+                '            if (rBand >= 0.0 && rRingWorld >= minPolarRadius && rRingWorld <= maxPolarRadius) {',
+                '                float rFracNorm = rRingWorld / outerR;',
+                '                float ringCircum = 6.2831853 * max(rRingWorld, 0.009);',
+                '                float arcCount = max(6.0, floor(ringCircum / targetArcLen + 0.5));',
+                '                float cellStepAng = 6.2831853 / arcCount;',
+                '                float spinRate = (collarPass > 0.5) ? 0.12 : 0.20;',
+                '                float spin = (mod(rBand + pf, 2.0) < 0.5 ? 1.0 : -1.0) * (uFlowPhase * spinRate + brushExcite * 0.85);',
+                '                float ringPhase = rBand * 1.913 + pf * 2.39996 + collarPass * 0.85;',
+                '                float aRaw  = ((ang + 3.14159265 + ringPhase + spin) / 6.2831853) * arcCount;',
+                '                float aBase = floor(aRaw);',
+                '                float aStart = aBase + step(0.5, fract(aRaw)) - 1.0;',
                 '',
-                '#ifdef SAFE_MODE',
-                '                    float aStart = aBase + step(0.5, fract(aRaw)) - 1.0;',
-                '                    for (int da = 0; da <= 1; da++) {',
-                '                        float aIdx = aStart + float(da);',
-                '#else',
-                '                    for (int da = -1; da <= 1; da++) {',
-                '                        float aIdx = aBase + float(da);',
-                '#endif',
-                '                        float wrappedA = mod(aIdx, arcCount);',
-                '                        vec3 rnd = hash23(vec2(rBand + pf * 23.0, wrappedA + center.x * 113.0 + center.y * 59.0));',
-                '                        float cellCenterAng = ((aIdx + 0.5) / arcCount) * 6.2831853 - 3.14159265 - pf * 1.61803 - rBand * 1.3247 - spin;',
-                '                        vec2 radialDir = vec2(cos(cellCenterAng), sin(cellCenterAng));',
-                '                        vec2 polarTan  = vec2(-radialDir.y, radialDir.x);',
+                '                for (int da = 0; da <= 1; da++) {',
+                '                    float aIdx = aStart + float(da);',
+                '                    float wrappedA = mod(aIdx, arcCount);',
+                '                    if (wrappedA < 0.0) wrappedA += arcCount;',
+                '                    vec3 rnd = hash23(vec2(rBand + pf * 31.0 + collarPass * 71.0, wrappedA + center.x * 113.0 + center.y * 59.0));',
                 '',
-                '                        float swirlStretch = (isMoon > 0.5) ? (0.12 * dot(radialDir, vec2(-0.66, -0.75))) : 0.0;',
-                '                        float featherProb = (1.0 - smoothstep(0.68 + swirlStretch, 1.18 + swirlStretch, rFracNorm + (rnd.x - 0.5) * 0.14))',
-                '                                          * (1.0 - uLinenGap * 0.12 * smoothstep(0.55, 1.0, rFracNorm));',
+                '                    float jitCap = min(uChaos, 1.80);',
+                '                    float dashAng = ((aIdx + 0.5 + (rnd.x - 0.5) * 0.30 * jitCap) * cellStepAng) - 3.14159265 - ringPhase - spin;',
+                '                    vec2 radialDir = vec2(cos(dashAng), sin(dashAng));',
                 '',
-                '                        if (rnd.z < featherProb) {',
-                '                            vec2 alignedStream = (dot(streamTan, polarTan) >= 0.0) ? streamTan : -streamTan;',
-                '                            float peelStart = (isMoon > 0.5) ? 0.60 : 0.72;',
-                '                            float peelBlend = smoothstep(peelStart, 1.14, rFracNorm) * ((isMoon > 0.5) ? 0.74 : 0.62);',
-                '                            vec2 strokeTan  = normalize(mix(polarTan, alignedStream, peelBlend));',
+                '                    float swirlStretch = (isMoon > 0.5) ? (0.07 * dot(radialDir, vec2(-0.66, -0.75))) : 0.0;',
+                '                    float featherEnd   = (collarPass > 0.5) ? ((isMoon > 0.5) ? 1.44 : 1.54) : (1.05 + swirlStretch);',
+                '                    float featherStart = (collarPass > 0.5) ? ((isMoon > 0.5) ? 1.16 : 1.22) : (0.74 + swirlStretch);',
+                '                    float passKeep     = (pf < 1.5) ? 0.96 : 0.64;',
+                '                    float featherProb  = (1.0 - smoothstep(featherStart, featherEnd, rFracNorm + (rnd.x - 0.5) * 0.12))',
+                '                                       * passKeep * (1.0 - uLinenGap * 0.14 * smoothstep(0.50, 1.0, rFracNorm));',
                 '',
-                '                            float wobbleLim = mix(0.22, 0.13, smoothstep(0.65, 1.05, rFracNorm));',
-                '                            float handTilt  = (rnd.z - 0.5) * wobbleLim * min(uChaos, 2.0);',
-                '                            float ct = cos(handTilt); float stSin = sin(handTilt);',
-                '                            strokeTan = mat2(ct, -stSin, stSin, ct) * strokeTan;',
-                '                            vec2 strokeNorm = vec2(-strokeTan.y, strokeTan.x);',
+                '                    if (rnd.z < featherProb) {',
+                '                        float rDash = max(0.005, rRingWorld + (rnd.y - 0.5) * ringPitch * 0.18 * jitCap);',
+                '                        float dAng  = mod(ang - dashAng + 3.14159265, 6.2831853) - 3.14159265;',
+                '                        float sAlong = dAng * rDash;',
+                '                        float subtleHand = (rnd.z - 0.5) * 0.045 * min(uChaos, 1.75);',
+                '                        float sAcross = (r - rDash) - sAlong * subtleHand;',
                 '',
-                '                            float jitCap = min(uChaos, 1.85);',
-                '                            vec2 anchorOffset = radialDir * rRingWorld',
-                '                                + polarTan * ((rnd.x - 0.5) * targetArcLen * 0.42 * jitCap)',
-                '                                + radialDir * ((rnd.y - 0.5) * baseRingPitch * 0.45 * jitCap);',
-                '                            vec2 relVec = d - anchorOffset;',
-                '                            float sAlong  = dot(relVec, strokeTan);',
-                '                            float sAcross = dot(relVec, strokeNorm) + (sAlong * sAlong) / (2.0 * max(rRingWorld, 0.032)) * (1.0 - peelBlend * 0.75);',
+                '                        float cellArcLen = cellStepAng * rDash;',
+                '                        float halfLen = cellArcLen * (0.50 + rnd.x * 0.20);',
+                '                        float outerTaper = (collarPass > 0.5) ? mix(0.95, 0.80, smoothstep(1.15, 1.52, rFracNorm)) : mix(0.98, 0.82, smoothstep(0.68, 1.04, rFracNorm));',
+                '                        float halfWid = ringPitch * (0.43 + rnd.y * 0.12) * outerTaper * (1.0 - uLinenGap * 0.12);',
                 '',
-                '                            float outerTaper = mix(1.0, 0.72, smoothstep(0.65, 1.15, rFracNorm));',
-                '                            float halfLen = targetArcLen * (0.58 + rnd.x * 0.34);',
-                '                            float halfWid = baseRingPitch * (0.48 + rnd.y * 0.16) * outerTaper * (1.0 - uLinenGap * 0.14);',
-                '',
-                '                            vec4 st = evalSlenderBristleStroke(sAlong / halfLen, sAcross / halfWid, rnd.x + pf * 3.1);',
-                '                            if (st.x > 0.01) {',
-                '                                vec3 colA; vec3 colB;',
-                '                                if (isMoon > 0.5) {',
-                '                                    if (rFracNorm < 0.56)      { colA = (rnd.y > 0.36) ? zincYellow : indianYellow; colB = sulfurCream; }',
-                '                                    else if (rFracNorm < 0.80) { colA = (rnd.y < 0.42 * yBoost) ? zincYellow : sulfurCream; colB = chartreuseHalo; }',
-                '                                    else if (rFracNorm < 0.98) { colA = (rnd.y < 0.38 * yBoost) ? chartreuseHalo : warmIvory; colB = celadonTurq; }',
-                '                                    else                       { colA = celadonTurq; colB = lumCerulean; }',
-                '                                } else if (starType > 1.5) {',
-                '                                    if (rFracNorm < 0.46)      { colA = warmIvory; colB = citronRhone; }',
-                '                                    else if (rFracNorm < 0.78) { colA = citronRhone; colB = celadonTurq; }',
-                '                                    else                       { colA = celadonTurq; colB = lumCerulean; }',
-                '                                } else if (starType > 0.5) {',
-                '                                    if (rFracNorm < 0.44)      { colA = venusWhiteGold; colB = warmIvory; }',
-                '                                    else if (rFracNorm < 0.76) { colA = (rnd.y < 0.35 * yBoost) ? zincYellow : warmIvory; colB = chartreuseHalo; }',
-                '                                    else if (rFracNorm < 0.96) { colA = warmIvory; colB = celadonTurq; }',
-                '                                    else                       { colA = celadonTurq; colB = lumCerulean; }',
-                '                                } else {',
-                '                                    if (rFracNorm < 0.48)      { colA = zincYellow; colB = sulfurCream; }',
-                '                                    else if (rFracNorm < 0.80) { colA = (rnd.y < 0.40 * yBoost) ? zincYellow : sulfurCream; colB = chartreuseHalo; }',
-                '                                    else                       { colA = (rnd.y < 0.28 * yBoost) ? chartreuseHalo : celadonTurq; colB = lumCerulean; }',
-                '                                }',
-                '                                vec3 dashCol = mix(colA, colB, st.w * 0.50) * (1.0 + st.y);',
-                '                                canvasCol = mix(canvasCol, dashCol, st.x);',
-                '                                heightAccum = mix(heightAccum, max(0.52, st.z + 0.14), st.x * 0.90);',
+                '                        vec4 st = evalSlenderBristleStroke(sAlong / max(halfLen, 0.0012), sAcross / max(halfWid, 0.0009), rnd.x + pf * 3.7 + rBand * 1.9 + collarPass * 5.3);',
+                '                        if (st.x > 0.01) {',
+                '                            vec3 colA; vec3 colB;',
+                '                            if (collarPass > 0.5) {',
+                '                                float darkInkCut = 0.15 * clamp(uBlackInk, 0.2, 1.4) * smoothstep(1.08, 1.44, rFracNorm);',
+                '                                if (rnd.z < darkInkCut)       { colA = skyInk; colB = skyPrussian; }',
+                '                                else if (rFracNorm < 1.12)    { colA = (rnd.y > 0.45) ? lumCerulean : celadonTurq; colB = skyCobalt; }',
+                '                                else if (rFracNorm < 1.30)    { colA = (rnd.y > 0.38) ? skyCobalt : lumCerulean; colB = skyUltramarine; }',
+                '                                else                          { colA = (rnd.y > 0.44) ? skyUltramarine : skyPrussian; colB = skyCobalt; }',
+                '                            } else if (isMoon > 0.5) {',
+                '                                if (rFracNorm < 0.52)      { colA = (rnd.y > 0.36) ? zincYellow : indianYellow; colB = sulfurCream; }',
+                '                                else if (rFracNorm < 0.76) { colA = (rnd.y < 0.42 * yBoost) ? zincYellow : sulfurCream; colB = chartreuseHalo; }',
+                '                                else if (rFracNorm < 0.92) { colA = (rnd.y < 0.38 * yBoost) ? chartreuseHalo : warmIvory; colB = celadonTurq; }',
+                '                                else                       { colA = (rnd.y > 0.45) ? celadonTurq : warmIvory; colB = lumCerulean; }',
+                '                            } else if (starType > 1.5) {',
+                '                                if (rFracNorm < 0.44)      { colA = venusWhiteGold; colB = citronRhone; }',
+                '                                else if (rFracNorm < 0.76) { colA = (rnd.y > 0.42) ? citronRhone : warmIvory; colB = celadonTurq; }',
+                '                                else                       { colA = celadonTurq; colB = lumCerulean; }',
+                '                            } else if (starType > 0.5) {',
+                '                                if (rFracNorm < 0.42)      { colA = venusWhiteGold; colB = warmIvory; }',
+                '                                else if (rFracNorm < 0.74) { colA = (rnd.y < 0.38 * yBoost) ? zincYellow : warmIvory; colB = chartreuseHalo; }',
+                '                                else if (rFracNorm < 0.92) { colA = (rnd.y > 0.45) ? warmIvory : chartreuseHalo; colB = celadonTurq; }',
+                '                                else                       { colA = celadonTurq; colB = lumCerulean; }',
+                '                            } else {',
+                '                                if (rFracNorm < 0.44)      { colA = (rnd.y > 0.35) ? zincYellow : indianYellow; colB = sulfurCream; }',
+                '                                else if (rFracNorm < 0.76) { colA = (rnd.y < 0.45 * yBoost) ? zincYellow : sulfurCream; colB = warmIvory; }',
+                '                                else                       { colA = (rnd.y < 0.36 * yBoost) ? sulfurCream : chartreuseHalo; colB = celadonTurq; }',
                 '                            }',
+                '                            vec3 dashCol = mix(colA, colB, st.w * 0.52) * (1.0 + st.y * 1.12);',
+                '                            canvasCol = mix(canvasCol, dashCol, st.x);',
+                '                            heightAccum = mix(heightAccum, max(0.52, st.z + ((collarPass > 0.5) ? 0.10 : 0.18)), st.x * 0.92);',
                 '                        }',
                 '                    }',
                 '                }',
@@ -4020,12 +4034,42 @@
                 '    }',
                 '}',
                 '',
-                'void paintWetOnWetMoon(vec3 rayDir, vec2 streamTan, float brushExcite, inout vec3 canvasCol, inout float heightAccum) {',
+                'void paintMoonBlueCollar(vec3 rayDir, float brushExcite, inout vec3 canvasCol, inout float heightAccum) {',
                 '    vec2 center = vec2(0.355, 0.455);',
                 '    float outerR = 0.142;',
                 '    vec2 d = celestialTangentDelta(rayDir, center);',
                 '    float r = length(d);',
-                '    if (r <= outerR * 1.30) {',
+                '    if (r >= outerR * 0.76 && r <= outerR * 1.50) {',
+                '        float effThin = mix(1.0, max(uThinness, 0.50), 0.42);',
+                '        float ringPitch = 0.0135 / effThin;',
+                '        float yBoost = clamp(uYellowBoost + brushExcite * 0.45, 0.3, 2.0);',
+                '        paintPolarCoronaRings(d, r, center, outerR, ringPitch, outerR * 0.86, outerR * 1.44, 1.0, 0.0, 1.0, brushExcite, yBoost, canvasCol, heightAccum);',
+                '    }',
+                '}',
+                '',
+                'void paintStarBlueCollar(vec3 rayDir, vec4 starInfo, float brushExcite, inout vec3 canvasCol, inout float heightAccum) {',
+                '    if (starInfo.z <= 0.0) return;',
+                '    vec2 center = starInfo.xy;',
+                '    float starType = floor(starInfo.w);',
+                '    float twinklePhase = fract(starInfo.w) * 6.98;',
+                '    float pulse = 1.0 + 0.045 * sin(uFlowPhase * 2.2 + twinklePhase);',
+                '    float outerR = starInfo.z * pulse;',
+                '    vec2 d = celestialTangentDelta(rayDir, center);',
+                '    float r = length(d);',
+                '    if (r >= outerR * 0.72 && r <= outerR * 1.62) {',
+                '        float effThin = mix(1.0, max(uThinness, 0.50), 0.42);',
+                '        float ringPitch = max(outerR * 0.225, 0.0094) / effThin;',
+                '        float yBoost = clamp(uYellowBoost + brushExcite * 0.45, 0.3, 2.0);',
+                '        paintPolarCoronaRings(d, r, center, outerR, ringPitch, outerR * 0.84, outerR * 1.54, 0.0, starType, 1.0, brushExcite, yBoost, canvasCol, heightAccum);',
+                '    }',
+                '}',
+                '',
+                'void paintWetOnWetMoon(vec3 rayDir, float brushExcite, inout vec3 canvasCol, inout float heightAccum) {',
+                '    vec2 center = vec2(0.355, 0.455);',
+                '    float outerR = 0.142;',
+                '    vec2 d = celestialTangentDelta(rayDir, center);',
+                '    float r = length(d);',
+                '    if (r <= outerR * 1.16) {',
                 '        vec3 cadOrange      = vec3(0.935, 0.495, 0.075);',
                 '        vec3 indianYellow   = vec3(0.972, 0.695, 0.125);',
                 '        vec3 zincYellow     = vec3(0.985, 0.895, 0.265);',
@@ -4034,60 +4078,24 @@
                 '        vec3 warmIvory      = vec3(0.985, 0.968, 0.835);',
                 '        vec3 celadonTurq    = vec3(0.505, 0.725, 0.795);',
                 '        vec3 lumCerulean    = vec3(0.239, 0.451, 0.722);',
-                '        vec3 transCobalt    = vec3(0.122, 0.271, 0.569);',
                 '',
-                '        float effThin = max(uThinness, 0.86) * (0.72 + 0.28 * uThinness);',
-                '        float baseRingPitch = 0.0086 / effThin;',
+                '        float effThin = mix(1.0, max(uThinness, 0.50), 0.42);',
+                '        float ringPitch = 0.0135 / effThin;',
                 '        float yBoost = clamp(uYellowBoost + brushExcite * 0.45, 0.3, 2.0);',
                 '',
                 '        float uNorm = r / outerR;',
-                '        float glazeJit = (vnoise(d * 42.0 + center * 23.0) - 0.5) * 0.22;',
-                '        float asymDir = dot(d / max(r, 0.001), vec2(-0.66, -0.75));',
-                '        float wetMask = 1.0 - smoothstep(0.56, 1.06 + 0.14 * asymDir, uNorm + glazeJit);',
+                '        float glazeJit = (vnoise(d * 42.0 + center * 23.0) - 0.5) * 0.14;',
+                '        float wetMask = 1.0 - smoothstep(0.36, 0.86, uNorm + glazeJit);',
                 '        if (wetMask > 0.005) {',
                 '            vec2 mUv = d / (outerR * 0.355);',
                 '            float inHollow = 1.0 - smoothstep(0.45, 0.88, length(mUv - vec2(0.34, 0.23)));',
-                '            vec3 innerMoonGlow = mix(mix(indianYellow, sulfurCream, smoothstep(0.18, 0.58, uNorm)), mix(sulfurCream, celadonTurq, 0.48), inHollow * 0.78);',
-                '            vec3 outerMoonGlow = mix(mix(celadonTurq, lumCerulean, smoothstep(0.66, 1.02, uNorm)), transCobalt, smoothstep(0.88, 1.16, uNorm));',
-                '            canvasCol = mix(canvasCol, mix(innerMoonGlow, outerMoonGlow, smoothstep(0.54, 0.98, uNorm)), wetMask * 0.82);',
-                '            heightAccum = max(heightAccum, 0.42 * wetMask);',
+                '            vec3 innerMoonGlow = mix(mix(indianYellow, sulfurCream, smoothstep(0.16, 0.56, uNorm)), mix(sulfurCream, celadonTurq, 0.45), inHollow * 0.75);',
+                '            vec3 outerMoonGlow = mix(celadonTurq, lumCerulean, smoothstep(0.55, 0.88, uNorm));',
+                '            canvasCol = mix(canvasCol, mix(innerMoonGlow, outerMoonGlow, smoothstep(0.46, 0.84, uNorm)), wetMask * 0.78);',
+                '            heightAccum = max(heightAccum, 0.40 * wetMask);',
                 '        }',
                 '',
-                '        if (r < outerR * 0.46) {',
-                '            float hPitch = baseRingPitch * 1.18;',
-                '            vec2 hollowDir = normalize(vec2(-0.52, 0.85));',
-                '            vec2 hollowNrm = vec2(-hollowDir.y, hollowDir.x);',
-                '            float hollowFade = 1.0 - smoothstep(0.33 * outerR, 0.45 * outerR, r);',
-                '#ifdef SAFE_MODE',
-                '            for (int hp = 0; hp < 1; hp++) {',
-                '#else',
-                '            for (int hp = 0; hp < 3; hp++) {',
-                '#endif',
-                '                float fhp = float(hp);',
-                '                vec2 hg = vec2(dot(d, hollowDir), dot(d, hollowNrm)) / hPitch + vec2(fhp * 0.37, fhp * 0.61);',
-                '                vec2 qStart = floor(hg) + step(vec2(0.5), fract(hg)) - vec2(1.0);',
-                '                for (int dy = 0; dy <= 1; dy++) {',
-                '                    for (int dx = 0; dx <= 1; dx++) {',
-                '                        vec2 cid = qStart + vec2(float(dx), float(dy));',
-                '                        vec3 rnd = hash23(cid + vec2(fhp * 19.1 + 7.3, 43.7));',
-                '                        vec2 relH = hg - (cid + vec2(0.5) + (rnd.xy - 0.5) * 0.58);',
-                '                        float aWob = (rnd.z - 0.5) * 0.38;',
-                '                        vec2 locH = mat2(cos(aWob), -sin(aWob), sin(aWob), cos(aWob)) * relH;',
-                '                        locH.y -= 0.16 * locH.x * locH.x;',
-                '                        vec4 stH = evalSlenderBristleStroke(locH.x / 1.15, locH.y / 0.36, rnd.x + fhp);',
-                '                        float mAlpha = stH.x * hollowFade;',
-                '                        if (mAlpha > 0.01) {',
-                '                            vec3 hColA = (rnd.y > 0.52) ? sulfurCream : ((rnd.y > 0.22) ? warmIvory : celadonTurq);',
-                '                            vec3 hColB = (rnd.x > 0.50) ? zincYellow : chartreuseHalo;',
-                '                            canvasCol = mix(canvasCol, mix(hColA, hColB, stH.w * 0.45) * (1.0 + stH.y), mAlpha);',
-                '                            heightAccum = mix(heightAccum, max(0.50, stH.z + 0.10), mAlpha * 0.85);',
-                '                        }',
-                '                    }',
-                '                }',
-                '            }',
-                '        }',
-                '',
-                '        paintPolarCoronaRings(d, r, center, outerR, baseRingPitch, outerR * 0.35, 1.0, 0.0, streamTan, brushExcite, yBoost, canvasCol, heightAccum);',
+                '        paintPolarCoronaRings(d, r, center, outerR, ringPitch, outerR * 0.10, outerR * 1.04, 1.0, 0.0, 0.0, brushExcite, yBoost, canvasCol, heightAccum);',
                 '',
                 '        if (r < outerR * 0.39) {',
                 '            vec2 cUv = d / (outerR * 0.355);',
@@ -4136,7 +4144,7 @@
                 '    }',
                 '}',
                 '',
-                'void paintWetOnWetStar(vec3 rayDir, vec4 starInfo, vec3 flow3D, float brushExcite, inout vec3 canvasCol, inout float heightAccum) {',
+                'void paintWetOnWetStar(vec3 rayDir, vec4 starInfo, float brushExcite, inout vec3 canvasCol, inout float heightAccum) {',
                 '    vec2 center = starInfo.xy;',
                 '    float starType = floor(starInfo.w);',
                 '    float twinklePhase = fract(starInfo.w) * 6.98;',
@@ -4144,15 +4152,7 @@
                 '    float outerR = starInfo.z * pulse;',
                 '    vec2 d = celestialTangentDelta(rayDir, center);',
                 '    float r = length(d);',
-                '    if (starInfo.z > 0.0 && r <= outerR * 1.30) {',
-                '        float caz = cos(center.x); float saz = sin(center.x);',
-                '        float cel = cos(center.y); float sel = sin(center.y);',
-                '        vec3 cDir   = vec3(saz * cel, sel, -caz * cel);',
-                '        vec3 upRef  = (abs(sel) > 0.985) ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 1.0, 0.0);',
-                '        vec3 cRight = normalize(cross(cDir, upRef));',
-                '        vec3 cUp    = cross(cRight, cDir);',
-                '        vec2 streamTan = normalize(vec2(dot(flow3D, cRight), dot(flow3D, cUp)) + vec2(0.0001));',
-                '',
+                '    if (starInfo.z > 0.0 && r <= outerR * 1.18) {',
                 '        vec3 indianYellow   = vec3(0.972, 0.695, 0.125);',
                 '        vec3 zincYellow     = vec3(0.985, 0.895, 0.265);',
                 '        vec3 sulfurCream    = vec3(0.992, 0.948, 0.555);',
@@ -4161,71 +4161,39 @@
                 '        vec3 venusWhiteGold = vec3(1.000, 0.988, 0.905);',
                 '        vec3 celadonTurq    = vec3(0.505, 0.725, 0.795);',
                 '        vec3 lumCerulean    = vec3(0.239, 0.451, 0.722);',
-                '        vec3 transCobalt    = vec3(0.122, 0.271, 0.569);',
                 '',
-                '        float effThin = max(uThinness, 0.86) * (0.72 + 0.28 * uThinness);',
-                '        float baseRingPitch = ((starType > 0.5) ? 0.0070 : 0.0064) / effThin;',
+                '        float effThin = mix(1.0, max(uThinness, 0.50), 0.42);',
+                '        float ringPitch = max(outerR * 0.225, 0.0094) / effThin;',
                 '        float yBoost = clamp(uYellowBoost + brushExcite * 0.45, 0.3, 2.0);',
                 '',
                 '        float uNorm = r / outerR;',
-                '        float glazeJit = (vnoise(d * 42.0 + center * 23.0) - 0.5) * 0.22;',
-                '        float wetMask = 1.0 - smoothstep(0.56, 1.12, uNorm + glazeJit);',
+                '        float glazeJit = (vnoise(d * 42.0 + center * 23.0) - 0.5) * 0.14;',
+                '        float wetMask = 1.0 - smoothstep(0.28, 0.74, uNorm + glazeJit);',
                 '        if (wetMask > 0.005) {',
                 '            vec3 innerGlow = (starType > 1.5) ? mix(citronRhone, warmIvory, 0.55) : ((starType > 0.5) ? warmIvory : sulfurCream);',
-                '            vec3 outerGlow = mix(mix(celadonTurq, lumCerulean, smoothstep(0.64, 1.02, uNorm)), transCobalt, smoothstep(0.88, 1.14, uNorm));',
-                '            canvasCol = mix(canvasCol, mix(innerGlow, outerGlow, smoothstep(0.38, 0.96, uNorm)), wetMask * 0.78);',
-                '            heightAccum = max(heightAccum, 0.42 * wetMask);',
+                '            vec3 outerGlow = mix(celadonTurq, lumCerulean, smoothstep(0.45, 0.78, uNorm));',
+                '            canvasCol = mix(canvasCol, mix(innerGlow, outerGlow, smoothstep(0.32, 0.74, uNorm)), wetMask * 0.74);',
+                '            heightAccum = max(heightAccum, 0.40 * wetMask);',
                 '        }',
                 '',
-                '        paintPolarCoronaRings(d, r, center, outerR, baseRingPitch, outerR * 0.24, 0.0, starType, streamTan, brushExcite, yBoost, canvasCol, heightAccum);',
+                '        // Chunky concentric curved dashes starting right from r = 0.10 * outerR out to 1.04 * outerR!',
+                '        paintPolarCoronaRings(d, r, center, outerR, ringPitch, outerR * 0.10, outerR * 1.04, 0.0, starType, 0.0, brushExcite, yBoost, canvasCol, heightAccum);',
                 '',
-                '        if (r < outerR * 0.88) {',
+                '        // Thick impasto bullseye dab right in the center heart (r < 0.28 * outerR)!',
+                '        if (r < outerR * 0.30) {',
                 '            float starSeed = center.x * 73.1 + center.y * 139.7;',
-                '            float dabPitch = min(baseRingPitch * 1.12, outerR * 0.22);',
-                '#ifdef SAFE_MODE',
-                '            for (int sp = 0; sp < 1; sp++) {',
-                '                if (true) {',
-                '#else',
-                '            for (int sp = 0; sp < 4; sp++) {',
-                '                if (sp < 2 || uQuality >= 0.45) {',
-                '#endif',
-                '                    float fsp = float(sp);',
-                '                    float passAng = starSeed + fsp * 1.12;',
-                '                    vec2 sDir = vec2(cos(passAng), sin(passAng));',
-                '                    vec2 sg = vec2(dot(d, sDir), dot(d, vec2(-sDir.y, sDir.x))) / dabPitch + vec2(fsp * 0.37, fsp * 0.63);',
-                '                    vec2 qStart = floor(sg) + step(vec2(0.5), fract(sg)) - vec2(1.0);',
-                '                    for (int dy = 0; dy <= 1; dy++) {',
-                '                        for (int dx = 0; dx <= 1; dx++) {',
-                '                            vec2 cid = qStart + vec2(float(dx), float(dy));',
-                '                            vec3 srnd = hash23(cid + vec2(fsp * 29.3 + starSeed, 67.1));',
-                '                            vec2 cGrid = cid + vec2(0.5) + (srnd.xy - 0.5) * 0.56;',
-                '                            vec2 cLocal = (cGrid - vec2(fsp * 0.37, fsp * 0.63)) * dabPitch;',
-                '                            float keepProb = 1.0 - smoothstep(0.14, 0.38, length(cLocal) / outerR + (srnd.z - 0.5) * 0.14);',
-                '                            if (srnd.x < keepProb) {',
-                '                                vec2 relS = sg - cGrid;',
-                '                                float wob = (srnd.z - 0.5) * 0.65;',
-                '                                vec2 locS = mat2(cos(wob), -sin(wob), sin(wob), cos(wob)) * relS;',
-                '                                locS.y -= 0.20 * locS.x * locS.x * ((srnd.y > 0.5) ? 1.0 : -1.0);',
-                '                                vec4 sst = evalSlenderBristleStroke(locS.x / (0.82 + srnd.y * 0.46), locS.y / (0.34 + srnd.z * 0.16), srnd.x + fsp * 4.3);',
-                '                                if (sst.x > 0.01) {',
-                '                                    vec3 cPigA; vec3 cPigB;',
-                '                                    if (starType > 1.5) {',
-                '                                        cPigA = (srnd.y > 0.38) ? venusWhiteGold : citronRhone;',
-                '                                        cPigB = (srnd.z > 0.45) ? celadonTurq : warmIvory;',
-                '                                    } else if (starType > 0.5) {',
-                '                                        cPigA = (srnd.y > 0.34) ? venusWhiteGold : warmIvory;',
-                '                                        cPigB = (srnd.z > 0.45) ? zincYellow : sulfurCream;',
-                '                                    } else {',
-                '                                        cPigA = (srnd.y > 0.42) ? zincYellow : indianYellow;',
-                '                                        cPigB = (srnd.z > 0.42) ? sulfurCream : warmIvory;',
-                '                                    }',
-                '                                    canvasCol = mix(canvasCol, mix(cPigA, cPigB, sst.w * 0.52) * (1.0 + sst.y * 1.05), sst.x);',
-                '                                    heightAccum = mix(heightAccum, max(0.56, sst.z + 0.16), sst.x * 0.90);',
-                '                                }',
-                '                            }',
-                '                        }',
-                '                    }',
-                '                }',
+                '            float coreR = outerR * 0.21;',
+                '            vec2 cRot = mat2(cos(starSeed), -sin(starSeed), sin(starSeed), cos(starSeed)) * (d / max(coreR, 0.003));',
+                '            cRot.y -= 0.26 * cRot.x * cRot.x;',
+                '            vec4 cst = evalSlenderBristleStroke(cRot.x / 0.96, cRot.y / 0.86, starSeed);',
+                '            float cDisc = 1.0 - smoothstep(0.58, 1.08, r / max(coreR, 0.003));',
+                '            float cAlpha = max(cst.x, cDisc * 0.90);',
+                '            if (cAlpha > 0.01) {',
+                '                vec3 cPigA = (starType > 1.5) ? venusWhiteGold : ((starType > 0.5) ? venusWhiteGold : indianYellow);',
+                '                vec3 cPigB = (starType > 1.5) ? citronRhone : ((starType > 0.5) ? warmIvory : zincYellow);',
+                '                vec3 heartCol = mix(cPigA, cPigB, cst.w * 0.55) * (1.0 + cst.y * 0.95);',
+                '                canvasCol = mix(canvasCol, heartCol, cAlpha);',
+                '                heightAccum = mix(heightAccum, max(0.68, cst.z + 0.22), cAlpha * 0.92);',
                 '            }',
                 '        }',
                 '    }',
@@ -4236,9 +4204,9 @@
                 '    float caz = cos(st.x); float saz = sin(st.x);',
                 '    float cel = cos(st.y); float sel = sin(st.y);',
                 '    vec3 cDir = vec3(saz * cel, sel, -caz * cel);',
-                '    if (dot(rayDir, cDir) < 0.958) return 0.0;',
+                '    if (dot(rayDir, cDir) < 0.930) return 0.0;',
                 '    float rNorm = length(celestialTangentDelta(rayDir, st.xy)) / (st.z * 1.045);',
-                '    return 1.0 - smoothstep(0.68, 1.08, rNorm);',
+                '    return 1.0 - smoothstep(1.20, 1.56, rNorm);',
                 '}',
                 '',
                 'vec4 evaluateCompleteSkyColor(vec3 d, vec2 p) {',
@@ -4285,35 +4253,37 @@
                 '    }',
                 '#endif',
                 '',
-                '    vec3 localFlow3D = getSkyFlow3D(d).xyz;',
                 '    float coreShield = max(evalStarShield(d, star0), evalStarShield(d, star1));',
-                '',
-                '    if (abs(p.x - 0.355) < 0.28 && abs(p.y - 0.455) < 0.24) {',
+                '    bool nearMoon = (abs(p.x - 0.355) < 0.30 && abs(p.y - 0.455) < 0.26);',
+                '    if (nearMoon) {',
                 '        float rm = length(celestialTangentDelta(d, vec2(0.355, 0.455))) / 0.142;',
-                '        coreShield = max(coreShield, 1.0 - smoothstep(0.68, 1.08, rm));',
-                '        vec3 mDir = skyAzElToDir(vec2(0.355, 0.455));',
-                '        vec3 mRgt = normalize(cross(mDir, vec3(0.0, 1.0, 0.0)));',
-                '        vec3 mUp  = cross(mRgt, mDir);',
-                '        vec2 moonStreamTan = normalize(vec2(dot(localFlow3D, mRgt), dot(localFlow3D, mUp)) + vec2(0.0001));',
-                '        paintWetOnWetMoon(d, moonStreamTan, moonExcite, canvasCol, heightAccum);',
+                '        coreShield = max(coreShield, 1.0 - smoothstep(1.16, 1.48, rm));',
                 '    }',
+                '',
+                '    // Stage 1: Paint concentric Van Gogh sky-blue collars FIRST so neighbor collars interlock cleanly behind all luminous star halos!',
+                '    if (nearMoon) { paintMoonBlueCollar(d, moonExcite, canvasCol, heightAccum); }',
+                '    if (star1.z > 0.0) { paintStarBlueCollar(d, star1, star1Excite, canvasCol, heightAccum); }',
+                '    if (star0.z > 0.0) { paintStarBlueCollar(d, star0, star0Excite, canvasCol, heightAccum); }',
+                '',
+                '    // Stage 2: Paint luminous concentric star & crescent moon halos + compact glowing cores ON TOP!',
+                '    if (nearMoon) { paintWetOnWetMoon(d, moonExcite, canvasCol, heightAccum); }',
                 '',
                 '#ifdef SAFE_MODE',
                 '    if (star1.z > 0.0) {',
                 '        vec2 dS1 = celestialTangentDelta(d, star1.xy);',
                 '        float uS1 = length(dS1) / max(0.008, star1.z);',
-                '        if (uS1 <= 1.15) {',
-                '            float mS1 = 1.0 - smoothstep(0.18, 1.08, uS1);',
-                '            float ringS1 = 0.5 + 0.5 * cos(uS1 * 18.0 - uFlowPhase * 1.4);',
+                '        if (uS1 <= 1.08) {',
+                '            float mS1 = 1.0 - smoothstep(0.18, 1.04, uS1);',
+                '            float ringS1 = 0.5 + 0.5 * cos(uS1 * 20.0 - uFlowPhase * 1.4);',
                 '            vec3 cS1 = mix(vec3(0.505, 0.725, 0.795), vec3(0.992, 0.948, 0.555), smoothstep(0.85, 0.20, uS1));',
                 '            canvasCol = mix(canvasCol, cS1 * (0.94 + 0.12 * ringS1), mS1 * 0.85);',
                 '            heightAccum = max(heightAccum, 0.52 * mS1);',
                 '        }',
                 '    }',
-                '    if (star0.z > 0.0) { paintWetOnWetStar(d, star0, localFlow3D, star0Excite, canvasCol, heightAccum); }',
+                '    if (star0.z > 0.0) { paintWetOnWetStar(d, star0, star0Excite, canvasCol, heightAccum); }',
                 '#else',
-                '    if (star1.z > 0.0) { paintWetOnWetStar(d, star1, localFlow3D, star1Excite, canvasCol, heightAccum); }',
-                '    if (star0.z > 0.0) { paintWetOnWetStar(d, star0, localFlow3D, star0Excite, canvasCol, heightAccum); }',
+                '    if (star1.z > 0.0) { paintWetOnWetStar(d, star1, star1Excite, canvasCol, heightAccum); }',
+                '    if (star0.z > 0.0) { paintWetOnWetStar(d, star0, star0Excite, canvasCol, heightAccum); }',
                 '',
                 '    if (uQuality > 0.45) {',
                 '        vec3 weaveCol = canvasCol;',
@@ -5204,21 +5174,27 @@
 
             var puffGeo = new THREE.SphereGeometry(1.0, 14, 10);
             puffGeo.setAttribute('aLocalPos', puffGeo.attributes.position.clone());
-            var trunkGeo = new THREE.CylinderGeometry(0.24, 0.46, 2.3, 7, 3);
-            var trkPos = trunkGeo.attributes.position;
-            for (var ti = 0; ti < trkPos.count; ti++) {
-                var tyL = trkPos.getY(ti);
-                trkPos.setX(ti, trkPos.getX(ti) + Math.sin(tyL * 2.3 + ti) * 0.08);
-                trkPos.setZ(ti, trkPos.getZ(ti) + Math.cos(tyL * 1.9 + ti) * 0.08);
-            }
-            trunkGeo.computeVertexNormals();
-            var trunkMat = new THREE.ShaderMaterial({
-                uniforms: { uBlackInk: uBlackInk, uLightDir: { value: GALLERY_LIGHT_DIR } },
+            var oliveWoodcutInkMat = getInnerInkMat(createLoadedInkContourMaterial(0.016));
+            var trunkMat = createSafeAwareShaderMaterial({
+                uniforms: {
+                    uThinness: uThinness,
+                    uChaos: uChaos,
+                    uYellowBoost: uYellowBoost,
+                    uBlackInk: uBlackInk,
+                    uQuality: uQuality,
+                    uDaylight: uDaylight,
+                    uLightDir: { value: GALLERY_LIGHT_DIR }
+                },
                 vertexShader: [
                     'precision highp float;',
+                    'attribute vec3 aLocalPos;',
+                    'varying vec2 vUv;',
+                    'varying vec3 vLocalPos;',
                     'varying vec3 vWorldPos;',
                     'varying vec3 vNormal;',
                     'void main() {',
+                    '    vUv = uv;',
+                    '    vLocalPos = aLocalPos;',
                     '    vec4 wp = modelMatrix * vec4(position, 1.0);',
                     '    vWorldPos = wp.xyz;',
                     '    vNormal = normalize(mat3(modelMatrix) * normal);',
@@ -5227,21 +5203,128 @@
                 ].join('\n'),
                 fragmentShader: [
                     'precision highp float;',
+                    'uniform float uThinness;',
+                    'uniform float uChaos;',
+                    'uniform float uYellowBoost;',
                     'uniform float uBlackInk;',
+                    'uniform float uQuality;',
+                    'uniform float uDaylight;',
                     'uniform vec3 uLightDir;',
+                    'varying vec2 vUv;',
+                    'varying vec3 vLocalPos;',
                     'varying vec3 vWorldPos;',
                     'varying vec3 vNormal;',
+                    '',
+                    GLSL_RIBBON_LIBRARY,
+                    '',
                     'void main() {',
                     '    vec3 N = normalize(vNormal);',
+                    '    vec3 V = normalize(cameraPosition - vWorldPos);',
                     '    float ndl = dot(N, uLightDir) * 0.5 + 0.5;',
-                    '    float groove = sin(vWorldPos.y * 13.0 + sin(vWorldPos.x * 8.0 + vWorldPos.z * 8.0) * 2.4) * 0.5 + 0.5;',
-                    '    vec3 darkBark = vec3(0.045, 0.058, 0.098);',
-                    '    vec3 warmUmber = vec3(0.385, 0.352, 0.195);',
-                    '    vec3 ochreHighlight = vec3(0.765, 0.695, 0.365);',
-                    '    vec3 col = mix(darkBark, mix(warmUmber, ochreHighlight, groove * 0.68), 0.28 + ndl * 0.66);',
-                    '    float fres = 1.0 - max(0.0, abs(dot(N, normalize(cameraPosition - vWorldPos))));',
-                    '    col = mix(col, vec3(0.016, 0.026, 0.062), smoothstep(0.62, 0.90, fres) * clamp(uBlackInk, 0.2, 1.2));',
-                    '    gl_FragColor = vec4(col, 0.48 + groove * 0.28);',
+                    '',
+                    '    float limbSeed  = vLocalPos.x;',
+                    '    float uAlong    = clamp(vLocalPos.y, 0.0, 1.0);',
+                    '    float nCircBase = max(4.0, floor(vLocalPos.z));',
+                    '    float cordMask  = clamp((fract(vLocalPos.z) - 0.5) / 0.36, -1.15, 1.15);',
+                    '    float twistSign = (fract(sin(limbSeed * 12.9898) * 43758.5453) > 0.5) ? 1.0 : -1.0;',
+                    '',
+                    '    // Van Gogh 1889 Saint-Remy Olive Bark Palette: Prussian woodcut crevices, blue-violet shadows, bronzed sienna & silver-sage',
+                    '    vec3 prussianInk  = vec3(0.015, 0.028, 0.074);',
+                    '    vec3 cobaltViolet = vec3(0.155, 0.128, 0.315);',
+                    '    vec3 slateBlue    = vec3(0.165, 0.272, 0.402);',
+                    '    vec3 burntUmber   = vec3(0.302, 0.192, 0.106);',
+                    '    vec3 warmSienna   = vec3(0.518, 0.334, 0.160);',
+                    '    vec3 oliveMoss    = vec3(0.308, 0.412, 0.262);',
+                    '    vec3 silverSage   = vec3(0.525, 0.592, 0.468);',
+                    '    vec3 naplesOchre  = vec3(0.795, 0.658, 0.278) * mix(0.88, 1.12, clamp(uYellowBoost * 0.65, 0.0, 1.0));',
+                    '    vec3 paleSilver   = vec3(0.715, 0.725, 0.575);',
+                    '',
+                    '    float lightCord = clamp(ndl * 0.55 + cordMask * 0.31 + 0.14, 0.0, 1.0);',
+                    '    vec3 underDark  = mix(prussianInk, cobaltViolet, 0.44);',
+                    '    vec3 underMid   = mix(burntUmber, oliveMoss, 0.48);',
+                    '    vec3 col = mix(underDark, underMid, clamp(lightCord * 0.85, 0.0, 1.0));',
+                    '    float hgt = 0.20 + max(0.0, cordMask) * 0.09;',
+                    '',
+                    '    float snakeWave = sin(vUv.x * 1.85 + limbSeed * 1.3) * 0.078 + cos(vUv.x * 3.45 - limbSeed * 0.7) * 0.036;',
+                    '    float twistTurns = vUv.y + uAlong * 0.38 * twistSign + snakeWave;',
+                    '    float seedShift = floor(limbSeed * 3.0);',
+                    '',
+                    '#ifdef SAFE_MODE',
+                    '    for (int k = 0; k < 2; k++) {',
+                    '        if (true) {',
+                    '#else',
+                    '    for (int k = 0; k < 4; k++) {',
+                    '        if (k < 2 || (k == 2 && uQuality >= 0.45) || uQuality >= 0.80) {',
+                    '#endif',
+                    '        float fk = float(k);',
+                    '        float nCirc = nCircBase + fk * 2.0;',
+                    '        float alongFreq = (2.32 + fk * 0.42) * mix(1.0, uThinness, 0.48);',
+                    '        float gAlong  = vUv.x * alongFreq + fk * 0.43 + fract(limbSeed * 0.173) * 6.0;',
+                    '        float gAround = twistTurns * nCirc + fk * 0.61;',
+                    '        vec2 g = vec2(gAlong, gAround);',
+                    '        vec2 bCell = floor(g);',
+                    '        vec2 qStart = bCell + step(vec2(0.5), fract(g)) - vec2(1.0);',
+                    '        for (int dy = 0; dy <= 1; dy++) {',
+                    '            for (int dx = 0; dx <= 1; dx++) {',
+                    '                vec2 cid = qStart + vec2(float(dx), float(dy));',
+                    '                float wrapCy = mod(cid.y, nCirc);',
+                    '                if (wrapCy < 0.0) wrapCy += nCirc;',
+                    '                vec3 rnd = hash23(vec2(cid.x, wrapCy) + vec2(fk * 19.7 + seedShift, 47.3));',
+                    '                vec2 jit = vec2(0.62 + 0.24 * uChaos, 0.48 + 0.18 * uChaos);',
+                    '                vec2 center = cid + vec2(0.5) + (rnd.xy - 0.5) * jit;',
+                    '                vec2 rel = g - center;',
+                    '                float swirlTilt = (rnd.z - 0.5) * 0.32 * clamp(uChaos, 0.45, 2.2) + sin(cid.x * 1.1 + wrapCy * 0.9) * 0.17;',
+                    '                vec2 loc = mat2(cos(swirlTilt), -sin(swirlTilt), sin(swirlTilt), cos(swirlTilt)) * rel;',
+                    '                loc.y -= 0.23 * loc.x * loc.x * (rnd.x > 0.5 ? 1.0 : -1.0);',
+                    '                vec4 st = evalSlenderBristleStroke(loc.x / (0.88 + rnd.x * 0.44), loc.y / (0.31 + rnd.y * 0.10), rnd.y + fk);',
+                    '                if (st.x > 0.01) {',
+                    '                    vec3 pigA; vec3 pigB;',
+                    '                    float furrowInk = (0.21 + max(0.0, -cordMask) * 0.28 + (1.0 - ndl) * 0.14) * clamp(uBlackInk, 0.25, 1.30);',
+                    '                    float lc = clamp(lightCord + (rnd.y - 0.5) * 0.22, 0.0, 1.0);',
+                    '                    if (rnd.z < furrowInk) {',
+                    '                        pigA = prussianInk;',
+                    '                        pigB = (rnd.x > 0.45) ? cobaltViolet : slateBlue;',
+                    '                    } else if (lc < 0.36) {',
+                    '                        if (rnd.x < 0.46) { pigA = cobaltViolet; pigB = slateBlue; }',
+                    '                        else if (rnd.x < 0.78) { pigA = burntUmber; pigB = cobaltViolet; }',
+                    '                        else { pigA = slateBlue; pigB = oliveMoss; }',
+                    '                    } else if (lc < 0.67) {',
+                    '                        if (rnd.x < 0.35) { pigA = warmSienna; pigB = burntUmber; }',
+                    '                        else if (rnd.x < 0.68) { pigA = silverSage; pigB = oliveMoss; }',
+                    '                        else if (rnd.x < 0.86) { pigA = oliveMoss; pigB = slateBlue; }',
+                    '                        else { pigA = cobaltViolet; pigB = warmSienna; }',
+                    '                    } else {',
+                    '                        if (rnd.x < 0.46) { pigA = naplesOchre; pigB = warmSienna; }',
+                    '                        else if (rnd.x < 0.80) { pigA = silverSage; pigB = paleSilver; }',
+                    '                        else { pigA = paleSilver; pigB = naplesOchre; }',
+                    '                    }',
+                    '                    vec3 pig = mix(pigA, pigB, st.w * 0.48) * (1.0 + st.y * 1.15);',
+                    '                    col = mix(col, pig, st.x);',
+                    '                    hgt = mix(hgt, st.z + max(0.0, cordMask) * 0.11 + 0.06, st.x * 0.90);',
+                    '                }',
+                    '            }',
+                    '        }',
+                    '        }',
+                    '    }',
+                    '',
+                    '    // Root-collar earth grounding & upper sub-canopy foliage shadow pocket',
+                    '    float rootShadow = (1.0 - smoothstep(0.03, 0.18, uAlong)) * 0.34;',
+                    '    float crownOcc   = smoothstep(0.76, 0.98, uAlong) * 0.42;',
+                    '    col = mix(col, mix(burntUmber * 0.42, prussianInk, 0.55), clamp(rootShadow, 0.0, 0.45));',
+                    '    col = mix(col, vec3(0.024, 0.052, 0.088), clamp(crownOcc, 0.0, 0.48));',
+                    '',
+                    '    // Woodcut-accentuated loaded Prussian-ink silhouette contour ("accentuated as in some old woodcuts", MoMA)',
+                    '    float distCam = distance(cameraPosition, vWorldPos);',
+                    '    float distSoft = 1.0 - smoothstep(42.0, 140.0, distCam) * 0.55;',
+                    '    float fresnel = 1.0 - max(0.0, abs(dot(N, V)));',
+                    '    float wob = (vnoise(vec2(vUv.x * 3.6, vUv.y * 9.0 + limbSeed)) - 0.5) * 0.24;',
+                    '    float rimBlk = smoothstep(0.64 + wob, 0.91, fresnel) * clamp(0.86 * uBlackInk, 0.22, 1.0) * distSoft;',
+                    '    col = mix(col, prussianInk, rimBlk);',
+                    '',
+                    '    // Temper peak luminance gently in Mistral Daylight so sunlit ochre/silver bark keeps crisp 3D bristle relief',
+                    '    col *= mix(1.0, 0.78, smoothstep(0.22, 1.0, uDaylight));',
+                    '    col = mix(col, vec3(0.068, 0.158, 0.355), smoothstep(65.0, 150.0, distCam) * 0.24);',
+                    '    gl_FragColor = vec4(clamp(col, 0.0, 1.0), clamp(hgt, 0.0, 1.0));',
                     '}'
                 ].join('\n')
             });
@@ -5253,27 +5336,137 @@
                 return oSeed / 4294967296;
             }
 
-            // Helper: builds a gnarled twisted trunk or scaffold bough tube
-            function addGnarledOliveLimb(pts, rBot, rTop, radialSegs, tubSegs) {
+            // Helper: builds a gnarled, helically-corded Provençal olive trunk, root spur, or crooked scaffold bough
+            // Returns surface-sampling helpers so woodcut ink contours & raised impasto cord strokes lock 100% to the bark!
+            function addGnarledOliveLimb(pts, rBot, rTop, radialSegs, tubSegs, opts) {
+                var o = opts || {};
+                var limbSeed = (o.seed !== undefined) ? o.seed : 11.7;
+                var nCirc = (o.nCirc !== undefined) ? o.nCirc : 8.0;
+                var cordAmp = (o.cordAmp !== undefined) ? o.cordAmp : 0.17;
+                var cordCount = (o.cordCount !== undefined) ? o.cordCount : 3.0;
+                var twistSpan = (o.twistSpan !== undefined) ? o.twistSpan : 3.4;
+                var twistSign = (Math.sin(limbSeed * 7.13) >= 0.0) ? 1.0 : -1.0;
+                var rootFlare = (o.rootFlare !== undefined) ? o.rootFlare : 0.0;
+                var crotchSwell = (o.crotchSwell !== undefined) ? o.crotchSwell : 0.0;
+                var crotchU = (o.crotchU !== undefined) ? o.crotchU : 0.56;
+                var forceCordVal = (o.forceCordVal !== undefined) ? o.forceCordVal : null;
+                var roundTip = (o.roundTip !== false);
+
                 var curve = new THREE.CatmullRomCurve3(pts);
+                var arcLen = Math.max(0.15, curve.getLength());
                 var geo = new THREE.TubeGeometry(curve, tubSegs, 1.0, radialSegs, false);
                 var posA = geo.attributes.position;
+                var uvA = geo.attributes.uv;
+                var locArr = new Float32Array(posA.count * 3);
                 var cPt = new THREE.Vector3();
+                var ringCenters = [];
+
+                for (var ri = 0; ri <= tubSegs; ri++) {
+                    var uR = THREE.MathUtils.clamp(ri / tubSegs, 0.0, 1.0);
+                    var pC = new THREE.Vector3();
+                    curve.getPointAt(uR, pC);
+                    ringCenters.push(pC);
+                }
+
                 for (var vi = 0; vi < posA.count; vi++) {
                     var ringI = Math.floor(vi / (radialSegs + 1));
+                    var radI  = vi % (radialSegs + 1);
                     var u = THREE.MathUtils.clamp(ringI / tubSegs, 0.0, 1.0);
-                    curve.getPointAt(u, cPt);
-                    var radNow = rBot * (1.0 - u) + rTop * u;
-                    var gnarl = 1.0 + 0.16 * Math.sin(u * 11.0 + vi * 1.7);
+                    cPt.copy(ringCenters[ringI]);
+
+                    var vFrac = radI / radialSegs;
+                    var theta = vFrac * Math.PI * 2.0;
+                    var twistPh = u * twistSpan * twistSign + limbSeed * 1.9;
+
+                    // Helical 3-cord muscular fluting + secondary bark ridges + ancient Provençal burls
+                    var cPrimary = Math.sin(theta * cordCount + twistPh);
+                    var cSecond  = Math.cos(theta * (cordCount + 2.0) - twistPh * 0.65 + limbSeed);
+                    var cordWave = cPrimary * 0.74 + cSecond * 0.26;
+
+                    var flareEnv = rootFlare * Math.exp(-Math.max(0.0, u - 0.08) * 5.8) * (0.62 + 0.55 * Math.max(0.0, cPrimary));
+                    var swellEnv = crotchSwell * Math.exp(-Math.pow((u - crotchU) / 0.14, 2.0));
+                    var burl1 = (o.hasBurls ? 0.11 : 0.0) * Math.exp(-Math.pow((u - 0.34) / 0.085, 2.0)) * Math.max(0.0, Math.cos(theta - limbSeed * 2.3));
+                    var burl2 = (o.hasBurls ? 0.09 : 0.0) * Math.exp(-Math.pow((u - 0.66) / 0.080, 2.0)) * Math.max(0.0, Math.sin(theta + limbSeed * 1.7));
+
+                    var baseR = rBot * (1.0 - u) + rTop * u;
+                    var tipCap = (roundTip && u > 0.89) ? Math.max(0.08, Math.cos(((u - 0.89) / 0.11) * Math.PI * 0.47)) : 1.0;
+                    var radMod = (1.0 + cordAmp * cordWave + flareEnv + swellEnv + burl1 + burl2) * tipCap;
+                    var rFinal = baseR * radMod;
+
                     posA.setXYZ(
                         vi,
-                        cPt.x + (posA.getX(vi) - cPt.x) * radNow * gnarl,
-                        cPt.y + (posA.getY(vi) - cPt.y) * radNow,
-                        cPt.z + (posA.getZ(vi) - cPt.z) * radNow * gnarl
+                        cPt.x + (posA.getX(vi) - cPt.x) * rFinal,
+                        cPt.y + (posA.getY(vi) - cPt.y) * rFinal,
+                        cPt.z + (posA.getZ(vi) - cPt.z) * rFinal
                     );
+
+                    if (uvA) {
+                        uvA.setXY(vi, u * arcLen, vFrac);
+                    }
+                    var cPacked = (forceCordVal !== null) ? forceCordVal : THREE.MathUtils.clamp(cordWave, -1.0, 1.0);
+                    var i3 = vi * 3;
+                    locArr[i3]     = limbSeed;
+                    locArr[i3 + 1] = u;
+                    locArr[i3 + 2] = nCirc + THREE.MathUtils.clamp(0.5 + cPacked * 0.36, 0.08, 0.92);
                 }
+
+                geo.setAttribute('aLocalPos', new THREE.BufferAttribute(locArr, 3));
                 geo.computeVertexNormals();
                 scene.add(new THREE.Mesh(geo, trunkMat));
+
+                var stride = radialSegs + 1;
+                return {
+                    getBottomTheta: function () {
+                        var midR = Math.floor(tubSegs * 0.5);
+                        var bestJ = 0;
+                        var bestY = 1e9;
+                        for (var j = 0; j < radialSegs; j++) {
+                            var yVal = posA.getY(midR * stride + j);
+                            if (yVal < bestY) {
+                                bestY = yVal;
+                                bestJ = j;
+                            }
+                        }
+                        return (bestJ / radialSegs) * Math.PI * 2.0;
+                    },
+                    sampleHelixPoints: function (uStart, uEnd, steps, startTheta, followTwist, embedScale) {
+                        var outPts = [];
+                        for (var s = 0; s <= steps; s++) {
+                            var uS = uStart + (uEnd - uStart) * (s / steps);
+                            var rFloat = THREE.MathUtils.clamp(uS * tubSegs, 0.0, tubSegs);
+                            var r0 = Math.min(tubSegs, Math.floor(rFloat));
+                            var r1 = Math.min(tubSegs, r0 + 1);
+                            var rt = rFloat - r0;
+
+                            var th = startTheta - (followTwist ? (uS * twistSpan * twistSign + limbSeed * 1.9) / cordCount : 0.0);
+                            var vNorm = th / (Math.PI * 2.0);
+                            vNorm = vNorm - Math.floor(vNorm);
+                            var cFloat = vNorm * radialSegs;
+                            var c0 = Math.floor(cFloat) % radialSegs;
+                            var c1 = (c0 + 1) % radialSegs;
+                            var ct = cFloat - Math.floor(cFloat);
+
+                            function ringSurf(rIdx) {
+                                var idxA = rIdx * stride + c0;
+                                var idxB = rIdx * stride + c1;
+                                var sx = posA.getX(idxA) * (1.0 - ct) + posA.getX(idxB) * ct;
+                                var sy = posA.getY(idxA) * (1.0 - ct) + posA.getY(idxB) * ct;
+                                var sz = posA.getZ(idxA) * (1.0 - ct) + posA.getZ(idxB) * ct;
+                                var cen = ringCenters[rIdx];
+                                return new THREE.Vector3(
+                                    cen.x + (sx - cen.x) * embedScale,
+                                    cen.y + (sy - cen.y) * embedScale,
+                                    cen.z + (sz - cen.z) * embedScale
+                                );
+                            }
+
+                            var p0 = ringSurf(r0);
+                            var p1 = ringSurf(r1);
+                            outPts.push(p0.lerp(p1, rt));
+                        }
+                        return outPts;
+                    }
+                };
             }
 
             // Strict spatial clearance check against all roads, buildings, walls, pines, cypresses & enclosures
@@ -5340,9 +5533,16 @@
                     var leanZ = Math.sin(sAng) * (0.75 + oRand() * 0.45);
                     addGnarledOliveLimb([
                         new THREE.Vector3(cx + leanX * 0.18, gy - 0.65, cz + leanZ * 0.18),
-                        new THREE.Vector3(cx + leanX * 0.55, gy + 1.35, cz + leanZ * 0.55),
-                        new THREE.Vector3(cx + leanX * 1.05, gy + 2.85, cz + leanZ * 1.05)
-                    ], 0.36, 0.20, 6, 7);
+                        new THREE.Vector3(cx + leanX * 0.55 + Math.sin(fIdx + stI) * 0.20, gy + 1.35, cz + leanZ * 0.55 - Math.cos(fIdx + stI) * 0.20),
+                        new THREE.Vector3(cx + leanX * 1.05, gy + 3.05, cz + leanZ * 1.05)
+                    ], 0.38, 0.14, 8, 10, {
+                        seed: 500.0 + fIdx * 7.3 + stI * 2.9,
+                        nCirc: 8.0,
+                        cordAmp: 0.16,
+                        cordCount: 3.0,
+                        twistSpan: 2.8,
+                        rootFlare: 0.22
+                    });
                 }
 
                 // Elevated, layered billowing grove crowns (bottom sits >= 1.25m ABOVE ground — never a ball in the dirt!)
@@ -5500,21 +5700,116 @@
                 var gy = getGroundY(cx, cz);
                 addCircleCollider(cx, cz, 0.66 * scaleT);
 
+                function tHash(m) {
+                    var v = Math.sin((seedIdx * 19.37 + cx * 3.17 - cz * 5.71) + m * 12.9898) * 43758.5453;
+                    return v - Math.floor(v);
+                }
+
                 var leanAng = oRand() * Math.PI * 2.0;
                 var leanAmt = (0.30 + oRand() * 0.36) * scaleT;
                 var forkX = cx + Math.cos(leanAng) * leanAmt;
                 var forkZ = cz + Math.sin(leanAng) * leanAmt;
                 var forkY = gy + (2.05 + oRand() * 0.34) * scaleT;
 
-                // Muscular, twisted Provençal main trunk rooted `-0.65m` into sloped orchard soil!
-                addGnarledOliveLimb([
-                    new THREE.Vector3(cx, gy - 0.65, cz),
-                    new THREE.Vector3(cx + Math.cos(leanAng + 0.7) * 0.26 * scaleT, gy + 0.68 * scaleT, cz + Math.sin(leanAng + 0.7) * 0.26 * scaleT),
-                    new THREE.Vector3(forkX - Math.cos(leanAng) * 0.18 * scaleT, gy + 1.42 * scaleT, forkZ - Math.sin(leanAng) * 0.18 * scaleT),
-                    new THREE.Vector3(forkX, forkY, forkZ)
-                ], 0.42 * scaleT, 0.27 * scaleT, 7, 9);
+                // Expressive Van Gogh writhing S-curve + continuous primary leader plunging deep inside `cPad` (ZERO blunt stump top!)
+                var perpAng = leanAng + Math.PI * 0.5 * (tHash(1.1) > 0.5 ? 1.0 : -1.0);
+                var bellyAmp = (0.28 + tHash(2.3) * 0.22) * scaleT;
+                var counterAmp = (0.20 + tHash(3.7) * 0.16) * scaleT;
+                var crotchX = forkX - Math.cos(leanAng) * 0.06 * scaleT;
+                var crotchZ = forkZ - Math.sin(leanAng) * 0.06 * scaleT;
+                var crotchY = forkY - 0.14 * scaleT;
+                var leaderAng = leanAng + (tHash(4.9) - 0.5) * 1.1;
+                var leaderTopX = forkX + Math.cos(leaderAng) * 0.28 * scaleT;
+                var leaderTopZ = forkZ + Math.sin(leaderAng) * 0.28 * scaleT;
+                var leaderTopY = forkY + 1.08 * scaleT; // Rises ~0.92m inside central `cPad` cloud so no flat top ever shows!
 
-                // 3-4 gnarled scaffold boughs + plump, billowing rounded Van Gogh olive cloud-lobes (ZERO flat discs!)
+                var mainBole = addGnarledOliveLimb([
+                    new THREE.Vector3(cx, gy - 0.65, cz),
+                    new THREE.Vector3(
+                        cx + Math.cos(leanAng) * 0.14 * scaleT + Math.cos(perpAng) * bellyAmp,
+                        gy + 0.58 * scaleT,
+                        cz + Math.sin(leanAng) * 0.14 * scaleT + Math.sin(perpAng) * bellyAmp
+                    ),
+                    new THREE.Vector3(
+                        cx + (forkX - cx) * 0.62 - Math.cos(perpAng) * counterAmp,
+                        gy + 1.30 * scaleT,
+                        cz + (forkZ - cz) * 0.62 - Math.sin(perpAng) * counterAmp
+                    ),
+                    new THREE.Vector3(crotchX, crotchY, crotchZ),
+                    new THREE.Vector3(
+                        (forkX + leaderTopX) * 0.5 + Math.cos(perpAng) * 0.12 * scaleT,
+                        forkY + 0.46 * scaleT,
+                        (forkZ + leaderTopZ) * 0.5 + Math.sin(perpAng) * 0.12 * scaleT
+                    ),
+                    new THREE.Vector3(leaderTopX, leaderTopY, leaderTopZ)
+                ], 0.48 * scaleT, 0.10 * scaleT, 14, 22, {
+                    seed: 13.7 + seedIdx * 4.31,
+                    nCirc: 12.0,
+                    cordAmp: 0.21,
+                    cordCount: 3.0,
+                    twistSpan: 3.8,
+                    rootFlare: 0.34,
+                    crotchSwell: 0.18,
+                    crotchU: 0.60,
+                    hasBurls: true
+                });
+
+                // 3-4 Clutching, Serpentine Provençal Root Buttresses gripping the sloped orchard earth!
+                var rootCount = 3 + ((seedIdx + 1) % 2);
+                var rootBaseAng = leanAng + Math.PI * 0.33 + tHash(5.7) * 1.4;
+                for (var ri = 0; ri < rootCount; ri++) {
+                    var rAng = rootBaseAng + (ri / rootCount) * Math.PI * 2.0 + (tHash(7.1 + ri * 2.3) - 0.5) * 0.42;
+                    var rReach = (0.64 + tHash(9.3 + ri * 1.9) * 0.30) * scaleT;
+                    var rBend = (tHash(11.7 + ri * 3.1) - 0.5) * 0.24 * scaleT;
+                    var rxMid = cx + Math.cos(rAng) * (rReach * 0.54) - Math.sin(rAng) * rBend;
+                    var rzMid = cz + Math.sin(rAng) * (rReach * 0.54) + Math.cos(rAng) * rBend;
+                    var ryMid = getGroundY(rxMid, rzMid) + 0.10 * scaleT;
+                    var rxEnd = cx + Math.cos(rAng) * rReach;
+                    var rzEnd = cz + Math.sin(rAng) * rReach;
+                    var ryEnd = getGroundY(rxEnd, rzEnd) - 0.34;
+
+                    var rootLimb = addGnarledOliveLimb([
+                        new THREE.Vector3(cx + Math.cos(rAng) * 0.10 * scaleT, gy + 0.48 * scaleT, cz + Math.sin(rAng) * 0.10 * scaleT),
+                        new THREE.Vector3(rxMid, ryMid, rzMid),
+                        new THREE.Vector3(rxEnd, ryEnd, rzEnd)
+                    ], 0.21 * scaleT, 0.065 * scaleT, 7, 9, {
+                        seed: 71.3 + seedIdx * 3.1 + ri * 5.7,
+                        nCirc: 5.0,
+                        cordAmp: 0.15,
+                        cordCount: 3.0,
+                        twistSpan: 2.2
+                    });
+
+                    // Woodcut Prussian-ink crease along the lower ground-hugging flank of the root spur
+                    if (ri < 2) {
+                        var rBotTh = rootLimb.getBottomTheta() + (ri === 0 ? 0.55 : -0.55);
+                        var rInkPts = rootLimb.sampleHelixPoints(0.08, 0.78, 7, rBotTh, false, 0.93);
+                        addCurveBrushStrokeFromPoints(scene, rInkPts, 0.075 * scaleT, oliveWoodcutInkMat, seedIdx * 2.7 + ri * 4.1, true);
+                    }
+                }
+
+                // Surface-locked Woodcut Prussian-Charcoal Furrow Contours + Raised 3D Impasto Cord Ribbons on Main Bole!
+                for (var fi = 0; fi < 2; fi++) {
+                    // Helical hollow minima: sin(3*theta) = -1 -> theta = -PI/6 + fi*(2*PI/3)
+                    var furrowTheta = -Math.PI / 6.0 + fi * ((Math.PI * 2.0) / 3.0);
+                    var furrowPts = mainBole.sampleHelixPoints(0.08, 0.84, 13, furrowTheta, true, 0.94);
+                    addCurveBrushStrokeFromPoints(scene, furrowPts, 0.105 * scaleT, oliveWoodcutInkMat, seedIdx * 5.3 + fi * 3.7, true);
+
+                    // Helical muscular cord maxima: sin(3*theta) = +1 -> theta = +PI/6 + fi*(2*PI/3)
+                    // Sculpted 3D raised golden-ochre / silver-sage impasto cord ribbon locked to the twisting ridge!
+                    var crestTheta = Math.PI / 6.0 + fi * ((Math.PI * 2.0) / 3.0);
+                    var crestPts = mainBole.sampleHelixPoints(0.10, 0.78, 10, crestTheta, true, 0.94);
+                    addGnarledOliveLimb(crestPts, 0.062 * scaleT, 0.030 * scaleT, 6, 11, {
+                        seed: 131.9 + seedIdx * 6.1 + fi * 8.3,
+                        nCirc: 4.0,
+                        cordAmp: 0.10,
+                        cordCount: 2.0,
+                        twistSpan: 1.8,
+                        forceCordVal: 0.92
+                    });
+                }
+
+                // 3-4 gnarled scaffold boughs + secondary crooked forks + plump, billowing Van Gogh olive cloud-lobes!
                 var boughCount = 3 + (seedIdx % 2);
                 var baseYaw = oRand() * Math.PI * 2.0;
                 for (var bi = 0; bi < boughCount; bi++) {
@@ -5524,11 +5819,54 @@
                     var tipZ = forkZ + Math.sin(bAng) * reach;
                     var tipY = forkY + (0.92 + oRand() * 0.44) * scaleT;
 
-                    addGnarledOliveLimb([
-                        new THREE.Vector3(forkX, forkY - 0.14 * scaleT, forkZ),
-                        new THREE.Vector3((forkX + tipX) * 0.5 + (oRand() - 0.5) * 0.24, (forkY + tipY) * 0.5 + 0.20 * scaleT, (forkZ + tipZ) * 0.5 + (oRand() - 0.5) * 0.24),
-                        new THREE.Vector3(tipX, tipY, tipZ)
-                    ], 0.22 * scaleT, 0.12 * scaleT, 6, 7);
+                    var midJitterX = (oRand() - 0.5) * 0.24;
+                    var midJitterZ = (oRand() - 0.5) * 0.24;
+                    var bPerp = bAng + Math.PI * 0.5 * ((bi % 2 === 0) ? 1.0 : -1.0);
+                    var elbowX = (crotchX + tipX) * 0.5 + midJitterX + Math.cos(bPerp) * 0.18 * scaleT;
+                    var elbowY = (crotchY + tipY) * 0.5 + (0.14 + tHash(15.1 + bi * 2.7) * 0.16) * scaleT;
+                    var elbowZ = (crotchZ + tipZ) * 0.5 + midJitterZ + Math.sin(bPerp) * 0.18 * scaleT;
+
+                    var boughLimb = addGnarledOliveLimb([
+                        new THREE.Vector3(crotchX, crotchY - 0.10 * scaleT, crotchZ),
+                        new THREE.Vector3(
+                            crotchX + Math.cos(bAng) * (reach * 0.26),
+                            crotchY + 0.18 * scaleT,
+                            crotchZ + Math.sin(bAng) * (reach * 0.26)
+                        ),
+                        new THREE.Vector3(elbowX, elbowY, elbowZ),
+                        new THREE.Vector3(tipX, tipY + 0.22 * scaleT, tipZ)
+                    ], 0.255 * scaleT, 0.088 * scaleT, 9, 12, {
+                        seed: 211.5 + seedIdx * 5.9 + bi * 7.3,
+                        nCirc: 7.0,
+                        cordAmp: 0.16,
+                        cordCount: 3.0,
+                        twistSpan: 2.6
+                    });
+
+                    // Calligraphic woodcut under-bough contour stroke along the true world-space underside (-Y)
+                    var bBotTh = boughLimb.getBottomTheta();
+                    var bInkPts = boughLimb.sampleHelixPoints(0.12, 0.84, 8, bBotTh, false, 0.93);
+                    addCurveBrushStrokeFromPoints(scene, bInkPts, 0.072 * scaleT, oliveWoodcutInkMat, seedIdx * 4.1 + bi * 2.9, true);
+
+                    // Secondary forked sub-branch splitting off the elbow into the upper-outer leaf cloud!
+                    if (bi < 3) {
+                        var subAng = bAng + (bi % 2 === 0 ? 0.52 : -0.52);
+                        var subReach = (0.48 + tHash(21.3 + bi * 3.3) * 0.24) * scaleT;
+                        var subTipX = elbowX + Math.cos(subAng) * subReach;
+                        var subTipZ = elbowZ + Math.sin(subAng) * subReach;
+                        var subTipY = tipY + (0.34 + tHash(25.7 + bi * 1.9) * 0.22) * scaleT;
+                        addGnarledOliveLimb([
+                            new THREE.Vector3(elbowX, elbowY - 0.04 * scaleT, elbowZ),
+                            new THREE.Vector3((elbowX + subTipX) * 0.5, (elbowY + subTipY) * 0.5 + 0.12 * scaleT, (elbowZ + subTipZ) * 0.5),
+                            new THREE.Vector3(subTipX, subTipY, subTipZ)
+                        ], 0.125 * scaleT, 0.052 * scaleT, 6, 8, {
+                            seed: 307.1 + seedIdx * 3.7 + bi * 6.1,
+                            nCirc: 5.0,
+                            cordAmp: 0.12,
+                            cordCount: 2.0,
+                            twistSpan: 1.8
+                        });
+                    }
 
                     var sx = (1.42 + oRand() * 0.34) * scaleT;
                     var sy = sx * (0.74 + oRand() * 0.10); // Plump, billowing Van Gogh crown lobe (matches Attachment 4)!
@@ -5566,7 +5904,6 @@
                 scene.add(cPad);
 
                 // Preserve exact deterministic PRNG stride without spawning detached straight-cylinder bark billboards
-                // (the S-curved 3D `addGnarledOliveLimb` mesh already carries full sculptural Van Gogh bark impasto!)
                 for (var bkO = 0; bkO < 10; bkO++) {
                     oRand();
                     oRand();
