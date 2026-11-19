@@ -9,7 +9,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Classic Global Three.js r128 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
@@ -123,9 +123,71 @@
         body.cutscene-playing #lab-drawer,
         body.cutscene-playing #step-hint-wrap,
         body.cutscene-playing #tour-director-hud,
+        body.cutscene-playing #exhibition-projection-overlay,
         body.cutscene-playing #boot-loading-pill {
             opacity: 0 !important;
             pointer-events: none !important;
+        }
+        .font-exh-quote {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            text-shadow: 0 2px 18px rgba(3, 8, 22, 0.96), 0 0 28px rgba(9, 20, 48, 0.88);
+        }
+        .font-exh-subtitle {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-style: normal;
+            font-weight: 600;
+            letter-spacing: 0.015em;
+            text-shadow:
+                0 2px 6px rgba(2, 6, 18, 0.99),
+                0 4px 18px rgba(3, 8, 24, 0.96),
+                0 0 32px rgba(6, 15, 42, 0.92);
+        }
+        .font-exh-script {
+            font-family: 'Dancing Script', 'Cormorant Garamond', Georgia, cursive;
+            text-shadow: 0 3px 20px rgba(3, 8, 22, 0.98), 0 0 26px rgba(248, 220, 59, 0.42);
+        }
+        #exh-dissolve-veil {
+            background: radial-gradient(ellipse at center, rgba(11, 25, 62, 0.90) 0%, rgba(4, 9, 24, 0.98) 100%);
+            transition: opacity 0.12s linear;
+        }
+        .exh-stage-fade {
+            transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .exh-stage-hidden {
+            opacity: 0 !important;
+            transform: translateY(8px);
+        }
+        @keyframes exhMoteFloat {
+            0%   { transform: translate3d(0px, 0px, 0) rotate(0deg); opacity: 0; }
+            18%  { opacity: 0.62; }
+            82%  { opacity: 0.48; }
+            100% { transform: translate3d(-46px, -68px, 0) rotate(28deg); opacity: 0; }
+        }
+        .exh-mote {
+            position: absolute;
+            border-radius: 999px;
+            pointer-events: none;
+            will-change: transform, opacity;
+            animation: exhMoteFloat var(--dur, 9s) linear infinite;
+            animation-delay: var(--dly, 0s);
+        }
+        @keyframes exhVoicePulse {
+            0%, 100% { transform: scaleY(0.45); opacity: 0.65; }
+            50%      { transform: scaleY(1.18); opacity: 1; }
+        }
+        .exh-wave-bar {
+            display: inline-block;
+            width: 2px;
+            height: 11px;
+            border-radius: 2px;
+            background: #fde68a;
+            box-shadow: 0 0 8px rgba(3, 8, 22, 0.95);
+            transform-origin: center bottom;
+            animation: exhVoicePulse 0.85s ease-in-out infinite;
+        }
+        #tour-timeline-track:hover #tour-hud-thumb,
+        #tour-timeline-track.scrubbing #tour-hud-thumb {
+            transform: translate(-50%, -50%) scale(1.26);
         }
         .cutscene-letterbox {
             position: absolute;
@@ -237,13 +299,10 @@
             <span class="text-[10px] font-mono text-cyan-200/80 hidden sm:inline">&middot; Esc</span>
         </button>
 
-        <!-- Finale Hold Controls Bar (fades in softly after Vivaldi "Summer" final-note signature) -->
+        <!-- Finale Hold Controls Bar (Nocturnal Prussian Blue-Out only) -->
         <div id="finale-controls-bar" class="hidden absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 rounded-full studio-glass transition-opacity duration-700 opacity-0 pointer-events-none max-w-[95vw]">
             <button id="btn-finale-replay-tour" type="button" class="mode-pill active rounded-full px-3 py-1 text-[10px] sm:text-xs font-semibold text-amber-100 whitespace-nowrap">
                 &#8635; Replay Summer Tour
-            </button>
-            <button id="btn-finale-toggle-bg" type="button" title="Switch finale screen between Nocturnal Prussian Blue-Out and Pure Velvet Blackout" class="mode-pill rounded-full px-2.5 py-1 text-[10px] sm:text-xs font-semibold text-cyan-100 whitespace-nowrap">
-                Backdrop: Blue-Out
             </button>
             <button id="btn-finale-return" type="button" class="mode-pill rounded-full px-3 py-1 text-[10px] sm:text-xs font-semibold text-amber-200 whitespace-nowrap">
                 1889 Wall &middot; Esc
@@ -292,21 +351,81 @@
         </div>
     </div>
 
-    <!-- Cinematic Tour Director Floating Pill (Active during Nocturne Drift & Vivaldi Summer Storm) -->
+    <!-- 360° Immersive Exhibition Projection Overlay (Letter Quotes, Cursive Artwork Script & Frameless Upright Serif Subtitles) -->
+    <div id="exhibition-projection-overlay" class="fixed inset-0 z-[18] hidden pointer-events-none select-none overflow-hidden">
+        <div id="exh-dissolve-veil" class="absolute inset-0 opacity-0"></div>
+        <div id="exh-motes-layer" class="absolute inset-0 overflow-hidden opacity-85">
+            <span class="exh-mote w-3.5 h-1 bg-amber-300/60" style="left:18%;top:74%;--dur:8.8s;--dly:0.2s;"></span>
+            <span class="exh-mote w-2.5 h-1 bg-cyan-200/55" style="left:34%;top:82%;--dur:10.4s;--dly:1.7s;"></span>
+            <span class="exh-mote w-4 h-1 bg-amber-200/65" style="left:52%;top:78%;--dur:9.2s;--dly:3.1s;"></span>
+            <span class="exh-mote w-3 h-1 bg-sky-300/55" style="left:69%;top:71%;--dur:11.0s;--dly:0.9s;"></span>
+            <span class="exh-mote w-3.5 h-1 bg-amber-300/55" style="left:83%;top:76%;--dur:9.6s;--dly:2.4s;"></span>
+            <span class="exh-mote w-2.5 h-1 bg-indigo-200/50" style="left:26%;top:58%;--dur:10.8s;--dly:4.2s;"></span>
+            <span class="exh-mote w-3 h-1 bg-amber-200/55" style="left:63%;top:54%;--dur:8.6s;--dly:5.0s;"></span>
+            <span class="exh-mote w-2.5 h-1 bg-cyan-300/50" style="left:78%;top:48%;--dur:10.2s;--dly:3.6s;"></span>
+        </div>
+
+        <!-- Floating Projected Letter Quote from Vincent (Upper-Left Gallery Wall Projection) -->
+        <div id="exh-quote-card" class="exh-stage-fade absolute left-3.5 right-3.5 sm:left-7 sm:right-auto top-[7.6rem] sm:top-[7.8rem] max-w-md">
+            <div class="inline-flex items-center gap-1.5 rounded-full bg-slate-950/55 border border-amber-300/30 px-2.5 py-0.5 text-[9px] uppercase tracking-[0.18em] text-amber-200/90 font-semibold mb-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-300"></span>
+                <span id="exh-chapter-pill">GALLERY I / VII &middot; SAINT-R&Eacute;MY 1889</span>
+            </div>
+            <blockquote id="exh-letter-quote" class="font-exh-quote italic text-lg sm:text-2xl leading-snug text-amber-50/95">
+                &ldquo;I often think that the night is more alive and more richly colored than the day.&rdquo;
+            </blockquote>
+            <div id="exh-letter-cite" class="mt-1 text-[10px] sm:text-[11px] uppercase tracking-[0.14em] text-cyan-200/85 font-semibold">
+                Vincent van Gogh &middot; Letters to Theo
+            </div>
+        </div>
+
+        <!-- Inline Projected Brush-Script Painting Signature & Date (Lower-Right) -->
+        <div id="exh-artwork-script-wrap" class="exh-stage-fade absolute right-4 sm:right-8 bottom-[7.8rem] sm:bottom-[6.8rem] text-right max-w-[82vw]">
+            <div id="exh-artwork-script" class="font-exh-script text-2xl sm:text-4xl text-amber-200/95 leading-tight">
+                Saint-R&eacute;my-de-Provence, 1889
+            </div>
+            <div id="exh-artwork-sub" class="text-[10px] uppercase tracking-[0.16em] text-cyan-100/80 font-semibold mt-0.5">
+                360&deg; Living Impasto Projection
+            </div>
+        </div>
+
+        <!-- Frameless Upright Cormorant Garamond Subtitles with Soft Dark Shadow (Bottom-Center) -->
+        <div id="exh-docent-bar" class="exh-stage-fade absolute bottom-[4.25rem] sm:bottom-[4.55rem] left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] max-w-2xl text-center px-2">
+            <p class="font-exh-subtitle text-[15px] sm:text-[19px] text-amber-50 leading-snug inline-flex items-baseline justify-center gap-2">
+                <span id="exh-voice-wave" class="inline-flex items-end gap-0.5 h-3 shrink-0 self-center" aria-hidden="true">
+                    <span class="exh-wave-bar" style="animation-delay:0s;"></span>
+                    <span class="exh-wave-bar" style="animation-delay:0.18s;"></span>
+                    <span class="exh-wave-bar" style="animation-delay:0.34s;"></span>
+                </span>
+                <span id="exh-docent-caption">Saint-R&eacute;my-de-Provence, 1889. Step inside Vincent van Gogh&rsquo;s living canvas, as charcoal contours awaken into bold Proven&ccedil;al colour and light.</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Cinematic Tour Director Floating Pill with Draggable Timeline Scrubber -->
     <div id="tour-director-hud" class="fixed top-14 sm:top-16 left-1/2 -translate-x-1/2 z-20 hidden pointer-events-auto max-w-[96vw]">
-        <div class="studio-glass rounded-2xl px-3 py-1.5 text-[11px] text-amber-100 flex flex-col gap-1 shadow-xl border-amber-300/55 min-w-[280px] sm:min-w-[420px]">
+        <div class="studio-glass rounded-2xl px-3 py-1.5 text-[11px] text-amber-100 flex flex-col gap-1 shadow-xl border-amber-300/55 min-w-[292px] sm:min-w-[490px]">
             <div class="flex flex-wrap items-center justify-between gap-1.5">
                 <div class="flex items-center gap-1" role="group" aria-label="Tour Preset Selector">
+                    <button id="btn-hud-tour-exhibition" type="button" title="Curated 360° Exhibition &amp; Floating Yellow Frame Walk with Audio Guide" class="mode-pill active rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-amber-200 whitespace-nowrap">
+                        &#10022; Exhibition
+                    </button>
                     <button id="btn-hud-tour-nocturne" type="button" title="Refined Serene 360° Saint-Rémy Spline Tour" class="mode-pill rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-cyan-100 whitespace-nowrap">
                         Nocturne Drift
                     </button>
-                    <button id="btn-hud-tour-vivaldi" type="button" title="Dynamic Music-Synced Vivaldi Summer Presto Tour with Vincent Finale" class="mode-pill active rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-amber-200 whitespace-nowrap">
+                    <button id="btn-hud-tour-vivaldi" type="button" title="Dynamic Music-Synced Vivaldi Summer Presto Tour with Blue-Out Vincent Finale" class="mode-pill rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-amber-200 whitespace-nowrap">
                         &#9889; Vivaldi Summer
                     </button>
                 </div>
                 <div class="flex items-center gap-1">
-                    <button id="btn-hud-finale-style" type="button" title="Toggle Finale Screen: Nocturnal Blue-Out vs Pure Blackout" class="mode-pill rounded-full px-2 py-0.5 text-[10px] font-semibold text-cyan-100 whitespace-nowrap">
-                        Blue-Out
+                    <button id="btn-hud-exh-prev" type="button" title="Previous Exhibition Gallery Chapter" class="mode-pill rounded-full px-2 py-0.5 text-[10px] font-semibold text-cyan-100 whitespace-nowrap">
+                        &#9664;
+                    </button>
+                    <button id="btn-hud-exh-next" type="button" title="Next Exhibition Gallery Chapter" class="mode-pill rounded-full px-2 py-0.5 text-[10px] font-semibold text-cyan-100 whitespace-nowrap">
+                        &#9654;
+                    </button>
+                    <button id="btn-hud-exh-voice" type="button" title="Toggle Museum Audio-Guide Voiceover" class="mode-pill active rounded-full px-2 py-0.5 text-[10px] font-semibold text-amber-200 whitespace-nowrap">
+                        Voice: On
                     </button>
                     <button id="btn-hud-finale-jump" type="button" title="Jump to the final 14s storm plunge &amp; last-note Vincent signature" class="mode-pill rounded-full px-2 py-0.5 text-[10px] font-semibold text-amber-200 whitespace-nowrap">
                         &#8677; Finale
@@ -317,11 +436,23 @@
                 </div>
             </div>
             <div class="flex items-center justify-between gap-2 text-[10px] px-0.5">
-                <span id="tour-hud-chapter" class="text-amber-200/95 font-medium truncate">I. Unison Storm &mdash; 1889 Canvas Launch</span>
-                <span id="tour-hud-time" class="font-mono text-cyan-200/85 shrink-0">0:00 / 2:39</span>
+                <span id="tour-hud-chapter" class="text-amber-200/95 font-medium truncate">I. Ink Sketch to Living Colour &mdash; Saint-R&eacute;my 1889</span>
+                <span id="tour-hud-time" class="font-mono text-cyan-200/85 shrink-0">0:00 / 1:38</span>
             </div>
-            <div class="w-full h-1 rounded-full bg-slate-950/80 overflow-hidden">
-                <div id="tour-hud-progress" class="h-full bg-gradient-to-r from-cyan-300 via-amber-300 to-amber-400 transition-all duration-150" style="width: 0%;"></div>
+            <!-- Interactive Drag-to-Seek Tour Timeline Scrubber -->
+            <div id="tour-timeline-track" role="slider" aria-label="Tour Timeline Scrubber" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" title="Click or drag to scrub Tour time" class="relative w-full py-1.5 cursor-pointer touch-none select-none group">
+                <div class="relative w-full h-1.5 rounded-full bg-slate-950/85 border border-amber-200/20 overflow-hidden">
+                    <div id="tour-hud-progress" class="h-full bg-gradient-to-r from-cyan-300 via-amber-300 to-amber-400" style="width: 0%;"></div>
+                    <div id="tour-hud-ticks" class="absolute inset-0 pointer-events-none">
+                        <span class="absolute top-0 bottom-0 w-px bg-slate-950/75" style="left:14.285%;"></span>
+                        <span class="absolute top-0 bottom-0 w-px bg-slate-950/75" style="left:28.571%;"></span>
+                        <span class="absolute top-0 bottom-0 w-px bg-slate-950/75" style="left:42.857%;"></span>
+                        <span class="absolute top-0 bottom-0 w-px bg-slate-950/75" style="left:57.143%;"></span>
+                        <span class="absolute top-0 bottom-0 w-px bg-slate-950/75" style="left:71.429%;"></span>
+                        <span class="absolute top-0 bottom-0 w-px bg-slate-950/75" style="left:85.714%;"></span>
+                    </div>
+                </div>
+                <div id="tour-hud-thumb" class="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-amber-300 border-2 border-slate-950 shadow-[0_0_10px_rgba(248,220,59,0.9)] pointer-events-none transition-transform duration-100" style="left: 0%;"></div>
             </div>
         </div>
     </div>
@@ -486,25 +617,33 @@
             <div class="bg-slate-950/55 border border-amber-300/25 rounded-xl p-2 flex flex-col gap-1.5">
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] uppercase tracking-wider font-bold text-amber-200">Cinematic Tours (Key C)</span>
-                    <span id="tour-drawer-status" class="text-[10px] font-mono text-cyan-200/80">2 Presets</span>
+                    <span id="tour-drawer-status" class="text-[10px] font-mono text-cyan-200/80">3 Presets</span>
                 </div>
                 <div class="grid grid-cols-1 gap-1 text-xs">
                     <button id="btn-tour-nocturne" type="button" class="preset-btn rounded-xl px-2.5 py-1.5 text-left flex items-center justify-between">
                         <span class="font-semibold">1. Nocturne Drift</span>
                         <span class="text-[10px] text-cyan-200/85">Serene 360&deg; Loop</span>
                     </button>
-                    <button id="btn-tour-vivaldi" type="button" class="preset-btn active rounded-xl px-2.5 py-1.5 text-left flex items-center justify-between">
+                    <button id="btn-tour-vivaldi" type="button" class="preset-btn rounded-xl px-2.5 py-1.5 text-left flex items-center justify-between">
                         <span class="font-semibold">&#9889; 2. Vivaldi &ldquo;Summer&rdquo;</span>
                         <span class="text-[10px] text-amber-300">Dynamic &middot; Finale</span>
                     </button>
+                    <button id="btn-tour-exhibition" type="button" class="preset-btn active rounded-xl px-2.5 py-1.5 text-left flex items-center justify-between">
+                        <span class="font-semibold">&#10022; 3. Immersive Exhibition</span>
+                        <span class="text-[10px] text-amber-300">Frames &middot; Voice Guide</span>
+                    </button>
                 </div>
                 <div class="flex items-center justify-between gap-1 pt-1 border-t border-amber-200/10 text-[10px]">
-                    <span class="text-cyan-100/80 shrink-0">Summer End:</span>
+                    <span class="text-cyan-100/80 shrink-0">Exhibition:</span>
                     <div class="flex items-center gap-1">
-                        <button id="btn-finale-blue" type="button" class="mode-pill active rounded-lg px-2 py-0.5 font-semibold text-cyan-100">Blue-Out</button>
-                        <button id="btn-finale-black" type="button" class="mode-pill rounded-lg px-2 py-0.5 font-semibold text-slate-200">Blackout</button>
-                        <button id="btn-drawer-finale-jump" type="button" title="Preview final 14s storm plunge &amp; last-note Vincent signature" class="mode-pill rounded-lg px-2 py-0.5 font-semibold text-amber-200">&#8677; End</button>
+                        <button id="btn-drawer-exh-voice" type="button" class="mode-pill active rounded-lg px-2 py-0.5 font-semibold text-amber-200">Voice: On</button>
+                        <button id="btn-drawer-exh-prev" type="button" title="Previous Exhibition Chapter" class="mode-pill rounded-lg px-2 py-0.5 font-semibold text-cyan-100">&#9664;</button>
+                        <button id="btn-drawer-exh-next" type="button" title="Next Exhibition Chapter" class="mode-pill rounded-lg px-2 py-0.5 font-semibold text-cyan-100">&#9654;</button>
                     </div>
+                </div>
+                <div class="flex items-center justify-between gap-1 pt-1 border-t border-amber-200/10 text-[10px]">
+                    <span class="text-cyan-100/80 shrink-0">Summer End (Blue-Out):</span>
+                    <button id="btn-drawer-finale-jump" type="button" title="Preview final 14s storm plunge &amp; last-note Blue-Out Vincent signature" class="mode-pill rounded-lg px-2.5 py-0.5 font-semibold text-amber-200">&#8677; End</button>
                 </div>
             </div>
 
@@ -543,8 +682,13 @@
 
             <div>
                 <div class="flex items-center justify-between mb-1.5">
-                    <span class="text-[10px] uppercase tracking-wider font-bold text-amber-200">1889 Field Easels</span>
+                    <span id="field-markers-heading" class="text-[10px] uppercase tracking-wider font-bold text-amber-200">1889 Field Easels</span>
                     <span id="easel-drawer-count" class="text-[10px] font-mono text-amber-300">0 / 4 Found</span>
+                </div>
+                <div class="grid grid-cols-3 gap-1 mb-1.5 text-[10px]" role="group" aria-label="1889 Field Display Mode">
+                    <button id="btn-markers-none" type="button" data-field-markers="none" class="field-marker-btn mode-pill rounded-lg py-1 font-semibold text-slate-200">Nothing</button>
+                    <button id="btn-markers-easels" type="button" data-field-markers="easels" class="field-marker-btn mode-pill active rounded-lg py-1 font-semibold text-cyan-100">Easels</button>
+                    <button id="btn-markers-frames" type="button" data-field-markers="frames" class="field-marker-btn mode-pill rounded-lg py-1 font-semibold text-amber-200">Yellow Frames</button>
                 </div>
                 <div class="grid grid-cols-2 gap-1.5 text-[11px]">
                     <button data-easel="0" class="easel-jump-btn mode-pill rounded-lg px-2 py-1.5 text-left font-semibold text-cyan-100 truncate">Irises (Cloister)</button>
@@ -737,7 +881,6 @@
         var sndHint       = document.getElementById('cutscene-sound-hint');
         var finaleBar     = document.getElementById('finale-controls-bar');
         var finaleReplayB = document.getElementById('btn-finale-replay-tour');
-        var finaleBgB     = document.getElementById('btn-finale-toggle-bg');
         var finaleRetB    = document.getElementById('btn-finale-return');
         var sigImg        = document.getElementById('vincent-sig-asset');
         if (!overlay || !canvas || !sigImg) {
@@ -1228,11 +1371,7 @@
             return u < 0.5 ? 2.0 * u * u : 1.0 - Math.pow(-2.0 * u + 2.0, 2.0) * 0.5;
         }
 
-        function syncFinaleBgBtnLabel() {
-            if (finaleBgB) {
-                finaleBgB.textContent = (state.bgStyle === 'black') ? 'Backdrop: Blackout' : 'Backdrop: Blue-Out';
-            }
-        }
+
 
         function hideFinaleControlsBar() {
             state.finaleBarShown = false;
@@ -1313,7 +1452,7 @@
             bakeImpastoFromSignatureImage();
             tipSparks.length = 0;
             state.mode = 'finale';
-            state.bgStyle = (styleMode === 'black') ? 'black' : 'blue';
+            state.bgStyle = 'blue';
             state.onFinaleReturn = onReturnCb || null;
             state.onFinaleReplay = onReplayCb || null;
             state.active = true;
@@ -1325,7 +1464,6 @@
             state.craneTriggered = true;
             state.barsOpened = false;
             hideFinaleControlsBar();
-            syncFinaleBgBtnLabel();
             if (skipBtn) skipBtn.classList.add('hidden');
             if (sndHint) {
                 sndHint.style.opacity = '0';
@@ -1344,9 +1482,8 @@
             }
         }
 
-        function setFinaleStyle(styleMode) {
-            state.bgStyle = (styleMode === 'black') ? 'black' : 'blue';
-            syncFinaleBgBtnLabel();
+        function setFinaleStyle() {
+            state.bgStyle = 'blue';
         }
 
         skipBtn.addEventListener('click', function (e) {
@@ -1378,14 +1515,7 @@
                 if (typeof repCb === 'function') repCb();
             });
         }
-        if (finaleBgB) {
-            finaleBgB.addEventListener('click', function (e) {
-                e.stopPropagation();
-                var nextS = (state.bgStyle === 'black') ? 'blue' : 'black';
-                setFinaleStyle(nextS);
-                if (window.__setTourFinaleStyle) window.__setTourFinaleStyle(nextS);
-            });
-        }
+
 
         overlay.addEventListener('click', function (e) {
             if (e.target === skipBtn || (skipBtn && skipBtn.contains(e.target))) return;
@@ -2039,8 +2169,10 @@
             drawerCollapsed: (window.innerWidth < 768 || window.innerHeight < 520),
             onWallSpot: true,
             tourActive: false,
-            tourPreset: 'vivaldi',      // 'nocturne' | 'vivaldi'
-            tourFinaleStyle: 'blue',    // 'blue' | 'black'
+            tourPreset: 'exhibition',   // 'exhibition' | 'nocturne' | 'vivaldi'
+            tourFinaleStyle: 'blue',    // Locked to Nocturnal Prussian Blue-Out
+            exhibitionVoice: true,
+            fieldMarkers: 'easels',     // 'none' | 'easels' | 'frames' (default 'easels'; 'frames' in Exhibition)
             walkActive: false,
             inStudio: false,
             activeEaselIdx: -1,
@@ -2311,6 +2443,7 @@
             for (var iter = 0; iter < 2; iter++) {
                 for (var i = 0; i < circleColliders.length; i++) {
                     var cc = circleColliders[i];
+                    if (cc.isFieldEasel && params.fieldMarkers !== 'easels') continue;
                     var dx = px - cc.x;
                     var dz = pz - cc.z;
                     var minD = cc.r + playerRadius;
@@ -8266,10 +8399,87 @@
                     }
                 ];
 
+                var easelGroup = new THREE.Group();
+                scene.add(easelGroup);
+                window.__vgEaselGroup = easelGroup;
+
+                var portalGroup = new THREE.Group();
+                portalGroup.visible = false;
+                scene.add(portalGroup);
+                window.__vgExhibitionPortals = portalGroup;
+
+                var frameGoldMat  = new THREE.MeshBasicMaterial({ color: 0xf2c94c });
+                var frameInnerMat = new THREE.MeshBasicMaterial({ color: 0x16294c });
+
+                function makePlaqueTexture(titleText, subText) {
+                    var c = document.createElement('canvas');
+                    c.width = 512;
+                    c.height = 112;
+                    var g = c.getContext('2d');
+                    g.fillStyle = 'rgba(7, 16, 38, 0.94)';
+                    g.fillRect(4, 4, 504, 104);
+                    g.strokeStyle = '#f2c94c';
+                    g.lineWidth = 4;
+                    g.strokeRect(8, 8, 496, 96);
+                    g.fillStyle = '#fef08a';
+                    g.textAlign = 'center';
+                    g.font = 'italic 600 32px Georgia, serif';
+                    g.fillText(titleText, 256, 52);
+                    g.fillStyle = '#bae6fd';
+                    g.font = '600 17px Inter, sans-serif';
+                    g.fillText(subText, 256, 84);
+                    var tex = new THREE.CanvasTexture(c);
+                    tex.minFilter = THREE.LinearFilter;
+                    return tex;
+                }
+
+                // Standless mid-air floating Yellow Gallery Frame + overhead title plaque
+                function buildFloatingYellowFrame(px, py, pz, rotY, apW, apH, floatH, titleText, subText) {
+                    var g = new THREE.Group();
+                    g.position.set(px, py, pz);
+                    g.rotation.y = rotY;
+                    var border = 0.09;
+                    var depth = 0.08;
+
+                    var topBar = new THREE.Mesh(new THREE.BoxGeometry(apW + border * 2.0, border, depth), frameGoldMat);
+                    topBar.position.set(0, floatH + apH + border * 0.5, 0);
+                    var botBar = new THREE.Mesh(new THREE.BoxGeometry(apW + border * 2.0, border, depth), frameGoldMat);
+                    botBar.position.set(0, floatH - border * 0.5, 0);
+                    var sideGeo = new THREE.BoxGeometry(border, apH, depth);
+                    var leftBar = new THREE.Mesh(sideGeo, frameGoldMat);
+                    leftBar.position.set(-apW * 0.5 - border * 0.5, floatH + apH * 0.5, 0);
+                    var rightBar = new THREE.Mesh(sideGeo, frameGoldMat);
+                    rightBar.position.set( apW * 0.5 + border * 0.5, floatH + apH * 0.5, 0);
+                    g.add(topBar, botBar, leftBar, rightBar);
+
+                    var lipGeoH = new THREE.BoxGeometry(apW + 0.02, 0.024, depth + 0.016);
+                    var lipT = new THREE.Mesh(lipGeoH, frameInnerMat);
+                    lipT.position.set(0, floatH + apH, 0);
+                    var lipB = new THREE.Mesh(lipGeoH, frameInnerMat);
+                    lipB.position.set(0, floatH, 0);
+                    var lipGeoV = new THREE.BoxGeometry(0.024, apH + 0.02, depth + 0.016);
+                    var lipL = new THREE.Mesh(lipGeoV, frameInnerMat);
+                    lipL.position.set(-apW * 0.5, floatH + apH * 0.5, 0);
+                    var lipR = new THREE.Mesh(lipGeoV, frameInnerMat);
+                    lipR.position.set( apW * 0.5, floatH + apH * 0.5, 0);
+                    g.add(lipT, lipB, lipL, lipR);
+
+                    var plaqueMat = new THREE.MeshBasicMaterial({
+                        map: makePlaqueTexture(titleText, subText),
+                        side: THREE.DoubleSide
+                    });
+                    var plaqueW = Math.min(apW * 0.92, 2.55);
+                    var plaqueH = plaqueW * (112.0 / 512.0);
+                    var plaque = new THREE.Mesh(new THREE.PlaneGeometry(plaqueW, plaqueH), plaqueMat);
+                    plaque.position.set(0, floatH + apH + border + plaqueH * 0.62, 0.01);
+                    g.add(plaque);
+                    return g;
+                }
+
                 window.__vgEasels = [];
                 easelSpecs.forEach(function (sp, idx) {
                     var ey = getGroundY(sp.x, sp.z);
-                    addCircleCollider(sp.x, sp.z, 0.58);
+                    circleColliders.push({ x: sp.x, z: sp.z, r: 0.58, isFieldEasel: true });
 
                     var dx = sp.x - sp.lookX;
                     var dz = sp.z - sp.lookZ;
@@ -8277,24 +8487,38 @@
                     var ux = dx / dLen, uz = dz / dLen;
                     var rx = -uz, rz = ux;
 
-                    // Orient `+Z` painted canvas directly toward the viewer at `standPos`!
                     var easelRotY = Math.atan2(ux, uz);
                     var eMesh = buildImpastoEasel(sp.x, ey, sp.z, easelRotY, sp.cA, sp.cB, sp.cC, 760.0 + idx * 10.0);
-                    scene.add(eMesh);
+                    easelGroup.add(eMesh);
 
                     var halo = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 6), winDabMat);
                     halo.position.set(sp.x, ey + 1.94, sp.z);
-                    scene.add(halo);
+                    easelGroup.add(halo);
                     easelHaloOrbs.push(halo);
 
-                    // Stand 1.52m directly in front of the `+Z` painted canvas (slightly offset 0.14m so both canvas & vista frame cleanly!)
                     var standX = sp.x + ux * 1.52 + rx * 0.14;
                     var standZ = sp.z + uz * 1.52 + rz * 0.14;
                     var standY = getGroundY(standX, standZ);
-                    // Look right across the front painted canvas (`ey + 1.18`) out into the matching 3D vista!
                     var focusX = sp.x - ux * 6.5;
                     var focusZ = sp.z - uz * 6.5;
                     var focusY = ey + 1.05;
+
+                    // Centered mid-air Yellow Frame right along the painting vista sightline
+                    var frameX = sp.x - ux * 0.45;
+                    var frameZ = sp.z - uz * 0.45;
+                    var frameY = getGroundY(frameX, frameZ);
+                    var fMesh = buildFloatingYellowFrame(
+                        frameX, frameY, frameZ, easelRotY, 2.58, 1.88, 0.68,
+                        sp.title, sp.date.toUpperCase()
+                    );
+                    portalGroup.add(fMesh);
+
+                    var fStandX = frameX + ux * 2.85;
+                    var fStandZ = frameZ + uz * 2.85;
+                    var fStandY = getGroundY(fStandX, fStandZ);
+                    var fLookX  = frameX - ux * 8.0;
+                    var fLookZ  = frameZ - uz * 8.0;
+                    var fLookY  = frameY + 1.56;
 
                     window.__vgEasels.push({
                         idx: idx,
@@ -8303,13 +8527,27 @@
                         date: sp.date,
                         note: sp.note,
                         x: sp.x, y: ey, z: sp.z,
+                        frameX: frameX, frameY: frameY, frameZ: frameZ,
+                        ux: ux, uz: uz, rx: rx, rz: rz,
                         rotY: easelRotY,
                         frontNormal: { x: Math.sin(easelRotY), z: Math.cos(easelRotY) },
                         standPos: new THREE.Vector3(standX, standY + FP_EYE_HEIGHT, standZ),
                         lookTarget: new THREE.Vector3(focusX, focusY, focusZ),
+                        frameStandPos: new THREE.Vector3(fStandX, fStandY + FP_EYE_HEIGHT, fStandZ),
+                        frameLookTarget: new THREE.Vector3(fLookX, fLookY, fLookZ),
                         discovered: false
                     });
                 });
+
+                // Grand Hillside 1889 Masterpiece Floating Yellow Frame (for Exhibition Chapter VII & hillside walks)
+                var hillFx = 0.18, hillFz = 72.8;
+                var hillFy = getGroundY(hillFx, hillFz);
+                var hillPortal = buildFloatingYellowFrame(
+                    hillFx, hillFy, hillFz, 0.018, 3.85, 2.85, 1.05,
+                    'The Starry Night', 'JUNE 1889 · SAINT-RÉMY-DE-PROVENCE'
+                );
+                portalGroup.add(hillPortal);
+                window.__vgHillsidePortal = hillPortal;
             })();
 
             // 7B. Sculpted 3D Violet-Iris & Golden-Marigold Beds inside Saint-Paul-de-Mausole Cloister (z=98..121)
@@ -11858,12 +12096,18 @@
         }
 
         function syncOnlineStreamVolume() {
+            var duck = (typeof window.__exhibitionSpeechDuck === 'number') ? window.__exhibitionSpeechDuck : 1.0;
             var st = audioSys.stream;
             if (st && st.el) {
                 try {
-                    st.el.volume = params.audioOn ? THREE.MathUtils.clamp(params.musicVol, 0.0, 1.0) : 0.0;
+                    st.el.volume = params.audioOn ? THREE.MathUtils.clamp(params.musicVol * duck, 0.0, 1.0) : 0.0;
                     st.el.muted = !params.audioOn;
                 } catch (e) {}
+            }
+            if (audioSys.musicBus && audioSys.ctx) {
+                try {
+                    audioSys.musicBus.gain.setTargetAtTime(params.musicVol * duck, audioSys.ctx.currentTime, 0.14);
+                } catch (e2) {}
             }
         }
 
@@ -12845,8 +13089,15 @@
             var list = window.__vgEasels || [];
             var found = 0;
             for (var i = 0; i < list.length; i++) if (list[i].discovered) found++;
-            document.getElementById('easel-card-progress').textContent = isStudio ? 'Saint-Paul-de-Mausole' : ('Easels: ' + found + ' / ' + list.length);
-            document.getElementById('btn-easel-next').classList.toggle('hidden', !!isStudio);
+            var useFrames = (params.fieldMarkers === 'frames');
+            document.getElementById('easel-card-progress').textContent = isStudio
+                ? 'Saint-Paul-de-Mausole'
+                : ((useFrames ? 'Frames: ' : 'Easels: ') + found + ' / ' + list.length);
+            var nextBtn = document.getElementById('btn-easel-next');
+            if (nextBtn) {
+                nextBtn.textContent = useFrames ? 'Next Frame' : 'Next Easel';
+                nextBtn.classList.toggle('hidden', !!isStudio);
+            }
             document.getElementById('btn-easel-exit-studio').classList.toggle('hidden', !isStudio);
             card.classList.remove('hidden');
         }
@@ -12902,6 +13153,7 @@
         function visitPleinAirEasel(idx) {
             var list = window.__vgEasels || [];
             if (idx < 0 || idx >= list.length) return;
+            var wasExhRunning = (params.tourActive && params.tourPreset === 'exhibition');
             var item = list[idx];
             item.discovered = true;
             exitPointerLockSafe();
@@ -12911,9 +13163,16 @@
             params.tourActive = false;
             params.onWallSpot = false;
             params.activeEaselIdx = idx;
-            camCtrl.desiredPos.copy(item.standPos);
-            camCtrl.desiredTarget.copy(item.lookTarget);
-            camCtrl.desiredFov = 54.0;
+            if (wasExhRunning && exhibitionState.autoSwitchedFrames) {
+                params.fieldMarkers = 'easels';
+                exhibitionState.autoSwitchedFrames = false;
+            } else if (params.fieldMarkers === 'none') {
+                params.fieldMarkers = 'easels';
+            }
+            var useFrames = (params.fieldMarkers === 'frames');
+            camCtrl.desiredPos.copy(useFrames ? item.frameStandPos : item.standPos);
+            camCtrl.desiredTarget.copy(useFrames ? item.frameLookTarget : item.lookTarget);
+            camCtrl.desiredFov = useFrames ? 52.0 : 54.0;
             syncYawPitchFromLook();
             syncModePills();
             updateEaselDiscoveryUI();
@@ -12940,40 +13199,549 @@
             skyCacheState.dirty = true;
         }
 
-        function syncTourPresetUI() {
-            var isViv = (params.tourPreset === 'vivaldi');
-            var isBlue = (params.tourFinaleStyle !== 'black');
+        // ========================================================================
+        // 13A-2. IMMERSIVE EXHIBITION TOUR + FLOATING YELLOW FRAMES + TIMELINE SCRUBBER
+        // ========================================================================
+        var EXHIBITION_CHAPTER_DUR = 14.0;
+        var EXHIBITION_CHAPTERS = [
+            {
+                roman: 'I',
+                hudLabel: 'I. Ink Sketch to Living Colour — Saint-Rémy 1889',
+                pill: 'GALLERY I / VII · LIVING PROJECTION',
+                script: 'Saint-Rémy-de-Provence, May 1889',
+                sub: 'Charcoal Contours Awakening into Impasto',
+                quote: '“I often think that the night is more alive and more richly colored than the day.”',
+                cite: 'Vincent van Gogh · Letters to Theo',
+                narration: 'Saint-Rémy-de-Provence, eighteen eighty-nine. Step inside Vincent van Gogh’s living canvas, as bold ink contours awaken into radiant Provençal colour and morning light.',
+                kind: 'hill_sketch',
+                fov0: 47.5, fov1: 44.5,
+                day0: 0.05, day1: 0.86,
+                ink0: 1.62, ink1: 0.82,
+                yel0: 0.34, yel1: 1.06,
+                chaos: 1.68, rel: 0.88, swirl: 0.32
+            },
+            {
+                roman: 'II',
+                hudLabel: 'II. Irises — Saint-Paul-de-Mausole Cloister',
+                pill: 'GALLERY II / VII · ASYLUM GARDEN',
+                script: 'Irises, May 1889',
+                sub: 'Saint-Paul-de-Mausole Monastery Garden',
+                quote: '“It strikes the eye from afar. The Irises are a beautiful study full of air and life.”',
+                cite: 'Theo van Gogh to Vincent · July 1889',
+                narration: 'Within his first week in the Saint-Paul monastery garden, Van Gogh painted Irises close to the earth, finding living rhythm in every curving violet petal.',
+                kind: 'easel', easelIdx: 0,
+                fov0: 53.5, fov1: 48.0,
+                day0: 0.90, day1: 0.96,
+                ink0: 0.84, ink1: 0.80,
+                yel0: 1.08, yel1: 1.14,
+                chaos: 1.74, rel: 0.88, swirl: 0.38
+            },
+            {
+                roman: 'III',
+                hudLabel: 'III. Wheat Field with Cypresses — Mistral Sun',
+                pill: 'GALLERY III / VII · ENCLOSED WHEAT FIELD',
+                script: 'Wheat Field with Cypresses, June 1889',
+                sub: 'Floating Frame · Provençal Countryside',
+                quote: '“The cypresses are always occupying my thoughts… It is a splash of black in a sunny landscape.”',
+                cite: 'Letter to Theo · 25 June 1889',
+                narration: 'Out under the Provençal sun, intense contrasting golds and cobalt blues make the wind-swept wheat fields and flame-like cypresses vibrate with life.',
+                kind: 'easel', easelIdx: 1,
+                fov0: 54.5, fov1: 48.5,
+                day0: 1.00, day1: 0.92,
+                ink0: 0.78, ink1: 0.80,
+                yel0: 1.28, yel1: 1.32,
+                chaos: 1.88, rel: 0.86, swirl: 0.84
+            },
+            {
+                roman: 'IV',
+                hudLabel: 'IV. The Olive Trees — Western Orchards',
+                pill: 'GALLERY IV / VII · ANCIENT OLIVE GROVES',
+                script: 'The Olive Trees, 1889',
+                sub: 'Daylight Complement to The Starry Night',
+                quote: '“The rustle of the olive grove has something very secret in it, and immensely old.”',
+                cite: 'Letter to Theo · Saint-Rémy, 1889',
+                narration: 'Among the western olive groves, he painted at least fifteen studies, turning gnarled silver-green boughs into continuous, shimmering waves of paint.',
+                kind: 'easel', easelIdx: 3,
+                fov0: 54.0, fov1: 48.5,
+                day0: 0.78, day1: 0.52,
+                ink0: 0.82, ink1: 0.86,
+                yel0: 1.12, yel1: 1.18,
+                chaos: 1.94, rel: 0.94, swirl: 0.64
+            },
+            {
+                roman: 'V',
+                hudLabel: 'V. The Road Menders — Boulevard Mirabeau Dusk',
+                pill: 'GALLERY V / VII · TWILIGHT BOULEVARD',
+                script: 'The Road Menders, December 1889',
+                sub: 'Gaslit Cobblestones & Plane Trees',
+                quote: '“In spite of everything, I shall rise again; I will take up my pencil, which I have forsaken in my great discouragement.”',
+                cite: 'Vincent van Gogh · Letters to Theo',
+                narration: 'As twilight settles along Boulevard Mirabeau, warm gaslights kindle beneath towering plane trees, guiding our walk from golden day into starry night.',
+                kind: 'easel', easelIdx: 2,
+                fov0: 55.0, fov1: 49.5,
+                day0: 0.44, day1: 0.14,
+                ink0: 0.84, ink1: 0.82,
+                yel0: 1.18, yel1: 1.26,
+                chaos: 1.82, rel: 0.86, swirl: 0.48
+            },
+            {
+                roman: 'VI',
+                hudLabel: 'VI. Barred Asylum Window — Pre-Dawn Venus',
+                pill: 'GALLERY VI / VII · UPSTAIRS ROOM',
+                script: 'Saint-Paul-de-Mausole, June 1889',
+                sub: 'East-Facing Iron-Barred Window Before Sunrise',
+                quote: '“This morning I saw the countryside from my window a long time before sunrise, with nothing but the morning star, which looked very big.”',
+                cite: 'Letter 777 to Theo · Early June 1889',
+                narration: 'Inside his austere upstairs room before dawn, Van Gogh gazed through iron bars at the blazing morning star, uniting keen observation with soaring imagination.',
+                kind: 'studio',
+                fov0: 57.5, fov1: 52.0,
+                day0: 0.14, day1: 0.00,
+                ink0: 0.82, ink1: 0.80,
+                yel0: 1.12, yel1: 1.22,
+                chaos: 1.76, rel: 0.78, swirl: 0.46
+            },
+            {
+                roman: 'VII',
+                hudLabel: 'VII. The Starry Night, 1889 — 360° Masterpiece',
+                pill: 'GALLERY VII / VII · IMMERSIVE FINALE',
+                script: 'The Starry Night, June 1889',
+                sub: 'Museum of Modern Art · 73.7 × 92.1 cm',
+                quote: '“Looking at the stars always makes me dream.”',
+                cite: 'Vincent van Gogh · Letter to Theo',
+                narration: 'Out of solitude emerged The Starry Night: swirling cobalt skies, eleven luminous stars, and a vision of nature that proved Van Gogh truly ahead of his time.',
+                kind: 'finale_wall',
+                fov0: 48.5, fov1: 43.0,
+                day0: 0.00, day1: 0.00,
+                ink0: 0.80, ink1: 0.80,
+                yel0: 1.24, yel1: 1.08,
+                chaos: 1.82, rel: 0.76, swirl: 0.56
+            }
+        ];
+        var EXHIBITION_TOTAL_DUR = EXHIBITION_CHAPTERS.length * EXHIBITION_CHAPTER_DUR;
 
+        var exhibitionState = {
+            elapsedSec: 0.0,
+            chapterIdx: -1,
+            spokenChapterIdx: -1,
+            speaking: false,
+            duckTimer: 0,
+            lastPresetReplay: 'exhibition',
+            autoSwitchedFrames: false,
+            wasExhibitionActive: false
+        };
+
+        var tourScrubState = {
+            dragging: false,
+            lastAudioSeekMs: 0,
+            pendingRatio: 0.0
+        };
+        window.__exhibitionSpeechDuck = 1.0;
+
+        function setExhibitionSpeechDuck(mult) {
+            window.__exhibitionSpeechDuck = mult;
+            syncOnlineStreamVolume();
+            var wave = document.getElementById('exh-voice-wave');
+            if (wave) {
+                wave.style.opacity = (mult < 0.85) ? '1' : '0.32';
+            }
+        }
+
+        function stopExhibitionNarration() {
+            if (exhibitionState.duckTimer) {
+                clearTimeout(exhibitionState.duckTimer);
+                exhibitionState.duckTimer = 0;
+            }
+            exhibitionState.speaking = false;
+            try {
+                if (window.speechSynthesis) {
+                    window.speechSynthesis.cancel();
+                }
+            } catch (e) {}
+            setExhibitionSpeechDuck(1.0);
+        }
+
+        function speakExhibitionChapter(chIdx) {
+            var ch = EXHIBITION_CHAPTERS[chIdx];
+            if (!ch) return;
+            exhibitionState.spokenChapterIdx = chIdx;
+            if (!params.exhibitionVoice || params.userMuted) {
+                setExhibitionSpeechDuck(1.0);
+                return;
+            }
+            if (typeof window.speechSynthesis === 'undefined' || typeof window.SpeechSynthesisUtterance === 'undefined') {
+                return;
+            }
+            try {
+                window.speechSynthesis.cancel();
+                var utt = new window.SpeechSynthesisUtterance(ch.narration);
+                utt.lang = 'en-GB';
+                utt.rate = 0.93;
+                utt.pitch = 0.97;
+                utt.volume = 0.96;
+                var voices = window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
+                if (voices && voices.length) {
+                    var preferred = null;
+                    var prefNames = ['Daniel', 'Google UK English Male', 'Arthur', 'Oliver', 'Google UK English Female', 'Samantha', 'Google US English'];
+                    for (var pi = 0; pi < prefNames.length && !preferred; pi++) {
+                        for (var vi = 0; vi < voices.length; vi++) {
+                            if (voices[vi].name && voices[vi].name.indexOf(prefNames[pi]) !== -1) {
+                                preferred = voices[vi];
+                                break;
+                            }
+                        }
+                    }
+                    if (!preferred) {
+                        for (var v2 = 0; v2 < voices.length; v2++) {
+                            if (voices[v2].lang && voices[v2].lang.toLowerCase().indexOf('en') === 0) {
+                                preferred = voices[v2];
+                                break;
+                            }
+                        }
+                    }
+                    if (preferred) utt.voice = preferred;
+                }
+                if (exhibitionState.duckTimer) clearTimeout(exhibitionState.duckTimer);
+                utt.onstart = function () {
+                    exhibitionState.speaking = true;
+                    setExhibitionSpeechDuck(0.34);
+                };
+                utt.onend = utt.onerror = function () {
+                    exhibitionState.speaking = false;
+                    setExhibitionSpeechDuck(1.0);
+                };
+                exhibitionState.duckTimer = setTimeout(function () {
+                    exhibitionState.speaking = false;
+                    setExhibitionSpeechDuck(1.0);
+                }, 12600);
+                window.speechSynthesis.speak(utt);
+            } catch (e) {
+                setExhibitionSpeechDuck(1.0);
+            }
+        }
+
+        function updateExhibitionOverlayChapter(chIdx) {
+            var ch = EXHIBITION_CHAPTERS[chIdx];
+            if (!ch) return;
+            var pillEl = document.getElementById('exh-chapter-pill');
+            var quoteEl = document.getElementById('exh-letter-quote');
+            var citeEl = document.getElementById('exh-letter-cite');
+            var scrEl = document.getElementById('exh-artwork-script');
+            var subEl = document.getElementById('exh-artwork-sub');
+            var capEl = document.getElementById('exh-docent-caption');
+            if (pillEl) pillEl.textContent = ch.pill;
+            if (quoteEl) quoteEl.textContent = ch.quote;
+            if (citeEl) citeEl.textContent = ch.cite;
+            if (scrEl) scrEl.textContent = ch.script;
+            if (subEl) subEl.textContent = ch.sub;
+            if (capEl) capEl.textContent = ch.narration;
+        }
+
+        function sampleExhibitionChapterCamera(ch, locT) {
+            var e = locT * locT * (3.0 - 2.0 * locT);
+            var list = window.__vgEasels || [];
+            var px = 0, py = 14.2, pz = 82.0, lx = 2.2, ly = 16.3, lz = -42.0;
+
+            if (ch.kind === 'hill_sketch') {
+                px = -14.5 + (4.2 - (-14.5)) * e;
+                pz =  88.0 + (77.5 - 88.0) * e;
+                py = Math.max(getGroundY(px, pz) + 2.6, 15.8 + (13.8 - 15.8) * e);
+                lx = -6.0 + (2.0 - (-6.0)) * e;
+                ly = 18.2 + (16.2 - 18.2) * e;
+                lz = -32.0 + (-42.0 - (-32.0)) * e;
+            } else if (ch.kind === 'easel' && list[ch.easelIdx]) {
+                var em = list[ch.easelIdx];
+                // Approach dead-center toward the floating Yellow Frame so the 3D vista composes cleanly inside the frame!
+                var distStart = (ch.easelIdx === 0) ? 5.8 : 8.4;
+                var distEnd   = 2.65;
+                var dNow = distStart + (distEnd - distStart) * e;
+                px = em.frameX + em.ux * dNow;
+                pz = em.frameZ + em.uz * dNow;
+                py = getGroundY(px, pz) + FP_EYE_HEIGHT + 0.24 * (1.0 - e * 0.45);
+                var lookDist = 7.2 + 4.5 * e;
+                lx = em.frameX - em.ux * lookDist;
+                lz = em.frameZ - em.uz * lookDist;
+                ly = em.frameY + 1.56 + 0.16 * e;
+            } else if (ch.kind === 'studio') {
+                var sfY = (typeof window.__vgStudioFloorY === 'number') ? window.__vgStudioFloorY : 6.2;
+                px = 0.42 + (0.12 - 0.42) * e;
+                py = sfY + FP_EYE_HEIGHT + 0.04;
+                pz = 122.15 + (120.52 - 122.15) * e;
+                lx = 1.4 + (2.2 - 1.4) * e;
+                ly = sfY + FP_EYE_HEIGHT + 0.55 + 1.15 * e;
+                lz = 52.0 + (-24.0 - 52.0) * e;
+            } else {
+                var eLock = Math.min(1.0, locT / 0.84);
+                var eSmooth = eLock * eLock * (3.0 - 2.0 * eLock);
+                px = -3.8 * (1.0 - eSmooth) + PRESETS[0].pos.x * eSmooth;
+                py = 15.5 * (1.0 - eSmooth) + PRESETS[0].pos.y * eSmooth;
+                pz = 88.5 * (1.0 - eSmooth) + PRESETS[0].pos.z * eSmooth;
+                lx =  0.8 * (1.0 - eSmooth) + PRESETS[0].target.x * eSmooth;
+                ly = 17.2 * (1.0 - eSmooth) + PRESETS[0].target.y * eSmooth;
+                lz = -36.0 * (1.0 - eSmooth) + PRESETS[0].target.z * eSmooth;
+            }
+            return {
+                px: px, py: py, pz: pz,
+                lx: lx, ly: ly, lz: lz,
+                fov: ch.fov0 + (ch.fov1 - ch.fov0) * e,
+                day: ch.day0 + (ch.day1 - ch.day0) * e,
+                ink: ch.ink0 + (ch.ink1 - ch.ink0) * e,
+                yel: ch.yel0 + (ch.yel1 - ch.yel0) * e,
+                OutdoorCheck: (ch.kind !== 'studio' && ch.kind !== 'finale_wall')
+            };
+        }
+
+        function syncFieldMarkersUI() {
+            var mode = params.fieldMarkers; // 'none' | 'easels' | 'frames'
+            if (window.__vgEaselGroup) {
+                window.__vgEaselGroup.visible = (mode === 'easels');
+            }
+            if (window.__vgExhibitionPortals) {
+                window.__vgExhibitionPortals.visible = (mode === 'frames') && !tourModState.finaleActive;
+            }
+            if (window.__vgHillsidePortal) {
+                // Keep pure 1889 MoMA Wall view unobstructed on Preset 0 unless running Exhibition or exploring off-wall
+                var onPureWall = (params.onWallSpot && !params.tourActive);
+                window.__vgHillsidePortal.visible = !onPureWall;
+            }
+            var mBtns = document.querySelectorAll('.field-marker-btn');
+            for (var i = 0; i < mBtns.length; i++) {
+                mBtns[i].classList.toggle('active', mBtns[i].getAttribute('data-field-markers') === mode);
+            }
+            var hd = document.getElementById('field-markers-heading');
+            if (hd) {
+                hd.textContent = (mode === 'frames')
+                    ? '1889 Yellow Frames'
+                    : ((mode === 'none') ? '1889 Field Spots (Hidden)' : '1889 Field Easels');
+            }
+            var card = document.getElementById('easel-story-card');
+            if (card && !card.classList.contains('hidden') && !params.inStudio) {
+                if (mode === 'none') {
+                    hideEaselStoryCard();
+                } else {
+                    var list = window.__vgEasels || [];
+                    var found = 0;
+                    for (var k = 0; k < list.length; k++) if (list[k].discovered) found++;
+                    var prog = document.getElementById('easel-card-progress');
+                    var nxtB = document.getElementById('btn-easel-next');
+                    if (prog) prog.textContent = (mode === 'frames' ? 'Frames: ' : 'Easels: ') + found + ' / ' + list.length;
+                    if (nxtB) nxtB.textContent = (mode === 'frames') ? 'Next Frame' : 'Next Easel';
+                }
+            }
+        }
+
+        function setFieldMarkersMode(mode) {
+            if (mode !== 'none' && mode !== 'easels' && mode !== 'frames') return;
+            params.fieldMarkers = mode;
+            exhibitionState.autoSwitchedFrames = false;
+            syncFieldMarkersUI();
+        }
+        window.__setFieldMarkersMode = setFieldMarkersMode;
+
+        function stepExhibitionChapter(deltaStep) {
+            if (!params.tourActive || params.tourPreset !== 'exhibition') {
+                startTourPreset('exhibition', true);
+                return;
+            }
+            var curIdx = Math.floor(exhibitionState.elapsedSec / EXHIBITION_CHAPTER_DUR);
+            var nextIdx = (curIdx + deltaStep + EXHIBITION_CHAPTERS.length) % EXHIBITION_CHAPTERS.length;
+            exhibitionState.elapsedSec = nextIdx * EXHIBITION_CHAPTER_DUR + 0.02;
+            exhibitionState.chapterIdx = -1;
+            var ch = EXHIBITION_CHAPTERS[nextIdx];
+            var smp0 = sampleExhibitionChapterCamera(ch, 0.0);
+            camCtrl.pos.set(smp0.px, smp0.py, smp0.pz);
+            camCtrl.target.set(smp0.lx, smp0.ly, smp0.lz);
+            camCtrl.desiredPos.copy(camCtrl.pos);
+            camCtrl.desiredTarget.copy(camCtrl.target);
+            skyCacheState.dirty = true;
+        }
+
+        function toggleExhibitionVoice() {
+            params.exhibitionVoice = !params.exhibitionVoice;
+            if (!params.exhibitionVoice) {
+                stopExhibitionNarration();
+            } else if (params.tourActive && params.tourPreset === 'exhibition' && exhibitionState.chapterIdx >= 0) {
+                speakExhibitionChapter(exhibitionState.chapterIdx);
+            }
+            syncTourPresetUI();
+        }
+
+        // Interactive Tour Timeline Scrubber handler (supports Exhibition, Vivaldi & Nocturne)
+        function scrubTourToRatio(ratio01, isCommitRelease) {
+            if (!params.tourActive) return;
+            var r = THREE.MathUtils.clamp(ratio01, 0.0, 0.996);
+            tourScrubState.pendingRatio = r;
+
+            if (params.tourPreset === 'exhibition') {
+                exhibitionState.elapsedSec = r * EXHIBITION_TOTAL_DUR;
+                var chIdx = Math.min(EXHIBITION_CHAPTERS.length - 1, Math.floor(exhibitionState.elapsedSec / EXHIBITION_CHAPTER_DUR));
+                var chSec = exhibitionState.elapsedSec - chIdx * EXHIBITION_CHAPTER_DUR;
+                var locT  = THREE.MathUtils.clamp(chSec / EXHIBITION_CHAPTER_DUR, 0.0, 1.0);
+                var chObj = EXHIBITION_CHAPTERS[chIdx];
+                var smpE  = sampleExhibitionChapterCamera(chObj, locT);
+
+                exhibitionState.chapterIdx = chIdx;
+                updateExhibitionOverlayChapter(chIdx);
+                var veilEl = document.getElementById('exh-dissolve-veil');
+                if (veilEl) veilEl.style.opacity = '0';
+                var qCard = document.getElementById('exh-quote-card');
+                var sWrap = document.getElementById('exh-artwork-script-wrap');
+                var dBar  = document.getElementById('exh-docent-bar');
+                if (qCard) qCard.classList.remove('exh-stage-hidden');
+                if (sWrap) sWrap.classList.remove('exh-stage-hidden');
+                if (dBar)  dBar.classList.remove('exh-stage-hidden');
+
+                camCtrl.desiredPos.set(smpE.px, smpE.py, smpE.pz);
+                camCtrl.desiredTarget.set(smpE.lx, smpE.ly, smpE.lz);
+                if (smpE.OutdoorCheck) {
+                    var gyE = getGroundY(camCtrl.desiredPos.x, camCtrl.desiredPos.z);
+                    if (camCtrl.desiredPos.y < gyE + 1.38) camCtrl.desiredPos.y = gyE + 1.38;
+                    resolveWorldCollisions(camCtrl.desiredPos, 0.46);
+                }
+                camCtrl.pos.copy(camCtrl.desiredPos);
+                camCtrl.target.copy(camCtrl.desiredTarget);
+                camCtrl.fov = smpE.fov;
+                camCtrl.desiredFov = smpE.fov;
+                camera.fov = smpE.fov;
+                camera.updateProjectionMatrix();
+
+                uDaylight.value    = THREE.MathUtils.clamp(smpE.day, 0.0, 1.0);
+                uBlackInk.value    = THREE.MathUtils.clamp(smpE.ink, 0.1, 2.0);
+                uYellowBoost.value = params.yellowBoost * smpE.yel;
+                uChaos.value       = chObj.chaos;
+                uRelief.value      = chObj.rel;
+                skyCacheState.dirty = true;
+
+                updateTourHudProgress(
+                    chObj.hudLabel,
+                    formatClassicalTime(exhibitionState.elapsedSec) + ' / ' + formatClassicalTime(EXHIBITION_TOTAL_DUR),
+                    r
+                );
+
+                if (isCommitRelease) {
+                    speakExhibitionChapter(chIdx);
+                } else {
+                    stopExhibitionNarration();
+                }
+            } else if (params.tourPreset === 'vivaldi') {
+                var pieceV = CLASSICAL_REPERTOIRE[3];
+                var stV = audioSys.stream;
+                var totSecV = pieceV.expectedDur || 159.0;
+                if (params.audioOn && stV && !stV.offlineMode && stV.el && stV.el.duration && isFinite(stV.el.duration) && stV.el.duration > 30.0) {
+                    totSecV = stV.el.duration;
+                } else if (params.audioOn && stV && stV.offlineMode) {
+                    totSecV = pieceV.totalDur || 170.43;
+                }
+                var lastNoteTriggerSec = Math.min(totSecV - 4.35, totSecV * 0.973);
+                var targetSec = r * lastNoteTriggerSec;
+                tourModState.fallbackClockSec = targetSec;
+                tourModState.finaleTriggered = false;
+
+                var smpV = sampleVivaldiTourAt(r);
+                camCtrl.desiredPos.set(smpV.px, smpV.py, smpV.pz);
+                camCtrl.desiredTarget.set(smpV.lx, smpV.ly, smpV.lz);
+                var gyV = getGroundY(camCtrl.desiredPos.x, camCtrl.desiredPos.z);
+                if (camCtrl.desiredPos.y < gyV + 2.15) camCtrl.desiredPos.y = gyV + 2.15;
+                if (camCtrl.desiredPos.y - gyV < 5.2) resolveWorldCollisions(camCtrl.desiredPos, 0.95);
+                camCtrl.pos.copy(camCtrl.desiredPos);
+                camCtrl.target.copy(camCtrl.desiredTarget);
+                camCtrl.fov = smpV.fov;
+                camCtrl.desiredFov = smpV.fov;
+                camera.fov = smpV.fov;
+                camera.updateProjectionMatrix();
+
+                uYellowBoost.value = params.yellowBoost * smpV.yel;
+                uChaos.value       = THREE.MathUtils.clamp(smpV.chaos, 0.4, 2.45);
+                uRelief.value      = THREE.MathUtils.clamp(smpV.rel, 0.2, 1.45);
+                uDaylight.value    = THREE.MathUtils.clamp(smpV.day, 0.0, 1.0);
+                skyCacheState.dirty = true;
+
+                var nowMs = performance.now();
+                if (isCommitRelease || (nowMs - tourScrubState.lastAudioSeekMs > 120)) {
+                    tourScrubState.lastAudioSeekMs = nowMs;
+                    var musicRatio = THREE.MathUtils.clamp(targetSec / Math.max(1.0, totSecV), 0.0, 0.992);
+                    seekClassicalPerformanceRatio(musicRatio);
+                }
+
+                updateTourHudProgress(
+                    smpV.label,
+                    formatClassicalTime(targetSec) + ' / ' + formatClassicalTime(totSecV),
+                    r
+                );
+            } else {
+                // Nocturne Drift (~66s loop)
+                var nocDur = 66.0;
+                camCtrl.tourTime = r;
+                tourPosCurve.getPointAt(r, camCtrl.desiredPos);
+                tourLookCurve.getPointAt(r, camCtrl.desiredTarget);
+                var gyN = getGroundY(camCtrl.desiredPos.x, camCtrl.desiredPos.z);
+                if (camCtrl.desiredPos.y < gyN + 2.25) camCtrl.desiredPos.y = gyN + 2.25;
+                if (camCtrl.desiredPos.y - gyN < 5.2) resolveWorldCollisions(camCtrl.desiredPos, 0.95);
+                camCtrl.pos.copy(camCtrl.desiredPos);
+                camCtrl.target.copy(camCtrl.desiredTarget);
+
+                var wfCount = NOCTURNE_TOUR_WAYPOINTS.length;
+                var wfIdx0 = Math.floor(r * wfCount) % wfCount;
+                camCtrl.desiredFov = NOCTURNE_TOUR_WAYPOINTS[wfIdx0].fov;
+                camCtrl.fov = camCtrl.desiredFov;
+                camera.fov = camCtrl.fov;
+                camera.updateProjectionMatrix();
+
+                updateTourHudProgress(
+                    NOCTURNE_TOUR_WAYPOINTS[wfIdx0].label,
+                    formatClassicalTime(r * nocDur) + ' / 1:06',
+                    r
+                );
+            }
+        }
+        window.__scrubTourToRatio = scrubTourToRatio;
+
+        function syncTourPresetUI() {
+            var isExh = (params.tourPreset === 'exhibition');
+            var isViv = (params.tourPreset === 'vivaldi');
+            var isNoc = (params.tourPreset === 'nocturne');
+
+            var bExh = document.getElementById('btn-tour-exhibition');
             var bNoc = document.getElementById('btn-tour-nocturne');
             var bViv = document.getElementById('btn-tour-vivaldi');
-            if (bNoc) bNoc.classList.toggle('active', params.tourActive ? !isViv : (!isViv));
-            if (bViv) bViv.classList.toggle('active', params.tourActive ? isViv : isViv);
+            if (bExh) bExh.classList.toggle('active', isExh);
+            if (bNoc) bNoc.classList.toggle('active', isNoc);
+            if (bViv) bViv.classList.toggle('active', isViv);
 
+            var hExh = document.getElementById('btn-hud-tour-exhibition');
             var hNoc = document.getElementById('btn-hud-tour-nocturne');
             var hViv = document.getElementById('btn-hud-tour-vivaldi');
-            if (hNoc) hNoc.classList.toggle('active', !isViv);
+            if (hExh) hExh.classList.toggle('active', isExh);
+            if (hNoc) hNoc.classList.toggle('active', isNoc);
             if (hViv) hViv.classList.toggle('active', isViv);
 
-            var fBlue = document.getElementById('btn-finale-blue');
-            var fBlk  = document.getElementById('btn-finale-black');
-            if (fBlue) fBlue.classList.toggle('active', isBlue);
-            if (fBlk)  fBlk.classList.toggle('active', !isBlue);
-
-            var hStyle = document.getElementById('btn-hud-finale-style');
-            var hJump  = document.getElementById('btn-hud-finale-jump');
-            if (hStyle) {
-                hStyle.textContent = isBlue ? 'Blue-Out' : 'Blackout';
-                hStyle.classList.toggle('hidden', !isViv);
-            }
+            var hJump = document.getElementById('btn-hud-finale-jump');
             if (hJump) {
                 hJump.classList.toggle('hidden', !isViv);
+            }
+
+            var hPrev = document.getElementById('btn-hud-exh-prev');
+            var hNext = document.getElementById('btn-hud-exh-next');
+            var hVoice = document.getElementById('btn-hud-exh-voice');
+            var dVoice = document.getElementById('btn-drawer-exh-voice');
+            var hTicks = document.getElementById('tour-hud-ticks');
+            if (hPrev) hPrev.classList.toggle('hidden', !isExh);
+            if (hNext) hNext.classList.toggle('hidden', !isExh);
+            if (hTicks) hTicks.classList.toggle('hidden', !isExh);
+            if (hVoice) {
+                hVoice.classList.toggle('hidden', !isExh);
+                hVoice.classList.toggle('active', params.exhibitionVoice);
+                hVoice.textContent = params.exhibitionVoice ? 'Voice: On' : 'Voice: Off';
+            }
+            if (dVoice) {
+                dVoice.classList.toggle('active', params.exhibitionVoice);
+                dVoice.textContent = params.exhibitionVoice ? 'Voice: On' : 'Voice: Off';
             }
 
             var stLbl = document.getElementById('tour-drawer-status');
             if (stLbl) {
                 stLbl.textContent = params.tourActive
-                    ? (isViv ? 'Playing · Vivaldi' : 'Playing · Nocturne')
-                    : '2 Presets';
+                    ? (isExh ? 'Playing · Exhibition' : (isViv ? 'Playing · Vivaldi' : 'Playing · Nocturne'))
+                    : '3 Presets';
             }
 
             var hud = document.getElementById('tour-director-hud');
@@ -12981,20 +13749,34 @@
                 hud.classList.toggle('hidden', !params.tourActive || params.uiHidden || tourModState.finaleActive);
                 hud.style.top = params.skyBrushMode ? '6.9rem' : '';
             }
-        }
 
-        function setTourFinaleStyle(styleMode) {
-            params.tourFinaleStyle = (styleMode === 'black') ? 'black' : 'blue';
-            if (window.__vincentCutscene && window.__vincentCutscene.setFinaleStyle) {
-                window.__vincentCutscene.setFinaleStyle(params.tourFinaleStyle);
+            var exhOv = document.getElementById('exhibition-projection-overlay');
+            if (exhOv) {
+                exhOv.classList.toggle('hidden', !(params.tourActive && isExh) || params.uiHidden || tourModState.finaleActive);
             }
-            syncTourPresetUI();
+            var motes = document.getElementById('exh-motes-layer');
+            if (motes) {
+                motes.classList.toggle('hidden', Boolean(params.safeShaders || params.activeTier === 'lite'));
+            }
+            syncFieldMarkersUI();
         }
-        window.__setTourFinaleStyle = setTourFinaleStyle;
 
         function syncModePills() {
-            if ((!params.tourActive || params.tourPreset !== 'vivaldi') && tourModState.active) {
+            var nowExhActive = Boolean(params.tourActive && params.tourPreset === 'exhibition');
+            if (exhibitionState.wasExhibitionActive && !nowExhActive) {
+                stopExhibitionNarration();
+                if (exhibitionState.autoSwitchedFrames) {
+                    params.fieldMarkers = 'easels';
+                    exhibitionState.autoSwitchedFrames = false;
+                }
+            }
+            exhibitionState.wasExhibitionActive = nowExhActive;
+
+            if ((!params.tourActive || (params.tourPreset !== 'vivaldi' && params.tourPreset !== 'exhibition')) && tourModState.active) {
                 restoreTourSceneModulation();
+            }
+            if (!nowExhActive) {
+                stopExhibitionNarration();
             }
             if (!params.tourActive && Math.abs(tourModState.rollRad) > 0.0001) {
                 tourModState.rollRad = 0.0;
@@ -13089,16 +13871,20 @@
 
         function startTourPreset(presetName, forceRestart) {
             exitPointerLockSafe();
-            var targetPreset = (presetName === 'nocturne') ? 'nocturne' : 'vivaldi';
+            var targetPreset = (presetName === 'nocturne' || presetName === 'vivaldi' || presetName === 'exhibition')
+                ? presetName
+                : 'exhibition';
             var wasSameRunning = (params.tourActive && params.tourPreset === targetPreset && !forceRestart);
             if (wasSameRunning) {
                 params.tourActive = false;
+                stopExhibitionNarration();
                 restoreTourSceneModulation();
                 syncModePills();
                 return;
             }
 
-            if (tourModState.active && targetPreset !== 'vivaldi') {
+            stopExhibitionNarration();
+            if (tourModState.active) {
                 restoreTourSceneModulation();
             }
 
@@ -13109,9 +13895,52 @@
             params.onWallSpot = false;
             tourModState.finaleTriggered = false;
             tourModState.finaleActive = false;
+            tourScrubState.dragging = false;
             hideEaselStoryCard();
 
-            if (targetPreset === 'vivaldi') {
+            if (targetPreset === 'exhibition') {
+                // Auto-switch field display to Floating Yellow Frames when Immersive Exhibition starts
+                params.fieldMarkers = 'frames';
+                exhibitionState.autoSwitchedFrames = true;
+                if (!tourModState.saved) {
+                    tourModState.saved = { musicAutoCycle: params.musicAutoCycle };
+                }
+                tourModState.active = true;
+                exhibitionState.elapsedSec = 0.0;
+                exhibitionState.chapterIdx = -1;
+                exhibitionState.spokenChapterIdx = -1;
+                exhibitionState.lastPresetReplay = 'exhibition';
+                initWebAudioIfNeeded();
+                var shouldUnmuteExh = !params.userMuted;
+                params.musicTrack = 0;
+                audioSys.pieceIdx = 0;
+                audioSys.eventCursor = 0;
+                if (shouldUnmuteExh && !params.audioOn) {
+                    toggleAudioSoundscape(true);
+                }
+                if (params.audioOn) {
+                    if (audioSys.stream && audioSys.stream.offlineMode) {
+                        engageOfflineClassicalFallback(0.0);
+                    } else {
+                        startOrSeekOnlineClassical(0, 0.0);
+                    }
+                } else {
+                    syncClassicalMusicUI();
+                }
+                var ch0 = EXHIBITION_CHAPTERS[0];
+                var sInit = sampleExhibitionChapterCamera(ch0, 0.0);
+                camCtrl.pos.set(sInit.px, sInit.py, sInit.pz);
+                camCtrl.target.set(sInit.lx, sInit.ly, sInit.lz);
+                camCtrl.desiredPos.copy(camCtrl.pos);
+                camCtrl.desiredTarget.copy(camCtrl.target);
+                camCtrl.desiredFov = sInit.fov;
+                skyCacheState.dirty = true;
+            } else if (targetPreset === 'vivaldi') {
+                if (exhibitionState.autoSwitchedFrames) {
+                    params.fieldMarkers = 'easels';
+                    exhibitionState.autoSwitchedFrames = false;
+                }
+                exhibitionState.lastPresetReplay = 'vivaldi';
                 if (!tourModState.saved) {
                     tourModState.saved = {
                         musicAutoCycle: params.musicAutoCycle
@@ -13144,6 +13973,10 @@
                 camCtrl.desiredTarget.copy(PRESETS[0].target);
                 camCtrl.desiredFov = PRESETS[0].fov;
             } else {
+                if (exhibitionState.autoSwitchedFrames) {
+                    params.fieldMarkers = 'easels';
+                    exhibitionState.autoSwitchedFrames = false;
+                }
                 autoStartAudioOnFirstStep();
                 if (forceRestart) camCtrl.tourTime = 0.0;
                 camCtrl.desiredFov = 46.0;
@@ -13197,16 +14030,26 @@
             syncYawPitchFromLook();
             syncModePills();
 
+            stopExhibitionNarration();
+            var replayPreset = (params.tourPreset === 'exhibition' || exhibitionState.lastPresetReplay === 'exhibition')
+                ? 'exhibition'
+                : 'vivaldi';
+            var repBtn = document.getElementById('btn-finale-replay-tour');
+            if (repBtn) {
+                repBtn.textContent = (replayPreset === 'exhibition')
+                    ? '↻ Replay Exhibition Tour'
+                    : '↻ Replay Summer Tour';
+            }
             if (window.__vincentCutscene && window.__vincentCutscene.playFinale) {
                 window.__vincentCutscene.playFinale(
-                    params.tourFinaleStyle,
+                    'blue',
                     function onReturnToWall() {
                         tourModState.finaleActive = false;
                         selectPreset(0);
                     },
-                    function onReplaySummer() {
+                    function onReplayTour() {
                         tourModState.finaleActive = false;
-                        startTourPreset('vivaldi', true);
+                        startTourPreset(replayPreset, true);
                     }
                 );
             }
@@ -13276,9 +14119,14 @@
             var chEl = document.getElementById('tour-hud-chapter');
             var tmEl = document.getElementById('tour-hud-time');
             var prEl = document.getElementById('tour-hud-progress');
+            var thEl = document.getElementById('tour-hud-thumb');
+            var trEl = document.getElementById('tour-timeline-track');
+            var pct = (THREE.MathUtils.clamp(ratio01, 0.0, 1.0) * 100.0).toFixed(1) + '%';
             if (chEl && chEl.textContent !== chapterText) chEl.textContent = chapterText;
             if (tmEl && tmEl.textContent !== timeText) tmEl.textContent = timeText;
-            if (prEl) prEl.style.width = (THREE.MathUtils.clamp(ratio01, 0.0, 1.0) * 100.0).toFixed(1) + '%';
+            if (prEl) prEl.style.width = pct;
+            if (thEl) thEl.style.left = pct;
+            if (trEl) trEl.setAttribute('aria-valuenow', Math.round(THREE.MathUtils.clamp(ratio01, 0.0, 1.0) * 100));
         }
 
         function toggleWalkMode(wantPointerLock) {
@@ -13378,6 +14226,11 @@
             }
             if (params.tourActive) {
                 camCtrl.bobAmount = 0;
+                if (tourScrubState.dragging) {
+                    camera.position.copy(camCtrl.pos);
+                    camera.lookAt(camCtrl.target);
+                    return;
+                }
                 if (params.tourPreset === 'vivaldi') {
                     // If user manually switched away from Track 3 in Music tab, glide smoothly in Nocturne Drift instead
                     if (params.musicTrack !== 3) {
@@ -13458,7 +14311,88 @@
                     }
                 }
 
-                if (params.tourPreset !== 'vivaldi') {
+                if (params.tourPreset === 'exhibition') {
+                    exhibitionState.elapsedSec += dt;
+                    if (exhibitionState.elapsedSec >= EXHIBITION_TOTAL_DUR) {
+                        exhibitionState.lastPresetReplay = 'exhibition';
+                        triggerVivaldiTourFinale();
+                        return;
+                    }
+
+                    var chIdx = Math.min(EXHIBITION_CHAPTERS.length - 1, Math.floor(exhibitionState.elapsedSec / EXHIBITION_CHAPTER_DUR));
+                    var chSec = exhibitionState.elapsedSec - chIdx * EXHIBITION_CHAPTER_DUR;
+                    var locT  = THREE.MathUtils.clamp(chSec / EXHIBITION_CHAPTER_DUR, 0.0, 1.0);
+                    var chObj = EXHIBITION_CHAPTERS[chIdx];
+                    var smpE  = sampleExhibitionChapterCamera(chObj, locT);
+
+                    if (chIdx !== exhibitionState.chapterIdx) {
+                        var prevIdx = exhibitionState.chapterIdx;
+                        exhibitionState.chapterIdx = chIdx;
+                        updateExhibitionOverlayChapter(chIdx);
+                        speakExhibitionChapter(chIdx);
+                        if (prevIdx >= 0) {
+                            camCtrl.pos.set(smpE.px, smpE.py, smpE.pz);
+                            camCtrl.target.set(smpE.lx, smpE.ly, smpE.lz);
+                            camCtrl.fov = smpE.fov;
+                            camera.fov = smpE.fov;
+                            camera.updateProjectionMatrix();
+                        }
+                        if (chObj.kind === 'easel' && window.__vgEasels && window.__vgEasels[chObj.easelIdx]) {
+                            window.__vgEasels[chObj.easelIdx].discovered = true;
+                            updateEaselDiscoveryUI();
+                        }
+                        skyCacheState.dirty = true;
+                    }
+
+                    var veilAlpha = 0.0;
+                    if (chIdx > 0 && chSec < 0.68) {
+                        veilAlpha = Math.pow(1.0 - chSec / 0.68, 1.5) * 0.92;
+                    } else if (chIdx < EXHIBITION_CHAPTERS.length - 1 && chSec > EXHIBITION_CHAPTER_DUR - 0.62) {
+                        veilAlpha = Math.pow((chSec - (EXHIBITION_CHAPTER_DUR - 0.62)) / 0.62, 1.5) * 0.92;
+                    }
+                    var veilEl = document.getElementById('exh-dissolve-veil');
+                    if (veilEl) veilEl.style.opacity = veilAlpha.toFixed(3);
+
+                    var textHidden = (chSec < 0.45) || (chSec > EXHIBITION_CHAPTER_DUR - 0.55);
+                    var qCard = document.getElementById('exh-quote-card');
+                    var sWrap = document.getElementById('exh-artwork-script-wrap');
+                    var dBar  = document.getElementById('exh-docent-bar');
+                    if (qCard) qCard.classList.toggle('exh-stage-hidden', textHidden);
+                    if (sWrap) sWrap.classList.toggle('exh-stage-hidden', textHidden);
+                    if (dBar)  dBar.classList.toggle('exh-stage-hidden', textHidden);
+
+                    camCtrl.desiredPos.set(smpE.px, smpE.py, smpE.pz);
+                    camCtrl.desiredTarget.set(smpE.lx, smpE.ly, smpE.lz);
+                    if (smpE.OutdoorCheck) {
+                        var gyE = getGroundY(camCtrl.desiredPos.x, camCtrl.desiredPos.z);
+                        if (camCtrl.desiredPos.y < gyE + 1.38) camCtrl.desiredPos.y = gyE + 1.38;
+                        resolveWorldCollisions(camCtrl.desiredPos, 0.46);
+                    }
+                    camCtrl.desiredFov = smpE.fov;
+                    tourModState.rollRad += (0.0 - tourModState.rollRad) * Math.min(1.0, dt * 4.0);
+
+                    tourModState.active = true;
+                    tourModState.liveSwirlSpeed = chObj.swirl;
+                    tourModState.cypressSwayMult = 0.95 + chObj.swirl * 0.65;
+                    var prevDay = uDaylight.value;
+                    var prevInk = uBlackInk.value;
+                    uDaylight.value    = THREE.MathUtils.clamp(smpE.day, 0.0, 1.0);
+                    uBlackInk.value    = THREE.MathUtils.clamp(smpE.ink, 0.1, 2.0);
+                    uYellowBoost.value = params.yellowBoost * smpE.yel;
+                    uChaos.value       = chObj.chaos;
+                    uRelief.value      = chObj.rel;
+                    if (Math.abs(uDaylight.value - prevDay) > 0.012 || Math.abs(uBlackInk.value - prevInk) > 0.018) {
+                        skyCacheState.dirty = true;
+                    }
+
+                    updateTourHudProgress(
+                        chObj.hudLabel,
+                        formatClassicalTime(exhibitionState.elapsedSec) + ' / ' + formatClassicalTime(EXHIBITION_TOTAL_DUR),
+                        exhibitionState.elapsedSec / EXHIBITION_TOTAL_DUR
+                    );
+                }
+
+                if (params.tourPreset === 'nocturne') {
                     // Preset 1: Refined Serene 360° Nocturne Drift (~66s seamless arc-length loop)
                     var nocDur = 66.0;
                     camCtrl.tourTime = (camCtrl.tourTime + dt / nocDur) % 1.0;
@@ -13574,7 +14508,7 @@
                 }
             }
 
-            var tourLerpSpd = (params.tourPreset === 'vivaldi') ? 5.4 : 3.4;
+            var tourLerpSpd = (params.tourPreset === 'vivaldi') ? 5.4 : ((params.tourPreset === 'exhibition') ? 4.6 : 3.4);
             var k = Math.min(1.0, dt * (params.tourActive ? tourLerpSpd : (params.walkActive ? 11.5 : 6.8)));
             camCtrl.pos.lerp(camCtrl.desiredPos, k);
             camCtrl.target.lerp(camCtrl.desiredTarget, k);
@@ -13766,22 +14700,68 @@
             });
             document.getElementById('btn-wall-snap').addEventListener('click', function () { selectPreset(0); });
             document.getElementById('btn-tour').addEventListener('click', toggleTourMode);
+            document.getElementById('btn-tour-exhibition').addEventListener('click', function () { startTourPreset('exhibition', false); });
             document.getElementById('btn-tour-nocturne').addEventListener('click', function () { startTourPreset('nocturne', false); });
             document.getElementById('btn-tour-vivaldi').addEventListener('click', function () { startTourPreset('vivaldi', false); });
+            document.getElementById('btn-hud-tour-exhibition').addEventListener('click', function () { startTourPreset('exhibition', true); });
             document.getElementById('btn-hud-tour-nocturne').addEventListener('click', function () { startTourPreset('nocturne', true); });
             document.getElementById('btn-hud-tour-vivaldi').addEventListener('click', function () { startTourPreset('vivaldi', true); });
+            document.getElementById('btn-hud-exh-prev').addEventListener('click', function () { stepExhibitionChapter(-1); });
+            document.getElementById('btn-hud-exh-next').addEventListener('click', function () { stepExhibitionChapter(1); });
+            document.getElementById('btn-drawer-exh-prev').addEventListener('click', function () { stepExhibitionChapter(-1); });
+            document.getElementById('btn-drawer-exh-next').addEventListener('click', function () { stepExhibitionChapter(1); });
+            document.getElementById('btn-hud-exh-voice').addEventListener('click', toggleExhibitionVoice);
+            document.getElementById('btn-drawer-exh-voice').addEventListener('click', toggleExhibitionVoice);
             document.getElementById('btn-hud-tour-stop').addEventListener('click', function () {
                 params.tourActive = false;
+                stopExhibitionNarration();
                 restoreTourSceneModulation();
                 syncModePills();
             });
-            document.getElementById('btn-finale-blue').addEventListener('click', function () { setTourFinaleStyle('blue'); });
-            document.getElementById('btn-finale-black').addEventListener('click', function () { setTourFinaleStyle('black'); });
-            document.getElementById('btn-hud-finale-style').addEventListener('click', function () {
-                setTourFinaleStyle(params.tourFinaleStyle === 'black' ? 'blue' : 'black');
-            });
             document.getElementById('btn-drawer-finale-jump').addEventListener('click', jumpToVivaldiFinalePreview);
             document.getElementById('btn-hud-finale-jump').addEventListener('click', jumpToVivaldiFinalePreview);
+
+            document.querySelectorAll('.field-marker-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    setFieldMarkersMode(btn.getAttribute('data-field-markers'));
+                });
+            });
+
+            var tourTrack = document.getElementById('tour-timeline-track');
+            if (tourTrack) {
+                function clientXToTourRatio(clientX) {
+                    var rect = tourTrack.getBoundingClientRect();
+                    if (!rect || rect.width <= 1) return 0.0;
+                    return THREE.MathUtils.clamp((clientX - rect.left) / rect.width, 0.0, 0.996);
+                }
+                tourTrack.addEventListener('pointerdown', function (e) {
+                    e.stopPropagation();
+                    if (!params.tourActive) return;
+                    tourScrubState.dragging = true;
+                    tourTrack.classList.add('scrubbing');
+                    if (tourTrack.setPointerCapture) {
+                        try { tourTrack.setPointerCapture(e.pointerId); } catch (err) {}
+                    }
+                    scrubTourToRatio(clientXToTourRatio(e.clientX), false);
+                });
+                tourTrack.addEventListener('pointermove', function (e) {
+                    if (!tourScrubState.dragging) return;
+                    e.stopPropagation();
+                    scrubTourToRatio(clientXToTourRatio(e.clientX), false);
+                });
+                function finishTourScrub(e) {
+                    if (!tourScrubState.dragging) return;
+                    e.stopPropagation();
+                    tourScrubState.dragging = false;
+                    tourTrack.classList.remove('scrubbing');
+                    if (tourTrack.releasePointerCapture) {
+                        try { tourTrack.releasePointerCapture(e.pointerId); } catch (err) {}
+                    }
+                    scrubTourToRatio(clientXToTourRatio(e.clientX), true);
+                }
+                tourTrack.addEventListener('pointerup', finishTourScrub);
+                tourTrack.addEventListener('pointercancel', finishTourScrub);
+            }
             document.getElementById('btn-walk').addEventListener('click', function () { toggleWalkMode(true); });
             document.getElementById('btn-studio-window').addEventListener('click', enterVincentsStudioWindow);
             document.getElementById('btn-interact-landmark').addEventListener('click', function () {
@@ -14353,14 +15333,14 @@
 
             var dt = Math.min(clock.getDelta(), 0.05);
 
-            var effSwirlSpeed = (params.tourActive && params.tourPreset === 'vivaldi' && tourModState.active)
+            var effSwirlSpeed = (params.tourActive && (params.tourPreset === 'vivaldi' || params.tourPreset === 'exhibition') && tourModState.active)
                 ? tourModState.liveSwirlSpeed
                 : params.swirlSpeed;
             if (effSwirlSpeed > 0.0001) {
                 uFlowPhase.value += dt * effSwirlSpeed;
                 skyCacheState.accumDt += dt * Math.max(1.0, effSwirlSpeed / 0.45);
                 if (cypressMainGroup) {
-                    var swayMult = (params.tourActive && params.tourPreset === 'vivaldi' && tourModState.active)
+                    var swayMult = (params.tourActive && (params.tourPreset === 'vivaldi' || params.tourPreset === 'exhibition') && tourModState.active)
                         ? tourModState.cypressSwayMult
                         : 1.0;
                     cypressMainGroup.rotation.z = Math.sin(uFlowPhase.value * 1.4) * 0.009 * swayMult;
@@ -14396,15 +15376,21 @@
                 if (dDoor < 3.6) {
                     best = { type: 'studio', label: "Enter Vincent's Upstairs Window (E / Tap)" };
                 } else {
-                    for (var ei = 0; ei < list.length; ei++) {
-                        var de = Math.hypot(camCtrl.pos.x - list[ei].x, camCtrl.pos.z - list[ei].z);
-                        if (de < 3.6) {
-                            if (!list[ei].discovered) {
-                                list[ei].discovered = true;
-                                updateEaselDiscoveryUI();
+                    if (params.fieldMarkers !== 'none') {
+                        var isFrameMode = (params.fieldMarkers === 'frames');
+                        for (var ei = 0; ei < list.length; ei++) {
+                            var deEasel = Math.hypot(camCtrl.pos.x - list[ei].x, camCtrl.pos.z - list[ei].z);
+                            var deFrame = Math.hypot(camCtrl.pos.x - list[ei].frameX, camCtrl.pos.z - list[ei].frameZ);
+                            var de = isFrameMode ? Math.min(deEasel, deFrame) : deEasel;
+                            if (de < 3.9) {
+                                if (!list[ei].discovered) {
+                                    list[ei].discovered = true;
+                                    updateEaselDiscoveryUI();
+                                }
+                                var actionPrefix = isFrameMode ? 'Step Into Frame: ' : 'Step Into Canvas: ';
+                                best = { type: 'easel', idx: ei, label: actionPrefix + list[ei].title + ' (E / Tap)' };
+                                break;
                             }
-                            best = { type: 'easel', idx: ei, label: 'Step Into Canvas: ' + list[ei].title + ' (E / Tap)' };
-                            break;
                         }
                     }
                 }
@@ -14533,7 +15519,7 @@
                 }
             }
 
-            if (((params.activeTier === 'lite' || isSoftwareWebGL || params.safeShaders) && params.relief < 0.12 && params.daylight < 0.02) || !sceneRT) {
+            if (((params.activeTier === 'lite' || isSoftwareWebGL || params.safeShaders) && uRelief.value < 0.12 && uDaylight.value < 0.02) || !sceneRT) {
                 renderer.setRenderTarget(null);
                 renderer.setClearColor(0x0b1942, 1.0);
                 renderer.clear();
