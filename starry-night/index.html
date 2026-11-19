@@ -115,13 +115,14 @@
             z-index: 12;
             pointer-events: none;
         }
-        #lab-ui-top, #bottom-mode-dock, #lab-drawer, #step-hint-wrap {
+        #lab-ui-top, #bottom-mode-dock, #lab-drawer, #step-hint-wrap, #tour-director-hud {
             transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1), transform 0.3s ease;
         }
         body.cutscene-playing #lab-ui-top,
         body.cutscene-playing #bottom-mode-dock,
         body.cutscene-playing #lab-drawer,
         body.cutscene-playing #step-hint-wrap,
+        body.cutscene-playing #tour-director-hud,
         body.cutscene-playing #boot-loading-pill {
             opacity: 0 !important;
             pointer-events: none !important;
@@ -230,11 +231,24 @@
             <span>Click anywhere for 1889 music</span>
         </div>
 
-        <!-- Sleek Skip Cutscene Pill (bottom-right) -->
+        <!-- Sleek Skip Cutscene Pill (bottom-right, opening prologue) -->
         <button id="btn-skip-cutscene" type="button" class="absolute bottom-2.5 sm:bottom-3.5 right-3.5 sm:right-5 z-10 studio-glass hover:border-amber-300 active:scale-95 transition rounded-full px-3.5 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-amber-100 flex items-center gap-1.5">
             <span>Skip Intro</span>
             <span class="text-[10px] font-mono text-cyan-200/80 hidden sm:inline">&middot; Esc</span>
         </button>
+
+        <!-- Finale Hold Controls Bar (fades in softly after Vivaldi "Summer" final-note signature) -->
+        <div id="finale-controls-bar" class="hidden absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 rounded-full studio-glass transition-opacity duration-700 opacity-0 pointer-events-none max-w-[95vw]">
+            <button id="btn-finale-replay-tour" type="button" class="mode-pill active rounded-full px-3 py-1 text-[10px] sm:text-xs font-semibold text-amber-100 whitespace-nowrap">
+                &#8635; Replay Summer Tour
+            </button>
+            <button id="btn-finale-toggle-bg" type="button" title="Switch finale screen between Nocturnal Prussian Blue-Out and Pure Velvet Blackout" class="mode-pill rounded-full px-2.5 py-1 text-[10px] sm:text-xs font-semibold text-cyan-100 whitespace-nowrap">
+                Backdrop: Blue-Out
+            </button>
+            <button id="btn-finale-return" type="button" class="mode-pill rounded-full px-3 py-1 text-[10px] sm:text-xs font-semibold text-amber-200 whitespace-nowrap">
+                1889 Wall &middot; Esc
+            </button>
+        </div>
     </div>
 
     <!-- WebGL Viewport -->
@@ -274,6 +288,40 @@
                     Clear (X)
                 </button>
                 <span class="text-[10px] text-cyan-200/80 hidden md:inline font-mono">[ ] pigment · B exit</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cinematic Tour Director Floating Pill (Active during Nocturne Drift & Vivaldi Summer Storm) -->
+    <div id="tour-director-hud" class="fixed top-14 sm:top-16 left-1/2 -translate-x-1/2 z-20 hidden pointer-events-auto max-w-[96vw]">
+        <div class="studio-glass rounded-2xl px-3 py-1.5 text-[11px] text-amber-100 flex flex-col gap-1 shadow-xl border-amber-300/55 min-w-[280px] sm:min-w-[420px]">
+            <div class="flex flex-wrap items-center justify-between gap-1.5">
+                <div class="flex items-center gap-1" role="group" aria-label="Tour Preset Selector">
+                    <button id="btn-hud-tour-nocturne" type="button" title="Refined Serene 360° Saint-Rémy Spline Tour" class="mode-pill rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-cyan-100 whitespace-nowrap">
+                        Nocturne Drift
+                    </button>
+                    <button id="btn-hud-tour-vivaldi" type="button" title="Dynamic Music-Synced Vivaldi Summer Presto Tour with Vincent Finale" class="mode-pill active rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-amber-200 whitespace-nowrap">
+                        &#9889; Vivaldi Summer
+                    </button>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button id="btn-hud-finale-style" type="button" title="Toggle Finale Screen: Nocturnal Blue-Out vs Pure Blackout" class="mode-pill rounded-full px-2 py-0.5 text-[10px] font-semibold text-cyan-100 whitespace-nowrap">
+                        Blue-Out
+                    </button>
+                    <button id="btn-hud-finale-jump" type="button" title="Jump to the final 14s storm plunge &amp; last-note Vincent signature" class="mode-pill rounded-full px-2 py-0.5 text-[10px] font-semibold text-amber-200 whitespace-nowrap">
+                        &#8677; Finale
+                    </button>
+                    <button id="btn-hud-tour-stop" type="button" title="Exit Tour (Key C)" class="mode-pill rounded-full px-2 py-0.5 text-[10px] font-semibold text-slate-200 hover:text-amber-200">
+                        &times;
+                    </button>
+                </div>
+            </div>
+            <div class="flex items-center justify-between gap-2 text-[10px] px-0.5">
+                <span id="tour-hud-chapter" class="text-amber-200/95 font-medium truncate">I. Unison Storm &mdash; 1889 Canvas Launch</span>
+                <span id="tour-hud-time" class="font-mono text-cyan-200/85 shrink-0">0:00 / 2:39</span>
+            </div>
+            <div class="w-full h-1 rounded-full bg-slate-950/80 overflow-hidden">
+                <div id="tour-hud-progress" class="h-full bg-gradient-to-r from-cyan-300 via-amber-300 to-amber-400 transition-all duration-150" style="width: 0%;"></div>
             </div>
         </div>
     </div>
@@ -433,8 +481,33 @@
             <button data-dtab="quality" class="drawer-tab-btn rounded-lg py-1 text-[11px] font-semibold">Quality</button>
         </div>
 
-        <!-- Tab 1: Explore (6 Vantages + 4 Field Easels) -->
+        <!-- Tab 1: Explore (2 Cinematic Tours + 6 Vantages + 4 Field Easels) -->
         <div id="dtab-explore" class="drawer-tab-panel flex flex-col gap-2.5">
+            <div class="bg-slate-950/55 border border-amber-300/25 rounded-xl p-2 flex flex-col gap-1.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] uppercase tracking-wider font-bold text-amber-200">Cinematic Tours (Key C)</span>
+                    <span id="tour-drawer-status" class="text-[10px] font-mono text-cyan-200/80">2 Presets</span>
+                </div>
+                <div class="grid grid-cols-1 gap-1 text-xs">
+                    <button id="btn-tour-nocturne" type="button" class="preset-btn rounded-xl px-2.5 py-1.5 text-left flex items-center justify-between">
+                        <span class="font-semibold">1. Nocturne Drift</span>
+                        <span class="text-[10px] text-cyan-200/85">Serene 360&deg; Loop</span>
+                    </button>
+                    <button id="btn-tour-vivaldi" type="button" class="preset-btn active rounded-xl px-2.5 py-1.5 text-left flex items-center justify-between">
+                        <span class="font-semibold">&#9889; 2. Vivaldi &ldquo;Summer&rdquo;</span>
+                        <span class="text-[10px] text-amber-300">Dynamic &middot; Finale</span>
+                    </button>
+                </div>
+                <div class="flex items-center justify-between gap-1 pt-1 border-t border-amber-200/10 text-[10px]">
+                    <span class="text-cyan-100/80 shrink-0">Summer End:</span>
+                    <div class="flex items-center gap-1">
+                        <button id="btn-finale-blue" type="button" class="mode-pill active rounded-lg px-2 py-0.5 font-semibold text-cyan-100">Blue-Out</button>
+                        <button id="btn-finale-black" type="button" class="mode-pill rounded-lg px-2 py-0.5 font-semibold text-slate-200">Blackout</button>
+                        <button id="btn-drawer-finale-jump" type="button" title="Preview final 14s storm plunge &amp; last-note Vincent signature" class="mode-pill rounded-lg px-2 py-0.5 font-semibold text-amber-200">&#8677; End</button>
+                    </div>
+                </div>
+            </div>
+
             <div>
                 <div class="flex items-center justify-between mb-1.5">
                     <span class="text-[10px] uppercase tracking-wider font-bold text-amber-200">Vantages (Keys 1&ndash;6)</span>
@@ -658,11 +731,15 @@
     //   3. Live calligraphy stroke-by-stroke painting + starlight brushstroke dissolve
     // ============================================================================
     (function initVincentOpeningCutscene() {
-        var overlay = document.getElementById('vincent-cutscene-overlay');
-        var canvas  = document.getElementById('vincent-cutscene-canvas');
-        var skipBtn = document.getElementById('btn-skip-cutscene');
-        var sndHint = document.getElementById('cutscene-sound-hint');
-        var sigImg  = document.getElementById('vincent-sig-asset');
+        var overlay       = document.getElementById('vincent-cutscene-overlay');
+        var canvas        = document.getElementById('vincent-cutscene-canvas');
+        var skipBtn       = document.getElementById('btn-skip-cutscene');
+        var sndHint       = document.getElementById('cutscene-sound-hint');
+        var finaleBar     = document.getElementById('finale-controls-bar');
+        var finaleReplayB = document.getElementById('btn-finale-replay-tour');
+        var finaleBgB     = document.getElementById('btn-finale-toggle-bg');
+        var finaleRetB    = document.getElementById('btn-finale-return');
+        var sigImg        = document.getElementById('vincent-sig-asset');
         if (!overlay || !canvas || !sigImg) {
             document.body.classList.remove('cutscene-playing');
             return;
@@ -737,7 +814,7 @@
         compositeSigCanvas.width = SIG_W; compositeSigCanvas.height = SIG_H;
 
         var bgCanvas = document.createElement('canvas');
-        var bgCachedW = 0, bgCachedH = 0;
+        var bgCachedW = 0, bgCachedH = 0, bgCachedStyle = '';
         var dissolveRibbons = [];
 
         function smoothstep(e0, e1, x) {
@@ -783,37 +860,54 @@
             return a;
         }
 
-        // Bake a sumptuous, high-resolution nocturnal oil-painted gallery backdrop at exact physical pixel size (cw x ch)
-        function ensurePolishedBackdrop(cw, ch) {
-            if (bgCachedW === cw && bgCachedH === ch) return;
+        // Bake a sumptuous, high-resolution nocturnal oil-painted or velvet-blackout backdrop at exact physical pixel size (cw x ch)
+        function ensurePolishedBackdrop(cw, ch, styleKey) {
+            var effStyle = (styleKey === 'black') ? 'black' : 'blue';
+            if (bgCachedW === cw && bgCachedH === ch && bgCachedStyle === effStyle) return;
             bgCachedW = cw;
             bgCachedH = ch;
+            bgCachedStyle = effStyle;
             bgCanvas.width = cw;
             bgCanvas.height = ch;
             var bctx = bgCanvas.getContext('2d');
             bctx.imageSmoothingEnabled = true;
             bctx.imageSmoothingQuality = 'high';
 
-            // 1. Deep velvety Prussian-ultramarine base sky gradient
+            var isBlack = (effStyle === 'black');
+
+            // 1. Base gradient: Deep Prussian-Ultramarine Blue-Out OR Pure Velvet Gallery Blackout
             var lin = bctx.createLinearGradient(0, 0, cw * 0.25, ch);
-            lin.addColorStop(0.0, '#050d21');
-            lin.addColorStop(0.48, '#09193c');
-            lin.addColorStop(1.0, '#040a1a');
+            if (isBlack) {
+                lin.addColorStop(0.0, '#010205');
+                lin.addColorStop(0.50, '#04060d');
+                lin.addColorStop(1.0, '#010103');
+            } else {
+                lin.addColorStop(0.0, '#050d21');
+                lin.addColorStop(0.48, '#0b204d');
+                lin.addColorStop(1.0, '#040a1a');
+            }
             bctx.fillStyle = lin;
             bctx.fillRect(0, 0, cw, ch);
 
-            // 2. Soft luminous nocturnal indigo aura centered behind "Vincent"
-            var cx = cw * 0.5, cy = ch * 0.465;
+            // 2. Soft luminous center aura behind "Vincent"
+            var cx = cw * 0.5, cy = ch * 0.485;
             var maxR = Math.hypot(cw, ch) * 0.64;
             var rad = bctx.createRadialGradient(cx, cy, Math.min(cw, ch) * 0.03, cx, cy, maxR);
-            rad.addColorStop(0.0, 'rgba(30, 66, 138, 0.52)');
-            rad.addColorStop(0.38, 'rgba(17, 40, 92, 0.34)');
-            rad.addColorStop(0.74, 'rgba(7, 17, 42, 0.18)');
-            rad.addColorStop(1.0, 'rgba(2, 6, 16, 0.0)');
+            if (isBlack) {
+                rad.addColorStop(0.0, 'rgba(248, 214, 72, 0.055)');
+                rad.addColorStop(0.35, 'rgba(14, 22, 44, 0.16)');
+                rad.addColorStop(0.75, 'rgba(3, 5, 12, 0.08)');
+                rad.addColorStop(1.0, 'rgba(0, 0, 0, 0.0)');
+            } else {
+                rad.addColorStop(0.0, 'rgba(36, 78, 164, 0.56)');
+                rad.addColorStop(0.38, 'rgba(19, 46, 106, 0.36)');
+                rad.addColorStop(0.74, 'rgba(7, 17, 42, 0.18)');
+                rad.addColorStop(1.0, 'rgba(2, 6, 16, 0.0)');
+            }
             bctx.fillStyle = rad;
             bctx.fillRect(0, 0, cw, ch);
 
-            // 3. Silky, feathered Van Gogh nocturnal oil-glaze flow (tapered multi-layer curved washes, zero capsule edges!)
+            // 3. Silky, feathered Van Gogh nocturnal oil-glaze flow
             var washC = document.createElement('canvas');
             washC.width = Math.max(320, Math.round(cw * 0.5));
             washC.height = Math.max(180, Math.round(ch * 0.5));
@@ -825,12 +919,18 @@
                 seed = (seed * 1664525 + 1013904223) >>> 0;
                 return seed / 4294967296.0;
             }
-            var glazePalette = [
-                'rgba(28, 64, 138, 0.065)',
-                'rgba(16, 42, 98, 0.075)',
-                'rgba(44, 88, 172, 0.048)',
+            var glazePalette = isBlack ? [
+                'rgba(14, 20, 36, 0.055)',
+                'rgba(8, 12, 24, 0.070)',
+                'rgba(22, 30, 52, 0.035)',
+                'rgba(3, 5, 11, 0.090)',
+                'rgba(32, 42, 68, 0.025)'
+            ] : [
+                'rgba(28, 64, 138, 0.068)',
+                'rgba(16, 42, 98, 0.078)',
+                'rgba(46, 94, 182, 0.052)',
                 'rgba(6, 16, 44, 0.085)',
-                'rgba(62, 110, 194, 0.035)'
+                'rgba(66, 118, 206, 0.038)'
             ];
             for (var gi = 0; gi < 680; gi++) {
                 var gx = nextRand() * ww;
@@ -1089,6 +1189,11 @@
 
         var state = {
             active: true,
+            mode: 'intro',     // 'intro' | 'finale'
+            bgStyle: 'blue',   // 'blue' | 'black'
+            finaleBarShown: false,
+            onFinaleReturn: null,
+            onFinaleReplay: null,
             skipping: false,
             skipFade: 0.0,
             elapsed: 0.0,
@@ -1123,17 +1228,39 @@
             return u < 0.5 ? 2.0 * u * u : 1.0 - Math.pow(-2.0 * u + 2.0, 2.0) * 0.5;
         }
 
+        function syncFinaleBgBtnLabel() {
+            if (finaleBgB) {
+                finaleBgB.textContent = (state.bgStyle === 'black') ? 'Backdrop: Blackout' : 'Backdrop: Blue-Out';
+            }
+        }
+
+        function hideFinaleControlsBar() {
+            state.finaleBarShown = false;
+            if (finaleBar) {
+                finaleBar.classList.add('hidden');
+                finaleBar.style.opacity = '0';
+                finaleBar.style.pointerEvents = 'none';
+            }
+        }
+
         function finishCutscene() {
             if (!state.active) return;
+            var wasFinale = (state.mode === 'finale');
+            var retCb = state.onFinaleReturn;
             state.active = false;
+            state.onFinaleReturn = null;
             if (state.rafId) {
                 cancelAnimationFrame(state.rafId);
                 state.rafId = 0;
             }
+            hideFinaleControlsBar();
+            if (skipBtn) skipBtn.classList.remove('hidden');
             overlay.classList.add('bars-open');
             overlay.style.display = 'none';
             document.body.classList.remove('cutscene-playing');
-            if (window.__finishIntro3DCameraSweep) {
+            if (wasFinale) {
+                if (typeof retCb === 'function') retCb();
+            } else if (window.__finishIntro3DCameraSweep) {
                 window.__finishIntro3DCameraSweep();
             }
         }
@@ -1142,9 +1269,10 @@
             if (!state.active || state.skipping) return;
             state.skipping = true;
             state.skipFade = 0.0;
+            hideFinaleControlsBar();
             overlay.classList.add('bars-open');
             document.body.classList.remove('cutscene-playing');
-            if (window.__finishIntro3DCameraSweep) {
+            if (state.mode !== 'finale' && window.__finishIntro3DCameraSweep) {
                 window.__finishIntro3DCameraSweep();
             }
         }
@@ -1152,6 +1280,10 @@
         function replayCutscene() {
             bakeImpastoFromSignatureImage();
             tipSparks.length = 0;
+            state.mode = 'intro';
+            state.bgStyle = 'blue';
+            state.onFinaleReturn = null;
+            state.onFinaleReplay = null;
             state.active = true;
             state.skipping = false;
             state.skipFade = 0.0;
@@ -1160,10 +1292,13 @@
             state.lastTs = performance.now();
             state.craneTriggered = false;
             state.barsOpened = false;
+            hideFinaleControlsBar();
+            if (skipBtn) skipBtn.classList.remove('hidden');
             overlay.style.display = 'block';
             overlay.classList.remove('bars-open');
             document.body.classList.add('cutscene-playing');
             if (sndHint) {
+                sndHint.classList.remove('hidden');
                 sndHint.style.opacity = (window.__isAudioActive && window.__isAudioActive()) ? '0' : '1';
             }
             if (window.__primeIntro3DCameraStart) {
@@ -1174,13 +1309,91 @@
             }
         }
 
+        function playFinale(styleMode, onReturnCb, onReplayCb) {
+            bakeImpastoFromSignatureImage();
+            tipSparks.length = 0;
+            state.mode = 'finale';
+            state.bgStyle = (styleMode === 'black') ? 'black' : 'blue';
+            state.onFinaleReturn = onReturnCb || null;
+            state.onFinaleReplay = onReplayCb || null;
+            state.active = true;
+            state.skipping = false;
+            state.skipFade = 0.0;
+            state.elapsed = 0.0;
+            state.holdWait = 0.0;
+            state.lastTs = performance.now();
+            state.craneTriggered = true;
+            state.barsOpened = false;
+            hideFinaleControlsBar();
+            syncFinaleBgBtnLabel();
+            if (skipBtn) skipBtn.classList.add('hidden');
+            if (sndHint) {
+                sndHint.style.opacity = '0';
+                sndHint.classList.add('hidden');
+            }
+            overlay.classList.add('bars-open');
+            overlay.style.display = 'block';
+            document.body.classList.add('cutscene-playing');
+            requestAnimationFrame(function () {
+                if (state.active && state.mode === 'finale' && !state.skipping) {
+                    overlay.classList.remove('bars-open');
+                }
+            });
+            if (!state.rafId) {
+                state.rafId = requestAnimationFrame(renderCutsceneFrame);
+            }
+        }
+
+        function setFinaleStyle(styleMode) {
+            state.bgStyle = (styleMode === 'black') ? 'black' : 'blue';
+            syncFinaleBgBtnLabel();
+        }
+
         skipBtn.addEventListener('click', function (e) {
             e.stopPropagation();
             triggerSkipCutscene();
         });
 
+        if (finaleRetB) {
+            finaleRetB.addEventListener('click', function (e) {
+                e.stopPropagation();
+                triggerSkipCutscene();
+            });
+        }
+        if (finaleReplayB) {
+            finaleReplayB.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var repCb = state.onFinaleReplay;
+                state.onFinaleReturn = null;
+                state.active = false;
+                if (state.rafId) {
+                    cancelAnimationFrame(state.rafId);
+                    state.rafId = 0;
+                }
+                hideFinaleControlsBar();
+                if (skipBtn) skipBtn.classList.remove('hidden');
+                overlay.classList.add('bars-open');
+                overlay.style.display = 'none';
+                document.body.classList.remove('cutscene-playing');
+                if (typeof repCb === 'function') repCb();
+            });
+        }
+        if (finaleBgB) {
+            finaleBgB.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var nextS = (state.bgStyle === 'black') ? 'blue' : 'black';
+                setFinaleStyle(nextS);
+                if (window.__setTourFinaleStyle) window.__setTourFinaleStyle(nextS);
+            });
+        }
+
         overlay.addEventListener('click', function (e) {
             if (e.target === skipBtn || (skipBtn && skipBtn.contains(e.target))) return;
+            if (finaleBar && finaleBar.contains(e.target)) return;
+            if (state.mode === 'finale') {
+                if (state.elapsed > 3.4) triggerSkipCutscene();
+                return;
+            }
             if (window.__unlockIntroAudio) {
                 window.__unlockIntroAudio();
             }
@@ -1190,6 +1403,7 @@
         window.addEventListener('keydown', function (e) {
             if (!state.active) return;
             if (e.code === 'Escape' || e.code === 'Space' || e.code === 'Enter') {
+                if (state.mode === 'finale' && state.elapsed < 0.75 && e.code !== 'Escape') return;
                 e.preventDefault();
                 e.stopPropagation();
                 triggerSkipCutscene();
@@ -1214,6 +1428,8 @@
                     finishCutscene();
                     return;
                 }
+            } else if (state.mode === 'finale') {
+                state.elapsed += dt;
             } else {
                 var worldReady = !!window.__vgWorldReady;
                 if (state.elapsed < T_HOLD_GATE || worldReady || state.holdWait > 4.2) {
@@ -1223,21 +1439,36 @@
                 }
             }
 
+            var isFinale = (state.mode === 'finale');
             var t = state.elapsed;
-            if (!state.craneTriggered && t >= T_HOLD_GATE - 0.08) {
-                state.craneTriggered = true;
-                if (window.__startIntro3DCameraSweep) {
-                    window.__startIntro3DCameraSweep(T_DISSOLVE_END - T_HOLD_GATE);
+
+            if (isFinale) {
+                if (!state.finaleBarShown && !state.skipping && t >= 3.25 && finaleBar) {
+                    state.finaleBarShown = true;
+                    finaleBar.classList.remove('hidden');
+                    requestAnimationFrame(function () {
+                        if (state.finaleBarShown && finaleBar) {
+                            finaleBar.style.opacity = '1';
+                            finaleBar.style.pointerEvents = 'auto';
+                        }
+                    });
                 }
-            }
-            if (!state.barsOpened && t >= T_DISSOLVE_END - 0.85) {
-                state.barsOpened = true;
-                overlay.classList.add('bars-open');
-                document.body.classList.remove('cutscene-playing');
-            }
-            if (t >= T_DISSOLVE_END) {
-                finishCutscene();
-                return;
+            } else {
+                if (!state.craneTriggered && t >= T_HOLD_GATE - 0.08) {
+                    state.craneTriggered = true;
+                    if (window.__startIntro3DCameraSweep) {
+                        window.__startIntro3DCameraSweep(T_DISSOLVE_END - T_HOLD_GATE);
+                    }
+                }
+                if (!state.barsOpened && t >= T_DISSOLVE_END - 0.85) {
+                    state.barsOpened = true;
+                    overlay.classList.add('bars-open');
+                    document.body.classList.remove('cutscene-playing');
+                }
+                if (t >= T_DISSOLVE_END) {
+                    finishCutscene();
+                    return;
+                }
             }
 
             var dpr = Math.min(window.devicePixelRatio || 1, 2.5);
@@ -1248,26 +1479,27 @@
                 canvas.width = cw;
                 canvas.height = ch;
             }
-            ensurePolishedBackdrop(cw, ch);
+            ensurePolishedBackdrop(cw, ch, isFinale ? state.bgStyle : 'blue');
 
             ctx.save();
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = 'high';
             ctx.clearRect(0, 0, cw, ch);
 
-            var dissolveT = Math.max(0.0, Math.min(1.0, (t - T_HOLD_GATE) / (T_DISSOLVE_END - T_HOLD_GATE)));
+            var dissolveT = isFinale ? 0.0 : Math.max(0.0, Math.min(1.0, (t - T_HOLD_GATE) / (T_DISSOLVE_END - T_HOLD_GATE)));
             var dissolveEase = dissolveT * dissolveT * (3.0 - 2.0 * dissolveT);
             var masterAlpha = state.skipping ? (1.0 - state.skipFade) : 1.0;
+            var finaleFadeIn = isFinale ? smoothstep(0.0, 0.88, t) : 1.0;
 
-            // 1. Native Physical-Pixel Polished Nocturnal Oil-Glaze Backdrop (zero upscaling blur or grid!)
-            var bgAlpha = masterAlpha * (1.0 - Math.pow(dissolveT, 1.35));
+            // 1. Native Physical-Pixel Polished Nocturnal Blue-Out or Velvet Blackout Backdrop
+            var bgAlpha = masterAlpha * finaleFadeIn * (1.0 - Math.pow(dissolveT, 1.35));
             if (bgAlpha > 0.005) {
                 ctx.save();
                 ctx.globalAlpha = bgAlpha;
                 ctx.drawImage(bgCanvas, 0, 0, cw, ch);
 
                 // Radial starlight iris cut-out as the 3D painting opens behind "Vincent"
-                if (dissolveT > 0.01) {
+                if (!isFinale && dissolveT > 0.01) {
                     ctx.globalCompositeOperation = 'destination-out';
                     var irisR = Math.hypot(cw, ch) * 0.72 * Math.pow(dissolveT, 1.15);
                     var irisG = ctx.createRadialGradient(cw * 0.5, ch * 0.48, irisR * 0.18, cw * 0.5, ch * 0.48, Math.max(12, irisR));
@@ -1308,11 +1540,14 @@
             }
 
             // 3. BIG CENTERED 2X-SUPERSAMPLED "Vincent" SIGNATURE — Live Impasto Calligraphy + Specular Gleam!
-            var zoomDrift = 1.0 + 0.042 * Math.min(1.0, t / T_HOLD_GATE) + dissolveEase * 0.088;
+            var zoomDrift = isFinale
+                ? (0.985 + 0.045 * smoothstep(0.0, 4.2, t))
+                : (1.0 + 0.042 * Math.min(1.0, t / T_HOLD_GATE) + dissolveEase * 0.088);
             var baseSigW = Math.min(vw * 0.74, vh * 1.44, 860) * zoomDrift;
             var baseSigH = baseSigW * (SRC_H / SRC_W);
             var sigX = (vw - baseSigW) * 0.5;
-            var sigY = (vh - baseSigH) * 0.465;
+            var sigY = (vh - baseSigH) * (isFinale ? 0.50 : 0.465);
+            var tCallig = isFinale ? ((t < 0.36) ? 0.0 : (0.38 + (t - 0.36) * 1.28)) : t;
 
             var activeNib = null;
             if (sigBaked) {
@@ -1327,8 +1562,8 @@
 
                 for (var si = 0; si < STROKES.length; si++) {
                     var st = STROKES[si];
-                    if (t < st.t0) continue;
-                    var rawU = Math.min(1.0, (t - st.t0) / Math.max(0.01, st.t1 - st.t0));
+                    if (tCallig < st.t0) continue;
+                    var rawU = Math.min(1.0, (tCallig - st.t0) / Math.max(0.01, st.t1 - st.t0));
                     var uE = easeCalligraphy(rawU);
 
                     mctx.save();
@@ -1384,18 +1619,16 @@
                     cctx.globalCompositeOperation = 'destination-in';
                     cctx.drawImage(revealMaskCanvas, 0, 0);
 
-                    if (t > 3.25) {
-                        var sheenU = (t - 3.25) / 1.55;
-                        if (sheenU >= 0.0 && sheenU <= 1.25) {
-                            cctx.globalCompositeOperation = 'source-atop';
-                            var gx0 = (sheenU * 1.35 - 0.25) * SIG_W;
-                            var sg = cctx.createLinearGradient(gx0 - 260, 0, gx0 + 260, 190);
-                            sg.addColorStop(0.0, 'rgba(255, 250, 210, 0.0)');
-                            sg.addColorStop(0.5, 'rgba(255, 253, 236, 0.36)');
-                            sg.addColorStop(1.0, 'rgba(255, 250, 210, 0.0)');
-                            cctx.fillStyle = sg;
-                            cctx.fillRect(0, 0, SIG_W, SIG_H);
-                        }
+                    var sheenClock = isFinale ? ((t > 2.85) ? (((t - 2.85) % 5.6) / 1.85) : -1.0) : ((t > 3.25) ? ((t - 3.25) / 1.55) : -1.0);
+                    if (sheenClock >= 0.0 && sheenClock <= 1.25) {
+                        cctx.globalCompositeOperation = 'source-atop';
+                        var gx0 = (sheenClock * 1.35 - 0.25) * SIG_W;
+                        var sg = cctx.createLinearGradient(gx0 - 260, 0, gx0 + 260, 190);
+                        sg.addColorStop(0.0, 'rgba(255, 250, 210, 0.0)');
+                        sg.addColorStop(0.5, 'rgba(255, 253, 236, 0.36)');
+                        sg.addColorStop(1.0, 'rgba(255, 250, 210, 0.0)');
+                        cctx.fillStyle = sg;
+                        cctx.fillRect(0, 0, SIG_W, SIG_H);
                     }
                     cctx.globalCompositeOperation = 'source-over';
 
@@ -1459,8 +1692,8 @@
                 ctx.restore();
             }
 
-            // 5. Refined Epigraph Beneath "Vincent": SAINT-RÉMY-DE-PROVENCE · JUNE 1889
-            var epiIn  = Math.max(0.0, Math.min(1.0, (t - 3.15) / 0.75));
+            // 5. Refined Epigraph Beneath "Vincent" (shown on Opening Prologue; Finale keeps pure centered "Vincent")
+            var epiIn  = isFinale ? 0.0 : Math.max(0.0, Math.min(1.0, (t - 3.15) / 0.75));
             var epiOut = 1.0 - Math.pow(Math.min(1.0, dissolveT * 1.35), 1.4);
             var epiAlpha = masterAlpha * epiIn * epiOut;
             if (epiAlpha > 0.01) {
@@ -1528,6 +1761,9 @@
 
         window.__vincentCutscene = {
             replay: replayCutscene,
+            playFinale: playFinale,
+            setFinaleStyle: setFinaleStyle,
+            getMode: function () { return state.mode; },
             skip: triggerSkipCutscene,
             isActive: function () { return state.active; },
             seekForTest: function (sec) {
@@ -1803,6 +2039,8 @@
             drawerCollapsed: (window.innerWidth < 768 || window.innerHeight < 520),
             onWallSpot: true,
             tourActive: false,
+            tourPreset: 'vivaldi',      // 'nocturne' | 'vivaldi'
+            tourFinaleStyle: 'blue',    // 'blue' | 'black'
             walkActive: false,
             inStudio: false,
             activeEaselIdx: -1,
@@ -11040,6 +11278,7 @@
                         'https://upload.wikimedia.org/wikipedia/commons/transcoded/1/17/The_Modena_Chamber_Orchestra_-_Vivaldi%27s_Summer,_RV_315_-_III._Presto.ogg/The_Modena_Chamber_Orchestra_-_Vivaldi%27s_Summer,_RV_315_-_III._Presto.ogg.mp3'
                     ],
                     expectedDur: 159,
+                    lastNoteSec: curTime - (28.0 * s16 + 2.0),
                     rubatoAmp: 0.0,
                     totalDur: curTime + 8.0 * s16,
                     events: ev
@@ -11714,6 +11953,9 @@
 
             a.addEventListener('ended', function () {
                 if (!params.audioOn || st.offlineMode) return;
+                if (params.musicTrack === 3 && window.__handleVivaldiAudioEnded && window.__handleVivaldiAudioEnded()) {
+                    return;
+                }
                 if (params.musicAutoCycle) {
                     startClassicalPiece((params.musicTrack + 1) % CLASSICAL_REPERTOIRE.length, true);
                 } else {
@@ -12037,6 +12279,10 @@
             }
 
             if (audioSys.eventCursor >= evs.length && now >= audioSys.pieceStartCtxTime + piece.totalDur) {
+                if (audioSys.pieceIdx === 3 && window.__handleVivaldiAudioEnded && window.__handleVivaldiAudioEnded()) {
+                    audioSys.schedulerReady = false;
+                    return;
+                }
                 var nextIdx = params.musicAutoCycle ? ((audioSys.pieceIdx + 1) % CLASSICAL_REPERTOIRE.length) : audioSys.pieceIdx;
                 startClassicalPiece(nextIdx, true);
             }
@@ -12203,25 +12449,72 @@
             pointerLocked: false
         };
 
-        var tourPosCurve = new THREE.CatmullRomCurve3([
-            new THREE.Vector3(0.0, 14.2, 82.0),
-            new THREE.Vector3(-58.0, 9.5, 28.0),
-            new THREE.Vector3(-2.3, -3.85, -6.5),
-            new THREE.Vector3(-2.0, -3.85, -17.5),
-            new THREE.Vector3(56.0, 8.5, 58.0),
-            new THREE.Vector3(4.0, 8.2, 132.0),
-            new THREE.Vector3(-18.0, 11.5, 104.0)
-        ], true);
+        // ========================================================================
+        // 13A. REFINED 2-PRESET CINEMATIC TOUR DIRECTOR
+        //   Preset 1 ('nocturne'): Serene 12-landmark centripetal 360° Saint-Rémy loop
+        //   Preset 2 ('vivaldi'):  Dynamic music-matched Vivaldi "Summer: III. Presto"
+        //                          storm tour culminating on the final chord with
+        //                          Nocturnal Blue-Out / Blackout + centered "Vincent"!
+        // ========================================================================
+        var NOCTURNE_TOUR_WAYPOINTS = [
+            { label: '1889 Masterpiece Frame',       pos: [  0.0, 14.2,  82.0], look: [  2.2, 16.3, -42.0], fov: 43.0 },
+            { label: 'Hero Flame Cypress',           pos: [-29.5, 11.8,  36.5], look: [-17.5, 18.5,  24.0], fov: 48.5 },
+            { label: 'Western Olive Orchards',       pos: [-52.0,  3.6,  22.0], look: [-68.0,  6.2,  14.0], fov: 52.0 },
+            { label: 'Boulevard Mirabeau Plane Trees', pos: [-18.5, -0.4,  -4.0], look: [ -2.0,  2.5,  -5.0], fov: 53.5 },
+            { label: 'Rue Carnot Lantern Alley',     pos: [ -2.2, -0.4, -11.2], look: [ -1.8,  6.5, -28.5], fov: 54.0 },
+            { label: 'Place de la République Spire', pos: [  0.5,  1.2, -18.8], look: [ -1.8, 24.5, -32.5], fov: 50.0 },
+            { label: 'Eastern Meadow & Alpilles',    pos: [ 32.0,  7.2,  12.0], look: [ 24.0, 25.0, -76.0], fov: 46.5 },
+            { label: 'Enclosed Golden Wheat Field',  pos: [ 50.5,  4.0,  57.5], look: [ 74.0,  7.5,  52.0], fov: 50.0 },
+            { label: 'Les Antiques Roman Monuments', pos: [ 13.5, 17.2, 126.5], look: [ 14.2, 17.8, 138.0], fov: 48.0 },
+            { label: 'Saint-Paul Cloister & Irises', pos: [  2.2, 11.4, 107.5], look: [ -7.5,  8.8, 101.5], fov: 50.0 },
+            { label: 'Asylum Garden & South Swirl',  pos: [-24.0, 14.2,  98.0], look: [  0.0, 33.0, 132.0], fov: 52.0 },
+            { label: 'Hillside Overlook Return',     pos: [-13.5, 15.6,  86.5], look: [  1.8, 16.5, -38.0], fov: 45.0 }
+        ];
 
-        var tourLookCurve = new THREE.CatmullRomCurve3([
-            new THREE.Vector3(2.2, 16.3, -42.0),
-            new THREE.Vector3(-72.0, 6.0, 12.0),
-            new THREE.Vector3(-1.5, 8.0, -31.0),
-            new THREE.Vector3(-1.2, 28.0, -34.0),
-            new THREE.Vector3(78.0, 9.0, 62.0),
-            new THREE.Vector3(16.0, 10.5, 138.0),
-            new THREE.Vector3(1.5, 16.0, -40.0)
-        ], true);
+        var tourPosCurve = new THREE.CatmullRomCurve3(
+            NOCTURNE_TOUR_WAYPOINTS.map(function (w) { return new THREE.Vector3(w.pos[0], w.pos[1], w.pos[2]); }),
+            true,
+            'centripetal'
+        );
+        var tourLookCurve = new THREE.CatmullRomCurve3(
+            NOCTURNE_TOUR_WAYPOINTS.map(function (w) { return new THREE.Vector3(w.look[0], w.look[1], w.look[2]); }),
+            true,
+            'centripetal'
+        );
+
+        // 19 Timed Musical Keyframes locked to Vivaldi RV 315 "Summer: III. Presto" (u = 0.000 -> 1.000)
+        var VIVALDI_SUMMER_KEYFRAMES = [
+            { u: 0.000, label: 'I. Unison G Tremolo — 1889 Canvas Launch',      pos: [  0.0, 14.2,  82.0], look: [  2.2,  16.3,  -42.0], fov: 43.0, roll:  0.00, swirl: 0.92, yel: 1.08, chaos: 1.82, rel: 0.80, day: 0.00 },
+            { u: 0.032, label: 'I. First Grand Pause — Electric Stillness',     pos: [-12.5, 13.4,  54.0], look: [-19.2,  20.0,   27.5], fov: 40.5, roll: -0.04, swirl: 0.03, yel: 1.24, chaos: 1.70, rel: 0.92, day: 0.00 },
+            { u: 0.070, label: 'II. Storm Chords — Hero Cypress Flame',         pos: [-28.5, 12.6,  34.5], look: [-17.0,  22.5,   24.5], fov: 47.5, roll:  0.08, swirl: 0.04, yel: 1.28, chaos: 2.02, rel: 0.98, day: 0.02 },
+            { u: 0.110, label: 'III. Antiphonal Scales — Rue Carnot Dive',      pos: [-16.0,  2.2,   2.0], look: [ -2.2,   1.5,  -14.0], fov: 57.0, roll: -0.11, swirl: 1.34, yel: 1.22, chaos: 2.12, rel: 0.95, day: 0.00 },
+            { u: 0.148, label: 'III. Canon Tempest — Fountain Parvis',          pos: [ -1.8,  0.8, -17.8], look: [ -1.8,  15.0,  -31.5], fov: 58.5, roll:  0.09, swirl: 1.38, yel: 1.26, chaos: 2.15, rel: 0.96, day: 0.00 },
+            { u: 0.205, label: 'IV. Bariolage Rockets — Church Spire Spiral',   pos: [  5.5, 13.5, -15.5], look: [ -1.8,  30.0,  -32.0], fov: 53.0, roll: -0.08, swirl: 1.26, yel: 1.36, chaos: 2.05, rel: 0.90, day: 0.04 },
+            { u: 0.248, label: 'IV. Great Sky Whirlpool Surge',                 pos: [-10.0, 21.0,   6.0], look: [  6.0,  62.0,  -68.0], fov: 55.5, roll:  0.05, swirl: 1.42, yel: 1.42, chaos: 2.18, rel: 0.88, day: 0.06 },
+            { u: 0.320, label: 'V. Menacing Cello Scales — Olive Groves',       pos: [-48.5,  2.2,  24.5], look: [-68.0,   7.5,   18.0], fov: 51.0, roll: -0.07, swirl: 0.78, yel: 0.98, chaos: 1.94, rel: 1.04, day: 0.16 },
+            { u: 0.390, label: 'VI. Solo Violin Virtuoso — Boulevard Sweep',    pos: [ 18.0,  5.8,  34.0], look: [ 58.0,   8.5,   54.0], fov: 54.0, roll:  0.08, swirl: 1.18, yel: 1.35, chaos: 1.92, rel: 0.86, day: 0.28 },
+            { u: 0.455, label: 'VI. Lightning Cascades — Golden Wheat Sea',     pos: [ 52.0,  4.8,  56.5], look: [ 76.0,   9.5,   50.0], fov: 52.5, roll:  0.06, swirl: 1.28, yel: 1.45, chaos: 2.00, rel: 0.88, day: 0.35 },
+            { u: 0.535, label: 'VII. Tutti Storm Ritornello — Les Antiques',    pos: [ 22.0, 18.2, 124.0], look: [ 13.8,  17.5,  137.8], fov: 49.0, roll: -0.08, swirl: 1.36, yel: 1.18, chaos: 2.20, rel: 1.02, day: 0.08 },
+            { u: 0.615, label: 'VII. Minor Tempest — Saint-Paul Cloister',      pos: [ -6.5, 13.0, 108.5], look: [  2.0,  26.0,  132.0], fov: 53.5, roll:  0.07, swirl: 1.40, yel: 1.26, chaos: 2.22, rel: 0.98, day: 0.00 },
+            { u: 0.675, label: 'VIII. Sweeping Solo Arpeggios — Studio Rise',   pos: [  4.5, 16.5, 114.0], look: [  2.0,  22.0,   40.0], fov: 48.0, roll: -0.04, swirl: 0.95, yel: 1.22, chaos: 1.88, rel: 0.82, day: 0.00 },
+            { u: 0.705, label: 'IX. Hushed Low-D Pedal (pp) — Crescent Moon',   pos: [ 28.0, 20.5,  34.0], look: [112.0, 158.0, -310.0], fov: 31.5, roll:  0.00, swirl: 0.14, yel: 0.95, chaos: 1.62, rel: 0.74, day: 0.00 },
+            { u: 0.785, label: 'IX. 13-Bar Chromatic Crescendo — Sky Vortex',   pos: [ 16.0, 24.5,  52.0], look: [ 18.0,  56.0,  -84.0], fov: 47.0, roll:  0.07, swirl: 1.05, yel: 1.32, chaos: 2.06, rel: 0.92, day: 0.00 },
+            { u: 0.855, label: 'IX. Blazing Peak (ff) — Saint-Rémy Panorama',   pos: [-22.0, 22.8,  62.0], look: [  4.0,  24.0,  -44.0], fov: 55.5, roll: -0.09, swirl: 1.50, yel: 1.48, chaos: 2.26, rel: 1.05, day: 0.00 },
+            { u: 0.905, label: 'X. Solo Cadenza Pause — Breath Before Plunge',  pos: [ -8.5, 17.8,  74.0], look: [  2.0,  19.5,  -42.0], fov: 45.5, roll:  0.02, swirl: 0.22, yel: 1.30, chaos: 1.85, rel: 0.88, day: 0.00 },
+            { u: 0.962, label: 'X. Final G-Minor Storm Plunge — 1889 Wall',     pos: [  0.0, 14.2,  82.0], look: [  2.2,  16.3,  -42.0], fov: 43.0, roll:  0.00, swirl: 1.46, yel: 1.44, chaos: 2.15, rel: 0.96, day: 0.00 },
+            { u: 1.000, label: 'X. Final Unison G — Vincent Signature',         pos: [  0.0, 14.2,  82.0], look: [  2.2,  16.3,  -42.0], fov: 43.0, roll:  0.00, swirl: 0.35, yel: 1.20, chaos: 1.75, rel: 0.76, day: 0.00 }
+        ];
+
+        var tourModState = {
+            active: false,
+            finaleTriggered: false,
+            finaleActive: false,
+            fallbackClockSec: 0.0,
+            liveSwirlSpeed: 0.40,
+            cypressSwayMult: 1.0,
+            rollRad: 0.0,
+            saved: null
+        };
 
         var keys = { w: false, a: false, s: false, d: false, q: false, e: false, shift: false };
 
@@ -12627,7 +12920,86 @@
             showEaselStoryCard(item.title, item.date, item.note, false);
         }
 
+        function restoreTourSceneModulation() {
+            if (!tourModState.active && Math.abs(tourModState.rollRad) < 0.0001) return;
+            tourModState.active = false;
+            tourModState.liveSwirlSpeed = params.swirlSpeed;
+            tourModState.cypressSwayMult = 1.0;
+            tourModState.rollRad = 0.0;
+            camera.up.set(0, 1, 0);
+            if (tourModState.saved) {
+                params.musicAutoCycle = tourModState.saved.musicAutoCycle;
+                tourModState.saved = null;
+                syncClassicalMusicUI();
+            }
+            uYellowBoost.value = params.yellowBoost;
+            uChaos.value       = params.chaos;
+            uRelief.value      = params.relief;
+            uDaylight.value    = params.daylight;
+            uBlackInk.value    = params.blackInk;
+            skyCacheState.dirty = true;
+        }
+
+        function syncTourPresetUI() {
+            var isViv = (params.tourPreset === 'vivaldi');
+            var isBlue = (params.tourFinaleStyle !== 'black');
+
+            var bNoc = document.getElementById('btn-tour-nocturne');
+            var bViv = document.getElementById('btn-tour-vivaldi');
+            if (bNoc) bNoc.classList.toggle('active', params.tourActive ? !isViv : (!isViv));
+            if (bViv) bViv.classList.toggle('active', params.tourActive ? isViv : isViv);
+
+            var hNoc = document.getElementById('btn-hud-tour-nocturne');
+            var hViv = document.getElementById('btn-hud-tour-vivaldi');
+            if (hNoc) hNoc.classList.toggle('active', !isViv);
+            if (hViv) hViv.classList.toggle('active', isViv);
+
+            var fBlue = document.getElementById('btn-finale-blue');
+            var fBlk  = document.getElementById('btn-finale-black');
+            if (fBlue) fBlue.classList.toggle('active', isBlue);
+            if (fBlk)  fBlk.classList.toggle('active', !isBlue);
+
+            var hStyle = document.getElementById('btn-hud-finale-style');
+            var hJump  = document.getElementById('btn-hud-finale-jump');
+            if (hStyle) {
+                hStyle.textContent = isBlue ? 'Blue-Out' : 'Blackout';
+                hStyle.classList.toggle('hidden', !isViv);
+            }
+            if (hJump) {
+                hJump.classList.toggle('hidden', !isViv);
+            }
+
+            var stLbl = document.getElementById('tour-drawer-status');
+            if (stLbl) {
+                stLbl.textContent = params.tourActive
+                    ? (isViv ? 'Playing · Vivaldi' : 'Playing · Nocturne')
+                    : '2 Presets';
+            }
+
+            var hud = document.getElementById('tour-director-hud');
+            if (hud) {
+                hud.classList.toggle('hidden', !params.tourActive || params.uiHidden || tourModState.finaleActive);
+                hud.style.top = params.skyBrushMode ? '6.9rem' : '';
+            }
+        }
+
+        function setTourFinaleStyle(styleMode) {
+            params.tourFinaleStyle = (styleMode === 'black') ? 'black' : 'blue';
+            if (window.__vincentCutscene && window.__vincentCutscene.setFinaleStyle) {
+                window.__vincentCutscene.setFinaleStyle(params.tourFinaleStyle);
+            }
+            syncTourPresetUI();
+        }
+        window.__setTourFinaleStyle = setTourFinaleStyle;
+
         function syncModePills() {
+            if ((!params.tourActive || params.tourPreset !== 'vivaldi') && tourModState.active) {
+                restoreTourSceneModulation();
+            }
+            if (!params.tourActive && Math.abs(tourModState.rollRad) > 0.0001) {
+                tourModState.rollRad = 0.0;
+                camera.up.set(0, 1, 0);
+            }
             document.getElementById('btn-wall-snap').classList.toggle('active', params.onWallSpot);
             document.getElementById('btn-tour').classList.toggle('active', params.tourActive);
             document.getElementById('btn-walk').classList.toggle('active', params.walkActive && !params.inStudio);
@@ -12644,6 +13016,7 @@
             if (retDot) {
                 retDot.style.transform = skyBrush.painting ? 'scale(2.2)' : 'scale(1.0)';
             }
+            syncTourPresetUI();
         }
 
         // Seamless "Take One Step" transition from the 1889 Wall Spot onto the Provençal Hillside!
@@ -12714,18 +13087,198 @@
             }
         }
 
-        function toggleTourMode() {
+        function startTourPreset(presetName, forceRestart) {
             exitPointerLockSafe();
-            autoStartAudioOnFirstStep();
-            params.tourActive = !params.tourActive;
-            if (params.tourActive) {
-                params.walkActive = false;
-                params.inStudio = false;
-                params.onWallSpot = false;
-                hideEaselStoryCard();
-                camCtrl.desiredFov = 48.0;
+            var targetPreset = (presetName === 'nocturne') ? 'nocturne' : 'vivaldi';
+            var wasSameRunning = (params.tourActive && params.tourPreset === targetPreset && !forceRestart);
+            if (wasSameRunning) {
+                params.tourActive = false;
+                restoreTourSceneModulation();
+                syncModePills();
+                return;
+            }
+
+            if (tourModState.active && targetPreset !== 'vivaldi') {
+                restoreTourSceneModulation();
+            }
+
+            params.tourPreset = targetPreset;
+            params.tourActive = true;
+            params.walkActive = false;
+            params.inStudio = false;
+            params.onWallSpot = false;
+            tourModState.finaleTriggered = false;
+            tourModState.finaleActive = false;
+            hideEaselStoryCard();
+
+            if (targetPreset === 'vivaldi') {
+                if (!tourModState.saved) {
+                    tourModState.saved = {
+                        musicAutoCycle: params.musicAutoCycle
+                    };
+                }
+                params.musicAutoCycle = false;
+                tourModState.active = true;
+                tourModState.fallbackClockSec = 0.0;
+                initWebAudioIfNeeded();
+                // Start Vivaldi Summer: III. Presto (Track 3) from 0:00 and enable soundscape unless explicitly muted
+                var shouldUnmute = !params.userMuted;
+                params.musicTrack = 3;
+                audioSys.pieceIdx = 3;
+                audioSys.eventCursor = 0;
+                if (shouldUnmute && !params.audioOn) {
+                    toggleAudioSoundscape(true);
+                }
+                if (params.audioOn) {
+                    if (audioSys.stream && audioSys.stream.offlineMode) {
+                        engageOfflineClassicalFallback(0.0);
+                    } else {
+                        startOrSeekOnlineClassical(3, 0.0);
+                    }
+                } else {
+                    syncClassicalMusicUI();
+                }
+                camCtrl.pos.copy(PRESETS[0].pos);
+                camCtrl.target.copy(PRESETS[0].target);
+                camCtrl.desiredPos.copy(PRESETS[0].pos);
+                camCtrl.desiredTarget.copy(PRESETS[0].target);
+                camCtrl.desiredFov = PRESETS[0].fov;
+            } else {
+                autoStartAudioOnFirstStep();
+                if (forceRestart) camCtrl.tourTime = 0.0;
+                camCtrl.desiredFov = 46.0;
             }
             syncModePills();
+        }
+        window.__startTourPreset = startTourPreset;
+
+        function toggleTourMode() {
+            if (params.tourActive) {
+                params.tourActive = false;
+                restoreTourSceneModulation();
+                syncModePills();
+            } else {
+                startTourPreset(params.tourPreset, true);
+            }
+        }
+
+        function jumpToVivaldiFinalePreview() {
+            if (!params.tourActive || params.tourPreset !== 'vivaldi') {
+                startTourPreset('vivaldi', true);
+            }
+            tourModState.finaleTriggered = false;
+            tourModState.finaleActive = false;
+            var previewRatio = 0.895; // ~14s before last note: solo cadenza pause -> final G-minor plunge -> Vincent finale!
+            tourModState.fallbackClockSec = 159.0 * previewRatio;
+            seekClassicalPerformanceRatio(previewRatio);
+        }
+
+        function triggerVivaldiTourFinale() {
+            if (tourModState.finaleTriggered) return;
+            tourModState.finaleTriggered = true;
+            tourModState.finaleActive = true;
+            params.tourActive = false;
+            restoreTourSceneModulation();
+
+            // Snap cleanly onto the iconic 1889 Masterpiece Wall beneath the closing wash
+            camCtrl.pos.copy(PRESETS[0].pos);
+            camCtrl.target.copy(PRESETS[0].target);
+            camCtrl.desiredPos.copy(PRESETS[0].pos);
+            camCtrl.desiredTarget.copy(PRESETS[0].target);
+            camCtrl.fov = PRESETS[0].fov;
+            camCtrl.desiredFov = PRESETS[0].fov;
+            camera.up.set(0, 1, 0);
+            camera.fov = PRESETS[0].fov;
+            camera.updateProjectionMatrix();
+            camera.position.copy(camCtrl.pos);
+            camera.lookAt(camCtrl.target);
+            params.onWallSpot = true;
+            params.activePreset = 0;
+            syncYawPitchFromLook();
+            syncModePills();
+
+            if (window.__vincentCutscene && window.__vincentCutscene.playFinale) {
+                window.__vincentCutscene.playFinale(
+                    params.tourFinaleStyle,
+                    function onReturnToWall() {
+                        tourModState.finaleActive = false;
+                        selectPreset(0);
+                    },
+                    function onReplaySummer() {
+                        tourModState.finaleActive = false;
+                        startTourPreset('vivaldi', true);
+                    }
+                );
+            }
+        }
+        window.__triggerVivaldiTourFinale = triggerVivaldiTourFinale;
+
+        window.__handleVivaldiAudioEnded = function () {
+            if (params.tourActive && params.tourPreset === 'vivaldi' && !tourModState.finaleTriggered) {
+                triggerVivaldiTourFinale();
+                return true;
+            }
+            if (tourModState.finaleActive) {
+                return true;
+            }
+            return false;
+        };
+
+        function catmullRom1D(p0, p1, p2, p3, t) {
+            var t2 = t * t;
+            var t3 = t2 * t;
+            return 0.5 * (
+                (2.0 * p1) +
+                (-p0 + p2) * t +
+                (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) * t2 +
+                (-p0 + 3.0 * p1 - 3.0 * p2 + p3) * t3
+            );
+        }
+
+        function sampleVivaldiTourAt(uNorm) {
+            var kfs = VIVALDI_SUMMER_KEYFRAMES;
+            var n = kfs.length;
+            var u = THREE.MathUtils.clamp(uNorm, 0.0, 1.0);
+            var seg = 0;
+            while (seg < n - 2 && u >= kfs[seg + 1].u) {
+                seg++;
+            }
+            var k0 = kfs[Math.max(0, seg - 1)];
+            var k1 = kfs[seg];
+            var k2 = kfs[Math.min(n - 1, seg + 1)];
+            var k3 = kfs[Math.min(n - 1, seg + 2)];
+            var span = Math.max(0.0005, k2.u - k1.u);
+            var locT = THREE.MathUtils.clamp((u - k1.u) / span, 0.0, 1.0);
+            var smoothT = locT * locT * (3.0 - 2.0 * locT);
+
+            var px = catmullRom1D(k0.pos[0],  k1.pos[0],  k2.pos[0],  k3.pos[0],  locT);
+            var py = catmullRom1D(k0.pos[1],  k1.pos[1],  k2.pos[1],  k3.pos[1],  locT);
+            var pz = catmullRom1D(k0.pos[2],  k1.pos[2],  k2.pos[2],  k3.pos[2],  locT);
+            var lx = catmullRom1D(k0.look[0], k1.look[0], k2.look[0], k3.look[0], locT);
+            var ly = catmullRom1D(k0.look[1], k1.look[1], k2.look[1], k3.look[1], locT);
+            var lz = catmullRom1D(k0.look[2], k1.look[2], k2.look[2], k3.look[2], locT);
+
+            return {
+                px: px, py: py, pz: pz,
+                lx: lx, ly: ly, lz: lz,
+                fov:   k1.fov   + (k2.fov   - k1.fov)   * smoothT,
+                roll:  k1.roll  + (k2.roll  - k1.roll)  * smoothT,
+                swirl: k1.swirl + (k2.swirl - k1.swirl) * smoothT,
+                yel:   k1.yel   + (k2.yel   - k1.yel)   * smoothT,
+                chaos: k1.chaos + (k2.chaos - k1.chaos) * smoothT,
+                rel:   k1.rel   + (k2.rel   - k1.rel)   * smoothT,
+                day:   k1.day   + (k2.day   - k1.day)   * smoothT,
+                label: k1.label
+            };
+        }
+
+        function updateTourHudProgress(chapterText, timeText, ratio01) {
+            var chEl = document.getElementById('tour-hud-chapter');
+            var tmEl = document.getElementById('tour-hud-time');
+            var prEl = document.getElementById('tour-hud-progress');
+            if (chEl && chEl.textContent !== chapterText) chEl.textContent = chapterText;
+            if (tmEl && tmEl.textContent !== timeText) tmEl.textContent = timeText;
+            if (prEl) prEl.style.width = (THREE.MathUtils.clamp(ratio01, 0.0, 1.0) * 100.0).toFixed(1) + '%';
         }
 
         function toggleWalkMode(wantPointerLock) {
@@ -12824,10 +13377,121 @@
                 return;
             }
             if (params.tourActive) {
-                camCtrl.tourTime = (camCtrl.tourTime + dt * 0.030) % 1.0;
-                tourPosCurve.getPointAt(camCtrl.tourTime, camCtrl.desiredPos);
-                tourLookCurve.getPointAt(camCtrl.tourTime, camCtrl.desiredTarget);
                 camCtrl.bobAmount = 0;
+                if (params.tourPreset === 'vivaldi') {
+                    // If user manually switched away from Track 3 in Music tab, glide smoothly in Nocturne Drift instead
+                    if (params.musicTrack !== 3) {
+                        params.tourPreset = 'nocturne';
+                        restoreTourSceneModulation();
+                        syncTourPresetUI();
+                    } else {
+                        var pieceV = CLASSICAL_REPERTOIRE[3];
+                        var stV = audioSys.stream;
+                        var curSecV = 0.0;
+                        var totSecV = pieceV.expectedDur || 159.0;
+                        var lastNoteTriggerSec = totSecV - 4.35;
+
+                        if (params.audioOn && stV && !stV.offlineMode && stV.el && (stV.active || stV.el.currentTime > 0.05)) {
+                            curSecV = stV.el.currentTime || 0.0;
+                            if (stV.el.duration && isFinite(stV.el.duration) && stV.el.duration > 30.0) {
+                                totSecV = stV.el.duration;
+                            }
+                            lastNoteTriggerSec = Math.min(totSecV - 4.35, totSecV * 0.973);
+                            tourModState.fallbackClockSec = curSecV;
+                        } else if (params.audioOn && stV && stV.offlineMode && audioSys.ctx && audioSys.schedulerReady) {
+                            totSecV = pieceV.totalDur || 170.43;
+                            curSecV = THREE.MathUtils.clamp(audioSys.ctx.currentTime - audioSys.pieceStartCtxTime, 0.0, totSecV);
+                            lastNoteTriggerSec = pieceV.lastNoteSec || (totSecV - 6.0);
+                            tourModState.fallbackClockSec = curSecV;
+                        } else {
+                            // Probing or muted fallback: advance smoothly at real-time 159s scale
+                            tourModState.fallbackClockSec += dt;
+                            curSecV = tourModState.fallbackClockSec;
+                            totSecV = 159.0;
+                            lastNoteTriggerSec = 154.65;
+                        }
+
+                        if (curSecV >= lastNoteTriggerSec && curSecV > 20.0) {
+                            triggerVivaldiTourFinale();
+                            return;
+                        }
+
+                        var uViv = THREE.MathUtils.clamp(curSecV / Math.max(1.0, lastNoteTriggerSec), 0.0, 1.0);
+                        var smp = sampleVivaldiTourAt(uViv);
+
+                        camCtrl.desiredPos.set(smp.px, smp.py, smp.pz);
+                        camCtrl.desiredTarget.set(smp.lx, smp.ly, smp.lz);
+
+                        // Terrain & obstacle safety cushion across every street & foothill dive
+                        var gyV = getGroundY(camCtrl.desiredPos.x, camCtrl.desiredPos.z);
+                        if (camCtrl.desiredPos.y < gyV + 2.15) {
+                            camCtrl.desiredPos.y = gyV + 2.15;
+                        }
+                        if (camCtrl.desiredPos.y - gyV < 5.2) {
+                            resolveWorldCollisions(camCtrl.desiredPos, 0.95);
+                        }
+
+                        // 136 BPM Presto 3/4 bar & 16th-note musical micro-pulse (hushed during Grand Pauses!)
+                        var isGrandPause = (uViv > 0.027 && uViv < 0.037) || (uViv > 0.065 && uViv < 0.075) || (uViv > 0.892 && uViv < 0.916);
+                        var beatEnv = isGrandPause ? 0.0 : THREE.MathUtils.clamp((smp.swirl - 0.12) / 1.25, 0.0, 1.0);
+                        var barPulse = Math.sin(curSecV * (Math.PI * 2.0 / 1.32)) * beatEnv;
+                        var shimmer16 = Math.sin(curSecV * (Math.PI * 2.0 / 0.22)) * beatEnv;
+
+                        camCtrl.desiredFov = THREE.MathUtils.clamp(smp.fov + barPulse * 0.85, 28.0, 62.0);
+                        var targetRoll = smp.roll + barPulse * 0.014;
+                        tourModState.rollRad += (targetRoll - tourModState.rollRad) * Math.min(1.0, dt * 4.5);
+
+                        // Dynamic scene shader choreography synced to Vivaldi's storm energy
+                        tourModState.active = true;
+                        tourModState.liveSwirlSpeed = Math.max(0.01, smp.swirl + barPulse * 0.12);
+                        tourModState.cypressSwayMult = 0.85 + smp.swirl * 1.35 + Math.abs(shimmer16) * 0.25;
+                        uYellowBoost.value = params.yellowBoost * (smp.yel + shimmer16 * 0.035);
+                        uChaos.value       = THREE.MathUtils.clamp(smp.chaos + barPulse * 0.06, 0.4, 2.45);
+                        uRelief.value      = THREE.MathUtils.clamp(smp.rel, 0.2, 1.45);
+                        uDaylight.value    = THREE.MathUtils.clamp(smp.day, 0.0, 1.0);
+
+                        updateTourHudProgress(
+                            smp.label,
+                            formatClassicalTime(curSecV) + ' / ' + formatClassicalTime(totSecV),
+                            uViv
+                        );
+                    }
+                }
+
+                if (params.tourPreset !== 'vivaldi') {
+                    // Preset 1: Refined Serene 360° Nocturne Drift (~66s seamless arc-length loop)
+                    var nocDur = 66.0;
+                    camCtrl.tourTime = (camCtrl.tourTime + dt / nocDur) % 1.0;
+                    tourPosCurve.getPointAt(camCtrl.tourTime, camCtrl.desiredPos);
+                    tourLookCurve.getPointAt(camCtrl.tourTime, camCtrl.desiredTarget);
+
+                    var gyN = getGroundY(camCtrl.desiredPos.x, camCtrl.desiredPos.z);
+                    if (camCtrl.desiredPos.y < gyN + 2.25) {
+                        camCtrl.desiredPos.y = gyN + 2.25;
+                    }
+                    if (camCtrl.desiredPos.y - gyN < 5.2) {
+                        resolveWorldCollisions(camCtrl.desiredPos, 0.95);
+                    }
+
+                    var wfCount = NOCTURNE_TOUR_WAYPOINTS.length;
+                    var wfPos = camCtrl.tourTime * wfCount;
+                    var wfIdx0 = Math.floor(wfPos) % wfCount;
+                    var wfIdx1 = (wfIdx0 + 1) % wfCount;
+                    var wfFrac = wfPos - Math.floor(wfPos);
+                    var wfSmooth = wfFrac * wfFrac * (3.0 - 2.0 * wfFrac);
+                    camCtrl.desiredFov = NOCTURNE_TOUR_WAYPOINTS[wfIdx0].fov +
+                        (NOCTURNE_TOUR_WAYPOINTS[wfIdx1].fov - NOCTURNE_TOUR_WAYPOINTS[wfIdx0].fov) * wfSmooth;
+
+                    var gentleBank = Math.sin(camCtrl.tourTime * Math.PI * 4.0) * 0.020;
+                    tourModState.rollRad += (gentleBank - tourModState.rollRad) * Math.min(1.0, dt * 3.0);
+
+                    var nocSec = camCtrl.tourTime * nocDur;
+                    updateTourHudProgress(
+                        NOCTURNE_TOUR_WAYPOINTS[wfIdx0].label,
+                        formatClassicalTime(nocSec) + ' / 1:06',
+                        camCtrl.tourTime
+                    );
+                }
             } else {
                 var mf = (keys.w ? 1 : 0) - (keys.s ? 1 : 0) - camCtrl.joyY;
                 var ms = (keys.d ? 1 : 0) - (keys.a ? 1 : 0) + camCtrl.joyX;
@@ -12910,7 +13574,8 @@
                 }
             }
 
-            var k = Math.min(1.0, dt * (params.tourActive ? 3.2 : (params.walkActive ? 11.5 : 6.8)));
+            var tourLerpSpd = (params.tourPreset === 'vivaldi') ? 5.4 : 3.4;
+            var k = Math.min(1.0, dt * (params.tourActive ? tourLerpSpd : (params.walkActive ? 11.5 : 6.8)));
             camCtrl.pos.lerp(camCtrl.desiredPos, k);
             camCtrl.target.lerp(camCtrl.desiredTarget, k);
 
@@ -12918,6 +13583,17 @@
                 camCtrl.fov += (camCtrl.desiredFov - camCtrl.fov) * Math.min(1.0, dt * 6.5);
                 camera.fov = camCtrl.fov;
                 camera.updateProjectionMatrix();
+            }
+
+            if (params.tourActive && Math.abs(tourModState.rollRad) > 0.0005) {
+                var fwdRoll = new THREE.Vector3().subVectors(camCtrl.target, camCtrl.pos).normalize();
+                var worldUp = new THREE.Vector3(0, 1, 0);
+                var rightRoll = new THREE.Vector3().crossVectors(fwdRoll, worldUp).normalize();
+                var orthoUp = new THREE.Vector3().crossVectors(rightRoll, fwdRoll).normalize();
+                camera.up.copy(orthoUp).multiplyScalar(Math.cos(tourModState.rollRad))
+                    .addScaledVector(rightRoll, Math.sin(tourModState.rollRad)).normalize();
+            } else {
+                camera.up.set(0, 1, 0);
             }
 
             camera.position.copy(camCtrl.pos);
@@ -13090,6 +13766,22 @@
             });
             document.getElementById('btn-wall-snap').addEventListener('click', function () { selectPreset(0); });
             document.getElementById('btn-tour').addEventListener('click', toggleTourMode);
+            document.getElementById('btn-tour-nocturne').addEventListener('click', function () { startTourPreset('nocturne', false); });
+            document.getElementById('btn-tour-vivaldi').addEventListener('click', function () { startTourPreset('vivaldi', false); });
+            document.getElementById('btn-hud-tour-nocturne').addEventListener('click', function () { startTourPreset('nocturne', true); });
+            document.getElementById('btn-hud-tour-vivaldi').addEventListener('click', function () { startTourPreset('vivaldi', true); });
+            document.getElementById('btn-hud-tour-stop').addEventListener('click', function () {
+                params.tourActive = false;
+                restoreTourSceneModulation();
+                syncModePills();
+            });
+            document.getElementById('btn-finale-blue').addEventListener('click', function () { setTourFinaleStyle('blue'); });
+            document.getElementById('btn-finale-black').addEventListener('click', function () { setTourFinaleStyle('black'); });
+            document.getElementById('btn-hud-finale-style').addEventListener('click', function () {
+                setTourFinaleStyle(params.tourFinaleStyle === 'black' ? 'blue' : 'black');
+            });
+            document.getElementById('btn-drawer-finale-jump').addEventListener('click', jumpToVivaldiFinalePreview);
+            document.getElementById('btn-hud-finale-jump').addEventListener('click', jumpToVivaldiFinalePreview);
             document.getElementById('btn-walk').addEventListener('click', function () { toggleWalkMode(true); });
             document.getElementById('btn-studio-window').addEventListener('click', enterVincentsStudioWindow);
             document.getElementById('btn-interact-landmark').addEventListener('click', function () {
@@ -13661,12 +14353,18 @@
 
             var dt = Math.min(clock.getDelta(), 0.05);
 
-            if (params.swirlSpeed > 0.0001) {
-                uFlowPhase.value += dt * params.swirlSpeed;
-                skyCacheState.accumDt += dt;
+            var effSwirlSpeed = (params.tourActive && params.tourPreset === 'vivaldi' && tourModState.active)
+                ? tourModState.liveSwirlSpeed
+                : params.swirlSpeed;
+            if (effSwirlSpeed > 0.0001) {
+                uFlowPhase.value += dt * effSwirlSpeed;
+                skyCacheState.accumDt += dt * Math.max(1.0, effSwirlSpeed / 0.45);
                 if (cypressMainGroup) {
-                    cypressMainGroup.rotation.z = Math.sin(uFlowPhase.value * 1.4) * 0.009;
-                    cypressMainGroup.rotation.x = Math.cos(uFlowPhase.value * 1.0) * 0.006;
+                    var swayMult = (params.tourActive && params.tourPreset === 'vivaldi' && tourModState.active)
+                        ? tourModState.cypressSwayMult
+                        : 1.0;
+                    cypressMainGroup.rotation.z = Math.sin(uFlowPhase.value * 1.4) * 0.009 * swayMult;
+                    cypressMainGroup.rotation.x = Math.cos(uFlowPhase.value * 1.0) * 0.006 * swayMult;
                 }
             }
 
