@@ -7539,6 +7539,50 @@
             }
             scene.add(ftnGrp);
 
+            function addImpastoBistroChair(cx, cz, faceYaw, seedC) {
+                var cy = getGroundY(cx, cz);
+                addCircleCollider(cx, cz, 0.28);
+                var chGrp = new THREE.Group();
+                chGrp.position.set(cx, cy, cz);
+                chGrp.rotation.y = faceYaw;
+
+                var seatGeo = new THREE.CylinderGeometry(0.21, 0.20, 0.055, 10);
+                var sPos = seatGeo.attributes.position;
+                for (var spi = 0; spi < sPos.count; spi++) {
+                    sPos.setX(spi, sPos.getX(spi) + Math.sin(spi * 2.3 + seedC) * 0.012);
+                    sPos.setZ(spi, sPos.getZ(spi) + Math.cos(spi * 1.9 + seedC) * 0.012);
+                }
+                seatGeo.computeVertexNormals();
+                var seatMesh = new THREE.Mesh(seatGeo, wallOchre);
+                seatMesh.position.y = 0.46;
+                chGrp.add(seatMesh);
+
+                // 4 splayed wrought-iron / bentwood legs rooted solidly into sloped cobbles
+                [[-0.14, -0.14, -0.17, -0.17], [0.14, -0.14, 0.17, -0.17], [-0.14, 0.14, -0.16, 0.16], [0.14, 0.14, 0.16, 0.16]].forEach(function (lg, lgi) {
+                    addThickLoadedOutlineStroke(chGrp, [lg[2], -0.36, lg[3]], [lg[0], 0.46, lg[1]], 0.065, sketchInkMat, seedC + lgi * 1.7, true);
+                });
+
+                // Curved Parisian bistro backrest on outer (-Z) edge (0.91m tall — well below the 1.92m café awning!)
+                addThickLoadedOutlineStroke(chGrp, [-0.17, 0.46, -0.15], [-0.19, 0.85, -0.21], 0.068, sketchInkMat, seedC + 8.1, true);
+                addThickLoadedOutlineStroke(chGrp, [ 0.17, 0.46, -0.15], [ 0.19, 0.85, -0.21], 0.068, sketchInkMat, seedC + 9.2, true);
+                addThickLoadedOutlineStroke(chGrp, [-0.06, 0.46, -0.18], [-0.07, 0.88, -0.22], 0.052, sketchInkMat, seedC + 10.3, true);
+                addThickLoadedOutlineStroke(chGrp, [ 0.06, 0.46, -0.18], [ 0.07, 0.88, -0.22], 0.052, sketchInkMat, seedC + 11.4, true);
+                addCurveBrushStrokeFromPoints(chGrp, [
+                    new THREE.Vector3(-0.19, 0.84, -0.21),
+                    new THREE.Vector3(-0.10, 0.91, -0.22),
+                    new THREE.Vector3( 0.10, 0.91, -0.22),
+                    new THREE.Vector3( 0.19, 0.84, -0.21)
+                ], 0.072, sketchInkMat, seedC + 12.5, true);
+                scene.add(chGrp);
+            }
+
+            var bistroChairOffsets = [
+                [[-0.74,  0.24], [-0.46, -0.64]],
+                [[-0.74,  0.26], [-0.44, -0.64]],
+                [[-0.68,  0.40], [ 0.68,  0.38]],
+                [[-0.68,  0.36], [ 0.66,  0.42]]
+            ];
+
             [[4.6, -17.8], [4.8, -20.2], [-5.8, -7.2], [-7.9, -7.1]].forEach(function (tb, tIdx) {
                 var tyB = getGroundY(tb[0], tb[1]);
                 addCircleCollider(tb[0], tb[1], 0.62);
@@ -7558,6 +7602,15 @@
                 // Warm Café Terrace candle-jar impasto dab glowing on each bistro table!
                 pushBristleStamp(tb[0], tyB + 0.96, tb[1], 0.0, 0.24, 0.0, 0.18, 0.0, 0.0, tIdx % 8, 0.01, tIdx, 3.0, 0xfff3a8, 0xf29f24);
                 scene.add(tbl);
+
+                // Paired rush-and-iron bistro chairs angled naturally toward each table (Terrace of a Café at Night reference)
+                var chPairs = bistroChairOffsets[tIdx] || [];
+                chPairs.forEach(function (co, cIdx) {
+                    var chX = tb[0] + co[0];
+                    var chZ = tb[1] + co[1];
+                    var faceAng = Math.atan2(tb[0] - chX, tb[1] - chZ) + (cIdx === 0 ? 0.10 : -0.10);
+                    addImpastoBistroChair(chX, chZ, faceAng, 70.0 + tIdx * 9.0 + cIdx * 4.1);
+                });
             });
 
             // 3. Tapered Hexagonal Impasto Wrought-Iron Street Lanterns (Café Terrace at Night style — zero CAD cubes!)
@@ -7759,6 +7812,65 @@
                 addThickLoadedOutlineStroke(bGrp, [ 0.85, -0.36, 0.29], [ 0.85, 0.50, 0.29], 0.12, sketchInkMat, 364.0 + sbIdx, true);
                 scene.add(bGrp);
             });
+
+            // 6B. "The Road Menders" (Dec 1889, Phillips Collection / Letter to Theo 7 Dec 1889):
+            //     Stacked Provençal limestone paving blocks & golden-ochre sand heaps beneath the Boulevard plane trees!
+            (function () {
+                var sandHeapMat = createPainterlyArchMaterial(0x261d10, 0xa88332, 0xf2d15b, 0.18, 2.55, false, false);
+                [
+                    [-10.55, -2.42, 0.94, 0.72, 0.56, 371.3],
+                    [ -8.35, -2.48, 0.68, 0.56, 0.42, 377.9]
+                ].forEach(function (sh, shIdx) {
+                    var sx = sh[0], sz = sh[1], rxS = sh[2], rzS = sh[3], hS = sh[4], sdS = sh[5];
+                    var sy = getGroundY(sx, sz);
+                    addCircleCollider(sx, sz, Math.max(rxS, rzS) * 0.82);
+                    var mGeoS = new THREE.SphereGeometry(1.0, 12, 9);
+                    var mPosS = mGeoS.attributes.position;
+                    for (var vi = 0; vi < mPosS.count; vi++) {
+                        var vx = mPosS.getX(vi), vy = mPosS.getY(vi), vz = mPosS.getZ(vi);
+                        var wob = 1.0 + 0.11 * Math.sin(vx * 3.7 + sdS) * Math.cos(vz * 3.3 - sdS);
+                        var ny = (vy >= 0.0) ? (Math.pow(vy, 0.82) * hS) : (vy * 0.42);
+                        var spread = (vy >= 0.0) ? (1.0 - 0.14 * vy) : 1.04;
+                        mPosS.setXYZ(vi, vx * rxS * spread * wob, ny, vz * rzS * spread * wob);
+                    }
+                    mGeoS.computeVertexNormals();
+                    var sandMesh = new THREE.Mesh(mGeoS, sandHeapMat);
+                    sandMesh.position.set(sx, sy - 0.02, sz);
+                    scene.add(sandMesh);
+                });
+
+                // Cut rectangular Provençal limestone curb & paving blocks lined along the roadside shoulder
+                [
+                    [-11.65, -2.26,  0.18, 0.92, 0.36, 0.42, 0.00],
+                    [ -9.52, -2.24, -0.14, 0.96, 0.38, 0.44, 0.00],
+                    [ -9.46, -2.30,  0.22, 0.82, 0.32, 0.38, 0.34],
+                    [ -7.35, -2.34,  0.11, 0.90, 0.36, 0.42, 0.00],
+                    [  9.85, -2.42, -0.16, 0.88, 0.35, 0.42, 0.00]
+                ].forEach(function (blk, bkIdx) {
+                    var bx = blk[0], bz = blk[1], rotB = blk[2], bw = blk[3], bh = blk[4], bd = blk[5], liftY = blk[6];
+                    var by = getGroundY(bx, bz);
+                    if (liftY < 0.05) {
+                        addOrientedBoxCollider(bx, bz, rotB, bw + 0.08, bd + 0.08);
+                    }
+                    var sink = (liftY < 0.05) ? 0.32 : 0.02;
+                    var fullH = bh + sink;
+                    var blkGrp = new THREE.Group();
+                    blkGrp.position.set(bx, by + liftY, bz);
+                    blkGrp.rotation.y = rotB;
+                    var blkMesh = new THREE.Mesh(
+                        makeWobblyBoxGeometry(bw, fullH, bd, 3, 2, 2, 0.018, 382.0 + bkIdx * 5.3),
+                        (bkIdx % 2 === 0) ? wallCream : curbStoneMat
+                    );
+                    blkMesh.position.y = (bh - sink) * 0.5;
+                    blkGrp.add(blkMesh);
+                    var hw = bw * 0.49, hd = bd * 0.49;
+                    addThickLoadedOutlineStroke(blkGrp, [-hw, bh,  hd], [ hw, bh,  hd], 0.085, sketchInkMat, 385.1 + bkIdx, true);
+                    addThickLoadedOutlineStroke(blkGrp, [-hw, bh, -hd], [ hw, bh, -hd], 0.080, sketchInkMat, 386.2 + bkIdx, true);
+                    addThickLoadedOutlineStroke(blkGrp, [-hw, bh, -hd], [-hw, bh,  hd], 0.080, sketchInkMat, 387.3 + bkIdx, true);
+                    addThickLoadedOutlineStroke(blkGrp, [ hw, bh, -hd], [ hw, bh,  hd], 0.080, sketchInkMat, 388.4 + bkIdx, true);
+                    scene.add(blkGrp);
+                });
+            })();
 
             // Exact path centerline helpers matching `evalFootpathMasks` & `getSurfaceMaterialAt` 1:1
             // so every town curb and countryside stone wall hugs its road border without ever blocking an intersection!
@@ -10565,12 +10677,95 @@
                 addPartStrokes(8, 1.60, 1.72, 0.24, 0.24, hatA, hatB, 0x071026, 0.78, 0.72, 1.4);
             }
 
-            // 1) Distant Reaper in the Enclosed Wheat Field (58.5, 66.0)
+            // 1) Distant Reaper in the Enclosed Wheat Field (58.5, 66.0 — Wheatfield with a Reaper, Sept 1889)
             addBrushstrokeFigure(58.5, 66.0, -1.85, 'reaper', 0x1f4d8c, 0x2f6cb5, 0x4b87c9, 0xd69e26, 0xf8dc3b, 0xd69e26, 11.0);
-            // 2) Road Mender on Boulevard Mirabeau (-9.5, -3.8)
-            addBrushstrokeFigure(-9.5, -3.8, 1.35, 'mender', 0x1b2d4f, 0x2b4573, 0xc48b28, 0x8a5a22, 0x5c4728, 0x9c7b38, 23.0);
-            // 3) Seated Patron at Café de la Place (-6.5, -6.6)
-            addBrushstrokeFigure(-6.5, -6.6, 0.45, 'cafe', 0x101c33, 0x22385e, 0xe8a838, 0xc97b28, 0xf2d15b, 0xc79c3a, 37.0);
+
+            // 2) Upright Hog-Bristle Saint-Paul-de-Mausole Cloister Irises & Marigolds (Irises, May 1889, Getty Museum)
+            //    Sword-leaved blue-violet irises, background orange marigolds, and the iconic solitary white iris on the left!
+            function addBrushstrokeIrisTuft(fx, fz, scaleT, variant, seedBase, withCol) {
+                var gy = getGroundY(fx, fz);
+                if (withCol) addCircleCollider(fx, fz, 0.30);
+
+                function addBladeOrPetalRing(count, yMin, yMax, radX, radZ, col1, col2, colAccent, contourHex, splayAmt, lenScale, widScale) {
+                    for (var k = 0; k < count; k++) {
+                        var t = k / Math.max(1, count - 1);
+                        var yy = (yMin + (yMax - yMin) * t + Math.sin(seedBase + k * 2.1) * 0.035) * scaleT;
+                        var ang = (k * 2.39996 + seedBase) % (Math.PI * 2.0);
+                        var flare = 0.55 + 0.65 * t;
+                        var px = fx + Math.cos(ang) * radX * flare * scaleT;
+                        var pz = fz + Math.sin(ang) * radZ * flare * scaleT;
+                        var py = gy + yy;
+                        var isContour = (k % 5 === 0);
+                        var cA = isContour ? contourHex : ((k % 3 === 0) ? colAccent : col1);
+                        var cB = isContour ? 0x162b4d : col2;
+                        var tx = Math.cos(ang) * splayAmt * lenScale * scaleT;
+                        var ty = (0.34 + (k % 3) * 0.06) * lenScale * scaleT;
+                        var tz = Math.sin(ang) * splayAmt * lenScale * scaleT;
+                        addMicroRec(
+                            px, py, pz,
+                            tx, ty, tz,
+                            0.0, (0.14 + (k % 2) * 0.04) * widScale * scaleT, 0.0,
+                            (k + Math.floor(seedBase)) % 8,
+                            0.016, seedBase + yy * 1.9, 1.0,
+                            cA, cB
+                        );
+                    }
+                }
+
+                // Sword-shaped blue-green & sage iris leaves (with Japanese woodblock Prussian-ink contours)
+                addBladeOrPetalRing(18, 0.14, 0.80, 0.25, 0.25, 0x164236, 0x3b7a5e, 0x6ca868, 0x071426, 0.18, 0.98, 0.96);
+
+                if (variant === 'white') {
+                    // Iconic solitary white iris standing slightly apart on the left (ivory-white & pearl-blue petals + golden beard)
+                    addBladeOrPetalRing(18, 0.72, 1.32, 0.24, 0.24, 0xf7f9fc, 0xdce8f2, 0xcadbe3, 0x122645, 0.15, 1.02, 1.08);
+                    addBladeOrPetalRing(8,  1.22, 1.50, 0.20, 0.20, 0xffffff, 0xeef4fa, 0xf7d448, 0x162b4d, 0.13, 0.84, 0.92);
+                } else if (variant === 'classic') {
+                    // Exact beloved Prussian-cobalt & golden-ochre impasto tuft palette preserved in the Cloister garden!
+                    addBladeOrPetalRing(18, 0.70, 1.30, 0.26, 0.22, 0x101c33, 0x22385e, 0xe8a838, 0x071026, 0.15, 1.04, 1.08);
+                    addBladeOrPetalRing(10, 1.20, 1.48, 0.22, 0.22, 0x264073, 0x454ed9, 0xf2d15b, 0x071026, 0.14, 0.82, 0.86);
+                } else if (variant === 'marigold') {
+                    // Warm cadmium-orange & golden marigold background band (upper edge of Getty's Irises)
+                    addBladeOrPetalRing(18, 0.64, 1.18, 0.26, 0.26, 0xc95f18, 0xf09b22, 0xfbe065, 0x14241b, 0.17, 0.92, 0.98);
+                } else {
+                    // Monumental cobalt-violet & ultramarine bearded irises with golden-ochre hearts
+                    addBladeOrPetalRing(18, 0.70, 1.28, 0.25, 0.24, 0x1b2f99, 0x434ed9, 0x7c6cf2, 0x071026, 0.15, 1.04, 1.06);
+                    addBladeOrPetalRing(8,  1.18, 1.46, 0.21, 0.21, 0x3242b8, 0x826ef2, 0xf2c94c, 0x071026, 0.13, 0.82, 0.88);
+                }
+            }
+
+            // Solitary White Iris on the left foreground of the Irises easel/frame sightline!
+            addBrushstrokeIrisTuft(-6.80, 107.20, 1.08, 'white', 31.0, true);
+
+            // Surge of blue-violet & cobalt-gold Irises across the West Cloister bed (framed by the Irises spot)
+            [
+                [-5.97, 106.67, 1.02, 'classic', true],
+                [-5.69, 105.90, 0.98, 'blue',    true],
+                [-5.49, 105.07, 1.04, 'blue',    true],
+                [-7.24, 106.42, 0.96, 'blue',    false],
+                [-6.91, 105.56, 1.06, 'classic', false],
+                [-6.61, 104.76, 1.00, 'blue',    false],
+                [-6.29, 103.93, 0.95, 'blue',    false],
+                [-8.41, 106.36, 0.98, 'blue',    false],
+                [-8.18, 105.31, 1.04, 'blue',    false],
+                [-7.79, 104.36, 0.97, 'classic', false],
+                [-7.46, 103.51, 1.02, 'blue',    false],
+                // Companion East Cloister iris tufts flanking the opposite side of the monastery garden walk
+                [ 6.10, 103.40, 1.00, 'blue',    true],
+                [ 6.65, 105.60, 1.04, 'classic', true],
+                [ 6.25, 107.80, 0.96, 'blue',    true],
+                [ 7.90, 104.60, 0.98, 'blue',    false],
+                [ 8.20, 106.90, 1.02, 'blue',    false]
+            ].forEach(function (ir, iIdx) {
+                addBrushstrokeIrisTuft(ir[0], ir[1], ir[2], ir[3], 41.0 + iIdx * 7.3, ir[4]);
+            });
+
+            // Warm orange-gold marigold blooms forming the upper background band behind the Irises
+            [
+                [-9.68, 105.02, 0.94], [-9.34, 104.16, 0.98], [-9.09, 103.25, 0.95], [-8.84, 102.34, 0.92],
+                [ 9.45, 103.80, 0.94], [ 9.75, 106.10, 0.96]
+            ].forEach(function (mg, mIdx) {
+                addBrushstrokeIrisTuft(mg[0], mg[1], mg[2], 'marigold', 180.0 + mIdx * 9.1, false);
+            });
 
             var figureCount = recs.length;
 
