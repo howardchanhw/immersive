@@ -115,7 +115,7 @@
             z-index: 12;
             pointer-events: none;
         }
-        #lab-ui-top, #bottom-mode-dock, #lab-drawer, #step-hint-wrap, #tour-director-hud {
+        #lab-ui-top, #bottom-mode-dock, #lab-drawer, #step-hint-wrap, #tour-director-hud, #ui-hidden-pill {
             transition: opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1), transform 0.3s ease;
         }
         body.cutscene-playing #lab-ui-top,
@@ -123,7 +123,15 @@
         body.cutscene-playing #lab-drawer,
         body.cutscene-playing #step-hint-wrap,
         body.cutscene-playing #tour-director-hud,
-        body.cutscene-playing #exhibition-projection-overlay {
+        body.cutscene-playing #exhibition-projection-overlay,
+        body.cutscene-playing #ui-hidden-pill,
+        body.exh-prologue-cinema #lab-ui-top,
+        body.exh-prologue-cinema #bottom-mode-dock,
+        body.exh-prologue-cinema #lab-drawer,
+        body.exh-prologue-cinema #step-hint-wrap,
+        body.exh-prologue-cinema #tour-director-hud,
+        body.exh-prologue-cinema #exhibition-projection-overlay,
+        body.exh-prologue-cinema #ui-hidden-pill {
             opacity: 0 !important;
             pointer-events: none !important;
         }
@@ -131,6 +139,11 @@
             position: fixed;
             inset: 0;
             z-index: 45;
+        }
+        #vincent-cutscene-overlay.exh-prologue-mode {
+            z-index: 19;
+            pointer-events: none;
+            cursor: default;
         }
         #vincent-boot-loader {
             position: fixed;
@@ -441,6 +454,12 @@
             <span class="text-[10px] font-mono text-cyan-200/80 hidden sm:inline">&middot; Esc</span>
         </button>
 
+        <!-- Sleek Skip Exhibition Intro Pill (bottom-right, Exhibition Starry Night Prologue when UI is visible) -->
+        <button id="btn-skip-exh-intro" type="button" title="Skip to Gallery I (Esc)" class="hidden absolute bottom-2.5 sm:bottom-3.5 right-3.5 sm:right-5 z-10 pointer-events-auto studio-glass hover:border-amber-300 active:scale-95 transition rounded-full px-3.5 py-1 sm:py-1.5 text-[10px] sm:text-xs font-semibold text-amber-100 flex items-center gap-1.5">
+            <span>Skip Intro</span>
+            <span class="text-[10px] font-mono text-cyan-200/85">&#9654;</span>
+        </button>
+
         <!-- Finale Hold Controls Bar (Nocturnal Prussian Blue-Out only) -->
         <div id="finale-controls-bar" class="hidden absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 rounded-full studio-glass transition-opacity duration-700 opacity-0 pointer-events-none max-w-[95vw]">
             <button id="btn-finale-replay-tour" type="button" class="mode-pill active rounded-full px-3 py-1 text-[10px] sm:text-xs font-semibold text-amber-100 whitespace-nowrap">
@@ -572,20 +591,21 @@
                 </div>
             </div>
             <div class="flex items-center justify-between gap-2 text-[10px] px-0.5">
-                <span id="tour-hud-chapter" class="text-amber-200/95 font-medium truncate">I. Ink Sketch to Living Colour &mdash; Saint-R&eacute;my 1889</span>
-                <span id="tour-hud-time" class="font-mono text-cyan-200/85 shrink-0">0:00 / 1:52</span>
+                <span id="tour-hud-chapter" class="text-amber-200/95 font-medium truncate">Prologue &middot; &ldquo;Vincent&rdquo; &mdash; The Starry Night, 1889</span>
+                <span id="tour-hud-time" class="font-mono text-cyan-200/85 shrink-0">0:00 / 2:00</span>
             </div>
             <!-- Interactive Drag-to-Seek Tour Timeline Scrubber -->
             <div id="tour-timeline-track" role="slider" aria-label="Tour Timeline Scrubber" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" title="Click or drag to scrub Tour time" class="relative w-full py-1.5 cursor-pointer touch-none select-none group">
                 <div class="relative w-full h-1.5 rounded-full bg-slate-950/85 border border-amber-200/20 overflow-hidden">
                     <div id="tour-hud-progress" class="h-full bg-gradient-to-r from-cyan-300 via-amber-300 to-amber-400" style="width: 0%;"></div>
                     <div id="tour-hud-ticks" class="absolute inset-0 pointer-events-none">
-                        <span class="absolute top-0 bottom-0 w-px bg-slate-950/75" style="left:14.285%;"></span>
-                        <span class="absolute top-0 bottom-0 w-px bg-slate-950/75" style="left:28.571%;"></span>
-                        <span class="absolute top-0 bottom-0 w-px bg-slate-950/75" style="left:42.857%;"></span>
-                        <span class="absolute top-0 bottom-0 w-px bg-slate-950/75" style="left:57.143%;"></span>
-                        <span class="absolute top-0 bottom-0 w-px bg-slate-950/75" style="left:71.429%;"></span>
-                        <span class="absolute top-0 bottom-0 w-px bg-slate-950/75" style="left:85.714%;"></span>
+                        <span class="absolute top-0 bottom-0 w-px bg-amber-200/55" style="left:6.667%;"></span>
+                        <span class="absolute top-0 bottom-0 w-px bg-slate-950/75" style="left:20.000%;"></span>
+                        <span class="absolute top-0 bottom-0 w-px bg-slate-950/75" style="left:33.333%;"></span>
+                        <span class="absolute top-0 bottom-0 w-px bg-slate-950/75" style="left:46.667%;"></span>
+                        <span class="absolute top-0 bottom-0 w-px bg-slate-950/75" style="left:60.000%;"></span>
+                        <span class="absolute top-0 bottom-0 w-px bg-slate-950/75" style="left:73.333%;"></span>
+                        <span class="absolute top-0 bottom-0 w-px bg-slate-950/75" style="left:86.667%;"></span>
                     </div>
                 </div>
                 <div id="tour-hud-thumb" class="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-amber-300 border-2 border-slate-950 shadow-[0_0_10px_rgba(248,220,59,0.9)] pointer-events-none transition-transform duration-100" style="left: 0%;"></div>
@@ -762,7 +782,7 @@
             <div class="bg-slate-950/55 border border-amber-300/25 rounded-xl p-2 flex flex-col gap-1.5">
                 <div class="flex items-center justify-between">
                     <span class="text-[10px] uppercase tracking-wider font-bold text-amber-200">Cinematic Tour (Key C)</span>
-                    <span id="tour-drawer-status" class="text-[10px] font-mono text-cyan-200/80">7 Chapters</span>
+                    <span id="tour-drawer-status" class="text-[10px] font-mono text-cyan-200/80">Intro + 7 Chapters</span>
                 </div>
                 <div class="grid grid-cols-1 gap-1 text-xs">
                     <button id="btn-tour-exhibition" type="button" class="preset-btn active rounded-xl px-2.5 py-1.5 text-left flex items-center justify-between">
@@ -1011,6 +1031,7 @@
         var overlay       = document.getElementById('vincent-cutscene-overlay');
         var canvas        = document.getElementById('vincent-cutscene-canvas');
         var skipBtn       = document.getElementById('btn-skip-cutscene');
+        var skipExhBtn    = document.getElementById('btn-skip-exh-intro');
         var sndHint       = document.getElementById('cutscene-sound-hint');
         var finaleBar     = document.getElementById('finale-controls-bar');
         var finaleReplayB = document.getElementById('btn-finale-replay-tour');
@@ -1480,9 +1501,11 @@
             rafId: 0
         };
 
-        var T_WRITE_END    = 4.02;
-        var T_HOLD_GATE    = 4.62;
-        var T_DISSOLVE_END = 7.95;
+        var T_WRITE_END        = 4.02;
+        var T_HOLD_GATE        = 4.62;
+        var T_DISSOLVE_END     = 7.95;
+        var T_EXH_HOLD_GATE    = 5.05;
+        var T_EXH_DISSOLVE_END = 7.85;
 
         function sampleStrokePointAt(st, frac) {
             var targetD = Math.max(0, Math.min(1, frac)) * st.totalLen;
@@ -1518,6 +1541,7 @@
         function finishCutscene() {
             if (!state.active) return;
             var wasFinale = (state.mode === 'finale');
+            var wasExhIntro = (state.mode === 'exh_intro');
             var retCb = state.onFinaleReturn;
             state.active = false;
             state.onFinaleReturn = null;
@@ -1526,19 +1550,26 @@
                 state.rafId = 0;
             }
             hideFinaleControlsBar();
+            if (skipExhBtn) skipExhBtn.classList.add('hidden');
             if (skipBtn) skipBtn.classList.remove('hidden');
+            overlay.classList.remove('exh-prologue-mode');
             overlay.classList.add('bars-open');
             overlay.style.display = 'none';
             document.body.classList.remove('cutscene-playing');
+            document.body.classList.remove('exh-prologue-cinema');
             if (wasFinale) {
                 if (typeof retCb === 'function') retCb();
-            } else if (window.__finishIntro3DCameraSweep) {
+            } else if (!wasExhIntro && window.__finishIntro3DCameraSweep) {
                 window.__finishIntro3DCameraSweep();
             }
         }
 
         function triggerSkipCutscene() {
             if (!state.active || state.skipping) return;
+            if (state.mode === 'exh_intro') {
+                if (window.__skipExhibitionPrologue) window.__skipExhibitionPrologue();
+                return;
+            }
             state.skipping = true;
             state.skipFade = 0.0;
             hideFinaleControlsBar();
@@ -1565,14 +1596,17 @@
             state.craneTriggered = false;
             state.barsOpened = false;
             hideFinaleControlsBar();
+            if (skipExhBtn) skipExhBtn.classList.add('hidden');
             var vBoot = document.getElementById('vincent-boot-loader');
             if (vBoot && window.__vgWorldReady) {
                 vBoot.style.opacity = '0';
                 vBoot.classList.add('hidden');
             }
             if (skipBtn) skipBtn.classList.remove('hidden');
+            overlay.classList.remove('exh-prologue-mode');
             overlay.style.display = 'block';
             overlay.classList.remove('bars-open');
+            document.body.classList.remove('exh-prologue-cinema');
             document.body.classList.add('cutscene-playing');
             if (sndHint) {
                 sndHint.classList.remove('hidden');
@@ -1602,6 +1636,7 @@
             state.craneTriggered = true;
             state.barsOpened = false;
             hideFinaleControlsBar();
+            if (skipExhBtn) skipExhBtn.classList.add('hidden');
             var vBootF = document.getElementById('vincent-boot-loader');
             if (vBootF) {
                 vBootF.style.opacity = '0';
@@ -1612,8 +1647,10 @@
                 sndHint.style.opacity = '0';
                 sndHint.classList.add('hidden');
             }
+            overlay.classList.remove('exh-prologue-mode');
             overlay.classList.add('bars-open');
             overlay.style.display = 'block';
+            document.body.classList.remove('exh-prologue-cinema');
             document.body.classList.add('cutscene-playing');
             requestAnimationFrame(function () {
                 if (state.active && state.mode === 'finale' && !state.skipping) {
@@ -1634,6 +1671,13 @@
             triggerSkipCutscene();
         });
 
+        if (skipExhBtn) {
+            skipExhBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (window.__skipExhibitionPrologue) window.__skipExhibitionPrologue();
+            });
+        }
+
         if (finaleRetB) {
             finaleRetB.addEventListener('click', function (e) {
                 e.stopPropagation();
@@ -1651,17 +1695,22 @@
                     state.rafId = 0;
                 }
                 hideFinaleControlsBar();
+                if (skipExhBtn) skipExhBtn.classList.add('hidden');
                 if (skipBtn) skipBtn.classList.remove('hidden');
+                overlay.classList.remove('exh-prologue-mode');
                 overlay.classList.add('bars-open');
                 overlay.style.display = 'none';
                 document.body.classList.remove('cutscene-playing');
+                document.body.classList.remove('exh-prologue-cinema');
                 if (typeof repCb === 'function') repCb();
             });
         }
 
 
         overlay.addEventListener('click', function (e) {
+            if (state.mode === 'exh_intro') return;
             if (e.target === skipBtn || (skipBtn && skipBtn.contains(e.target))) return;
+            if (skipExhBtn && (e.target === skipExhBtn || skipExhBtn.contains(e.target))) return;
             if (finaleBar && finaleBar.contains(e.target)) return;
             if (state.mode === 'finale') {
                 if (state.elapsed > 3.4) triggerSkipCutscene();
@@ -1675,6 +1724,14 @@
 
         window.addEventListener('keydown', function (e) {
             if (!state.active) return;
+            if (state.mode === 'exh_intro') {
+                if (e.code === 'Escape' && !document.pointerLockElement) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (window.__skipExhibitionPrologue) window.__skipExhibitionPrologue();
+                }
+                return;
+            }
             if (e.code === 'Escape' || e.code === 'Space' || e.code === 'Enter') {
                 if (state.mode === 'finale' && state.elapsed < 0.75 && e.code !== 'Escape') return;
                 e.preventDefault();
@@ -1683,65 +1740,9 @@
             }
         }, true);
 
-        function renderCutsceneFrame(nowTs) {
-            if (!state.active) return;
-            state.rafId = requestAnimationFrame(renderCutsceneFrame);
-
-            if (!state.lastTs) state.lastTs = nowTs;
-            var dt = Math.min(0.05, Math.max(0.001, (nowTs - state.lastTs) / 1000.0));
-            state.lastTs = nowTs;
-
+        function drawVincentSignatureStage(t, dt, isFinale, isExhIntro, masterAlpha, isScrubbing) {
             if (!sigBaked && sigImg.complete && sigImg.naturalWidth > 0) {
                 bakeImpastoFromSignatureImage();
-            }
-
-            if (state.skipping) {
-                state.skipFade += dt / 0.42;
-                if (state.skipFade >= 1.0) {
-                    finishCutscene();
-                    return;
-                }
-            } else if (state.mode === 'finale') {
-                state.elapsed += dt;
-            } else {
-                var worldReady = !!window.__vgWorldReady;
-                if (state.elapsed < T_HOLD_GATE || worldReady || state.holdWait > 18.0) {
-                    state.elapsed += dt;
-                } else {
-                    state.holdWait += dt;
-                }
-            }
-
-            var isFinale = (state.mode === 'finale');
-            var t = state.elapsed;
-
-            if (isFinale) {
-                if (!state.finaleBarShown && !state.skipping && t >= 3.25 && finaleBar) {
-                    state.finaleBarShown = true;
-                    finaleBar.classList.remove('hidden');
-                    requestAnimationFrame(function () {
-                        if (state.finaleBarShown && finaleBar) {
-                            finaleBar.style.opacity = '1';
-                            finaleBar.style.pointerEvents = 'auto';
-                        }
-                    });
-                }
-            } else {
-                if (!state.craneTriggered && t >= T_HOLD_GATE - 0.08) {
-                    state.craneTriggered = true;
-                    if (window.__startIntro3DCameraSweep) {
-                        window.__startIntro3DCameraSweep(T_DISSOLVE_END - T_HOLD_GATE);
-                    }
-                }
-                if (!state.barsOpened && t >= T_DISSOLVE_END - 0.85) {
-                    state.barsOpened = true;
-                    overlay.classList.add('bars-open');
-                    document.body.classList.remove('cutscene-playing');
-                }
-                if (t >= T_DISSOLVE_END) {
-                    finishCutscene();
-                    return;
-                }
             }
 
             var dpr = Math.min(window.devicePixelRatio || 1, 2.5);
@@ -1752,51 +1753,108 @@
                 canvas.width = cw;
                 canvas.height = ch;
             }
-            ensurePolishedBackdrop(cw, ch, isFinale ? state.bgStyle : 'blue');
+            if (!isExhIntro) {
+                ensurePolishedBackdrop(cw, ch, isFinale ? state.bgStyle : 'blue');
+            }
 
             ctx.save();
             ctx.imageSmoothingEnabled = true;
             ctx.imageSmoothingQuality = 'high';
             ctx.clearRect(0, 0, cw, ch);
 
-            var dissolveT = isFinale ? 0.0 : Math.max(0.0, Math.min(1.0, (t - T_HOLD_GATE) / (T_DISSOLVE_END - T_HOLD_GATE)));
+            var holdGate = isExhIntro ? T_EXH_HOLD_GATE : T_HOLD_GATE;
+            var dissEnd  = isExhIntro ? T_EXH_DISSOLVE_END : T_DISSOLVE_END;
+            var dissolveT = isFinale ? 0.0 : Math.max(0.0, Math.min(1.0, (t - holdGate) / (dissEnd - holdGate)));
             var dissolveEase = dissolveT * dissolveT * (3.0 - 2.0 * dissolveT);
-            var masterAlpha = state.skipping ? (1.0 - state.skipFade) : 1.0;
             var finaleFadeIn = isFinale ? smoothstep(0.0, 0.88, t) : 1.0;
 
-            // 1. Native Physical-Pixel Polished Nocturnal Blue-Out or Velvet Blackout Backdrop
-            var bgAlpha = masterAlpha * finaleFadeIn * (1.0 - Math.pow(dissolveT, 1.35));
-            if (bgAlpha > 0.005) {
-                ctx.save();
-                ctx.globalAlpha = bgAlpha;
-                ctx.drawImage(bgCanvas, 0, 0, cw, ch);
+            // 1. Backdrop: Solid Prussian-Blue Oil Glaze (Opening Boot & Finale Outro) OR Live 3D Starry Night (Exhibition Prologue)
+            if (!isExhIntro) {
+                var bgAlpha = masterAlpha * finaleFadeIn * (1.0 - Math.pow(dissolveT, 1.35));
+                if (bgAlpha > 0.005) {
+                    ctx.save();
+                    ctx.globalAlpha = bgAlpha;
+                    ctx.drawImage(bgCanvas, 0, 0, cw, ch);
 
-                // Radial starlight iris cut-out as the 3D painting opens behind "Vincent"
-                if (!isFinale && dissolveT > 0.01) {
-                    ctx.globalCompositeOperation = 'destination-out';
-                    var irisR = Math.hypot(cw, ch) * 0.72 * Math.pow(dissolveT, 1.15);
-                    var irisG = ctx.createRadialGradient(cw * 0.5, ch * 0.48, irisR * 0.18, cw * 0.5, ch * 0.48, Math.max(12, irisR));
-                    irisG.addColorStop(0.0, 'rgba(0,0,0,0.96)');
-                    irisG.addColorStop(0.65, 'rgba(0,0,0,0.55)');
-                    irisG.addColorStop(1.0, 'rgba(0,0,0,0.0)');
-                    ctx.fillStyle = irisG;
-                    ctx.fillRect(0, 0, cw, ch);
-                    ctx.globalCompositeOperation = 'source-over';
+                    // Radial starlight iris cut-out as the 3D painting opens behind "Vincent"
+                    if (!isFinale && dissolveT > 0.01) {
+                        ctx.globalCompositeOperation = 'destination-out';
+                        var irisR = Math.hypot(cw, ch) * 0.72 * Math.pow(dissolveT, 1.15);
+                        var irisG = ctx.createRadialGradient(cw * 0.5, ch * 0.48, irisR * 0.18, cw * 0.5, ch * 0.48, Math.max(12, irisR));
+                        irisG.addColorStop(0.0, 'rgba(0,0,0,0.96)');
+                        irisG.addColorStop(0.65, 'rgba(0,0,0,0.55)');
+                        irisG.addColorStop(1.0, 'rgba(0,0,0,0.0)');
+                        ctx.fillStyle = irisG;
+                        ctx.fillRect(0, 0, cw, ch);
+                        ctx.globalCompositeOperation = 'source-over';
+                    }
+                    ctx.restore();
                 }
-                ctx.restore();
             }
 
             // Switch to logical CSS coordinates (scaled by dpr) for crisp resolution-independent layout
             ctx.scale(dpr, dpr);
 
+            var zoomDrift = isFinale
+                ? (0.985 + 0.045 * smoothstep(0.0, 4.2, t))
+                : (isExhIntro
+                    ? (0.985 + 0.045 * smoothstep(0.0, T_EXH_HOLD_GATE, t) + dissolveEase * 0.076)
+                    : (1.0 + 0.042 * Math.min(1.0, t / T_HOLD_GATE) + dissolveEase * 0.088));
+            var baseSigW = Math.min(vw * 0.74, vh * 1.44, 860) * zoomDrift;
+            var baseSigH = baseSigW * (SRC_H / SRC_W);
+            var sigX = (vw - baseSigW) * 0.5;
+            var sigY = (vh - baseSigH) * ((isFinale || isExhIntro) ? 0.50 : 0.465);
+
+            // 1B. Exhibition Intro over Live Starry Night: subtle letterbox-edge feather + snug borderless nocturnal aura hugging "Vincent"
+            if (isExhIntro) {
+                var auraIn  = smoothstep(0.02, 0.58, t);
+                var auraOut = 1.0 - Math.pow(Math.min(1.0, dissolveT * 1.24), 1.38);
+                var auraAmt = masterAlpha * auraIn * auraOut;
+                if (auraAmt > 0.006) {
+                    ctx.save();
+                    // Soft kiss along top & bottom cinema letterbox inner edges (leaves middle 76% of Starry Night 100% vivid)
+                    var topG = ctx.createLinearGradient(0, 0, 0, vh * 0.14);
+                    topG.addColorStop(0.0, 'rgba(2, 6, 18, ' + (0.30 * auraAmt).toFixed(3) + ')');
+                    topG.addColorStop(1.0, 'rgba(2, 6, 18, 0.0)');
+                    ctx.fillStyle = topG;
+                    ctx.fillRect(0, 0, vw, vh * 0.14);
+
+                    var botG = ctx.createLinearGradient(0, vh * 0.86, 0, vh);
+                    botG.addColorStop(0.0, 'rgba(2, 6, 18, 0.0)');
+                    botG.addColorStop(1.0, 'rgba(2, 6, 18, ' + (0.30 * auraAmt).toFixed(3) + ')');
+                    ctx.fillStyle = botG;
+                    ctx.fillRect(0, vh * 0.86, vw, vh * 0.14);
+
+                    // Snug elliptical nocturnal cushion right behind the "Vincent" calligraphy strokes
+                    var acx = sigX + baseSigW * 0.50;
+                    var acy = sigY + baseSigH * 0.54;
+                    var arx = baseSigW * 0.53;
+                    var ary = baseSigH * 0.64;
+                    ctx.translate(acx, acy);
+                    ctx.scale(arx, ary);
+                    var sigAura = ctx.createRadialGradient(0, 0, 0.04, 0, 0, 1.0);
+                    sigAura.addColorStop(0.00, 'rgba(2, 7, 22, ' + (0.42 * auraAmt).toFixed(3) + ')');
+                    sigAura.addColorStop(0.46, 'rgba(3, 10, 30, ' + (0.24 * auraAmt).toFixed(3) + ')');
+                    sigAura.addColorStop(0.76, 'rgba(4, 12, 34, ' + (0.07 * auraAmt).toFixed(3) + ')');
+                    sigAura.addColorStop(1.00, 'rgba(4, 12, 34, 0.0)');
+                    ctx.fillStyle = sigAura;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 1.0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+
             // 2. Drifting Soft Starlight Pigment Motes
-            var moteAlpha = masterAlpha * (1.0 - dissolveEase * 0.85) * Math.min(1.0, t / 0.5);
+            var moteAlpha = masterAlpha * (1.0 - dissolveEase * 0.85) * Math.min(1.0, t / 0.5) * (isExhIntro ? 0.82 : 1.0);
             if (moteAlpha > 0.01) {
                 ctx.save();
                 for (var dm = 0; dm < dustMotes.length; dm++) {
                     var m = dustMotes[dm];
-                    m.x = (m.x + m.vx * dt + 1.0) % 1.0;
-                    m.y = (m.y + m.vy * dt + 1.0) % 1.0;
+                    if (dt > 0.0) {
+                        m.x = (m.x + m.vx * dt + 1.0) % 1.0;
+                        m.y = (m.y + m.vy * dt + 1.0) % 1.0;
+                    }
                     var tw = 0.45 + 0.55 * Math.sin(t * 2.4 + m.ph);
                     var mx = m.x * vw, my = m.y * vh;
                     var mg = ctx.createRadialGradient(mx, my, 0, mx, my, m.r * 2.8);
@@ -1813,14 +1871,9 @@
             }
 
             // 3. BIG CENTERED 2X-SUPERSAMPLED "Vincent" SIGNATURE — Live Impasto Calligraphy + Specular Gleam!
-            var zoomDrift = isFinale
-                ? (0.985 + 0.045 * smoothstep(0.0, 4.2, t))
-                : (1.0 + 0.042 * Math.min(1.0, t / T_HOLD_GATE) + dissolveEase * 0.088);
-            var baseSigW = Math.min(vw * 0.74, vh * 1.44, 860) * zoomDrift;
-            var baseSigH = baseSigW * (SRC_H / SRC_W);
-            var sigX = (vw - baseSigW) * 0.5;
-            var sigY = (vh - baseSigH) * (isFinale ? 0.50 : 0.465);
-            var tCallig = isFinale ? ((t < 0.36) ? 0.0 : (0.38 + (t - 0.36) * 1.28)) : t;
+            var tCallig = isFinale
+                ? ((t < 0.36) ? 0.0 : (0.38 + (t - 0.36) * 1.28))
+                : (isExhIntro ? Math.max(0.0, t - 0.04) : t);
 
             var activeNib = null;
             if (sigBaked) {
@@ -1881,7 +1934,11 @@
                     cctx.drawImage(revealMaskCanvas, 0, 0);
 
                     ctx.save();
-                    ctx.globalAlpha = sigAlpha * 0.82;
+                    ctx.globalAlpha = sigAlpha * (isExhIntro ? 0.94 : 0.82);
+                    if (isExhIntro) {
+                        ctx.shadowColor = 'rgba(1, 5, 18, 0.88)';
+                        ctx.shadowBlur = 14;
+                    }
                     ctx.drawImage(compositeSigCanvas, sigX + baseSigW * 0.006, sigY + baseSigH * 0.020, baseSigW, baseSigH);
                     ctx.restore();
 
@@ -1892,13 +1949,17 @@
                     cctx.globalCompositeOperation = 'destination-in';
                     cctx.drawImage(revealMaskCanvas, 0, 0);
 
-                    var sheenClock = isFinale ? ((t > 2.85) ? (((t - 2.85) % 5.6) / 1.85) : -1.0) : ((t > 3.25) ? ((t - 3.25) / 1.55) : -1.0);
+                    var sheenClock = isFinale
+                        ? ((t > 2.85) ? (((t - 2.85) % 5.6) / 1.85) : -1.0)
+                        : (isExhIntro
+                            ? ((t > 3.30) ? ((t - 3.30) / 1.62) : -1.0)
+                            : ((t > 3.25) ? ((t - 3.25) / 1.55) : -1.0));
                     if (sheenClock >= 0.0 && sheenClock <= 1.25) {
                         cctx.globalCompositeOperation = 'source-atop';
                         var gx0 = (sheenClock * 1.35 - 0.25) * SIG_W;
                         var sg = cctx.createLinearGradient(gx0 - 260, 0, gx0 + 260, 190);
                         sg.addColorStop(0.0, 'rgba(255, 250, 210, 0.0)');
-                        sg.addColorStop(0.5, 'rgba(255, 253, 236, 0.36)');
+                        sg.addColorStop(0.5, 'rgba(255, 253, 236, 0.38)');
                         sg.addColorStop(1.0, 'rgba(255, 250, 210, 0.0)');
                         cctx.fillStyle = sg;
                         cctx.fillRect(0, 0, SIG_W, SIG_H);
@@ -1907,7 +1968,7 @@
 
                     ctx.save();
                     ctx.globalAlpha = sigAlpha;
-                    ctx.shadowColor = 'rgba(248, 210, 56, 0.28)';
+                    ctx.shadowColor = isExhIntro ? 'rgba(248, 214, 64, 0.34)' : 'rgba(248, 210, 56, 0.28)';
                     ctx.shadowBlur = 22;
                     ctx.drawImage(compositeSigCanvas, sigX, sigY, baseSigW, baseSigH);
                     ctx.restore();
@@ -1916,19 +1977,21 @@
 
             // 4. Live Glowing Bristle Nib + Trailing Wet-Paint Sparks while signing "Vincent"
             if (activeNib && !state.skipping) {
-                for (var sp = 0; sp < 3; sp++) {
-                    var aSp = Math.random() * Math.PI * 2.0;
-                    var vSp = 18 + Math.random() * 54;
-                    tipSparks.push({
-                        x: activeNib.x + (Math.random() - 0.5) * 5,
-                        y: activeNib.y + (Math.random() - 0.5) * 5,
-                        vx: Math.cos(aSp) * vSp,
-                        vy: Math.sin(aSp) * vSp - 14,
-                        life: 0.0,
-                        maxLife: 0.36 + Math.random() * 0.34,
-                        r: 1.3 + Math.random() * 2.1,
-                        col: (sp === 0) ? '#fff9d6' : ((sp === 1) ? '#f8dc3b' : '#e89b24')
-                    });
+                if (!isScrubbing && dt > 0.0) {
+                    for (var sp = 0; sp < 3; sp++) {
+                        var aSp = Math.random() * Math.PI * 2.0;
+                        var vSp = 18 + Math.random() * 54;
+                        tipSparks.push({
+                            x: activeNib.x + (Math.random() - 0.5) * 5,
+                            y: activeNib.y + (Math.random() - 0.5) * 5,
+                            vx: Math.cos(aSp) * vSp,
+                            vy: Math.sin(aSp) * vSp - 14,
+                            life: 0.0,
+                            maxLife: 0.36 + Math.random() * 0.34,
+                            r: 1.3 + Math.random() * 2.1,
+                            col: (sp === 0) ? '#fff9d6' : ((sp === 1) ? '#f8dc3b' : '#e89b24')
+                        });
+                    }
                 }
                 ctx.save();
                 ctx.globalAlpha = masterAlpha * 0.92;
@@ -1965,8 +2028,8 @@
                 ctx.restore();
             }
 
-            // 5. Refined Epigraph Beneath "Vincent" (shown on Opening Prologue; Finale keeps pure centered "Vincent")
-            var epiIn  = isFinale ? 0.0 : Math.max(0.0, Math.min(1.0, (t - 3.15) / 0.75));
+            // 5. Refined Epigraph Beneath "Vincent" (shown on Opening Boot Prologue; Exhibition Intro & Finale keep pure centered "Vincent")
+            var epiIn  = (isFinale || isExhIntro) ? 0.0 : Math.max(0.0, Math.min(1.0, (t - 3.15) / 0.75));
             var epiOut = 1.0 - Math.pow(Math.min(1.0, dissolveT * 1.35), 1.4);
             var epiAlpha = masterAlpha * epiIn * epiOut;
             if (epiAlpha > 0.01) {
@@ -2032,9 +2095,146 @@
             ctx.restore();
         }
 
+        function renderCutsceneFrame(nowTs) {
+            if (!state.active || state.mode === 'exh_intro') return;
+            state.rafId = requestAnimationFrame(renderCutsceneFrame);
+
+            if (!state.lastTs) state.lastTs = nowTs;
+            var dt = Math.min(0.05, Math.max(0.001, (nowTs - state.lastTs) / 1000.0));
+            state.lastTs = nowTs;
+
+            if (state.skipping) {
+                state.skipFade += dt / 0.42;
+                if (state.skipFade >= 1.0) {
+                    finishCutscene();
+                    return;
+                }
+            } else if (state.mode === 'finale') {
+                state.elapsed += dt;
+            } else {
+                var worldReady = !!window.__vgWorldReady;
+                if (state.elapsed < T_HOLD_GATE || worldReady || state.holdWait > 18.0) {
+                    state.elapsed += dt;
+                } else {
+                    state.holdWait += dt;
+                }
+            }
+
+            var isFinale = (state.mode === 'finale');
+            var t = state.elapsed;
+
+            if (isFinale) {
+                if (!state.finaleBarShown && !state.skipping && t >= 3.25 && finaleBar) {
+                    state.finaleBarShown = true;
+                    finaleBar.classList.remove('hidden');
+                    requestAnimationFrame(function () {
+                        if (state.finaleBarShown && finaleBar) {
+                            finaleBar.style.opacity = '1';
+                            finaleBar.style.pointerEvents = 'auto';
+                        }
+                    });
+                }
+            } else {
+                if (!state.craneTriggered && t >= T_HOLD_GATE - 0.08) {
+                    state.craneTriggered = true;
+                    if (window.__startIntro3DCameraSweep) {
+                        window.__startIntro3DCameraSweep(T_DISSOLVE_END - T_HOLD_GATE);
+                    }
+                }
+                if (!state.barsOpened && t >= T_DISSOLVE_END - 0.85) {
+                    state.barsOpened = true;
+                    overlay.classList.add('bars-open');
+                    document.body.classList.remove('cutscene-playing');
+                }
+                if (t >= T_DISSOLVE_END) {
+                    finishCutscene();
+                    return;
+                }
+            }
+
+            var masterAlpha = state.skipping ? (1.0 - state.skipFade) : 1.0;
+            drawVincentSignatureStage(t, dt, isFinale, false, masterAlpha, false);
+        }
+
+        // State-driven Exhibition Prologue ("Vincent" centered over live 3D Starry Night, synced to Tour Timeline Scrubber)
+        function syncExhibitionPrologue(active, sec, dt, isScrubbing, uiHidden) {
+            if (!active) {
+                if (state.mode === 'exh_intro') {
+                    state.active = false;
+                    state.mode = 'idle';
+                    tipSparks.length = 0;
+                    if (skipExhBtn) skipExhBtn.classList.add('hidden');
+                    overlay.classList.remove('exh-prologue-mode');
+                    overlay.classList.add('bars-open');
+                    overlay.style.display = 'none';
+                    document.body.classList.remove('exh-prologue-cinema');
+                }
+                return;
+            }
+
+            bakeImpastoFromSignatureImage();
+            var justEntered = (!state.active || state.mode !== 'exh_intro');
+            if (justEntered) {
+                if (state.rafId) {
+                    cancelAnimationFrame(state.rafId);
+                    state.rafId = 0;
+                }
+                if (state.mode === 'intro' && window.__finishIntro3DCameraSweep) {
+                    window.__finishIntro3DCameraSweep();
+                }
+                tipSparks.length = 0;
+                state.mode = 'exh_intro';
+                state.active = true;
+                state.skipping = false;
+                state.skipFade = 0.0;
+                hideFinaleControlsBar();
+                if (skipBtn) skipBtn.classList.add('hidden');
+                if (sndHint) {
+                    sndHint.style.opacity = '0';
+                    sndHint.classList.add('hidden');
+                }
+                var vBootE = document.getElementById('vincent-boot-loader');
+                if (vBootE && window.__vgWorldReady) {
+                    vBootE.style.opacity = '0';
+                    vBootE.classList.add('hidden');
+                }
+                document.body.classList.remove('cutscene-playing');
+                overlay.classList.add('exh-prologue-mode');
+                overlay.style.display = 'block';
+                if (sec < 0.12 && !isScrubbing) {
+                    overlay.classList.add('bars-open');
+                    requestAnimationFrame(function () {
+                        if (state.active && state.mode === 'exh_intro' && state.elapsed < 7.15) {
+                            overlay.classList.remove('bars-open');
+                        }
+                    });
+                } else {
+                    overlay.classList.toggle('bars-open', sec >= 7.15);
+                }
+            } else {
+                if (sec >= 7.15) {
+                    overlay.classList.add('bars-open');
+                } else if (sec > 0.12 || isScrubbing) {
+                    overlay.classList.remove('bars-open');
+                }
+            }
+
+            state.elapsed = sec;
+            if (isScrubbing && sec > 4.15) {
+                tipSparks.length = 0;
+            }
+            document.body.classList.toggle('exh-prologue-cinema', (sec < 7.15) && !isScrubbing);
+            if (skipExhBtn) {
+                skipExhBtn.classList.toggle('hidden', !(sec < 6.85 && !uiHidden && !isScrubbing));
+            }
+
+            drawVincentSignatureStage(sec, isScrubbing ? 0.0 : Math.max(0.0, dt || 0.0), false, true, 1.0, Boolean(isScrubbing));
+        }
+
         window.__vincentCutscene = {
             replay: replayCutscene,
             playFinale: playFinale,
+            syncExhibitionPrologue: syncExhibitionPrologue,
             setFinaleStyle: setFinaleStyle,
             getMode: function () { return state.mode; },
             skip: triggerSkipCutscene,
@@ -2044,7 +2244,11 @@
                 if (sec > T_WRITE_END) tipSparks.length = 0;
                 state.elapsed = sec;
                 state.lastTs = performance.now();
-                renderCutsceneFrame(state.lastTs + 16);
+                if (state.mode === 'exh_intro') {
+                    drawVincentSignatureStage(sec, 0.016, false, true, 1.0, false);
+                } else {
+                    renderCutsceneFrame(state.lastTs + 16);
+                }
             }
         };
 
@@ -15194,8 +15398,27 @@
         // ========================================================================
         // 13A-2. IMMERSIVE EXHIBITION TOUR + FLOATING YELLOW FRAMES + TIMELINE SCRUBBER
         // ========================================================================
+        var EXHIBITION_PROLOGUE_DUR = 8.0;
         var EXHIBITION_CHAPTER_DUR = 16.0;
         var EXHIBITION_CHAPTERS = [
+            {
+                roman: 'PROLOGUE',
+                isPrologue: true,
+                dur: EXHIBITION_PROLOGUE_DUR,
+                hudLabel: 'Prologue · “Vincent” — The Starry Night, 1889',
+                pill: 'EXHIBITION PROLOGUE · SAINT-RÉMY 1889',
+                script: 'The Starry Night, June 1889',
+                sub: 'Museum of Modern Art · Living Masterpiece',
+                quote: '',
+                cite: '',
+                narration: '',
+                kind: 'prologue',
+                fov0: 45.0, fov1: 47.5,
+                day0: 0.00, day1: 0.05,
+                ink0: 0.80, ink1: 1.62,
+                yel0: 1.18, yel1: 0.34,
+                chaos: 1.80, rel: 0.80, swirl: 0.54
+            },
             {
                 roman: 'I',
                 hudLabel: 'I. Ink Sketch to Living Colour — Saint-Rémy 1889',
@@ -15313,7 +15536,31 @@
                 chaos: 1.82, rel: 0.76, swirl: 0.56
             }
         ];
-        var EXHIBITION_TOTAL_DUR = EXHIBITION_CHAPTERS.length * EXHIBITION_CHAPTER_DUR;
+        var EXHIBITION_TOTAL_DUR = (function () {
+            var acc = 0.0;
+            for (var i = 0; i < EXHIBITION_CHAPTERS.length; i++) {
+                var c = EXHIBITION_CHAPTERS[i];
+                c.dur = (typeof c.dur === 'number' && c.dur > 0.5) ? c.dur : EXHIBITION_CHAPTER_DUR;
+                c.tStart = acc;
+                acc += c.dur;
+                c.tEnd = acc;
+            }
+            return acc;
+        })();
+
+        function getExhibitionChapterInfo(elapsedSec) {
+            var s = THREE.MathUtils.clamp(elapsedSec, 0.0, Math.max(0.0, EXHIBITION_TOTAL_DUR - 0.0001));
+            for (var i = 0; i < EXHIBITION_CHAPTERS.length; i++) {
+                var c = EXHIBITION_CHAPTERS[i];
+                if (s < c.tEnd || i === EXHIBITION_CHAPTERS.length - 1) {
+                    var chSec = Math.max(0.0, s - c.tStart);
+                    var locT  = THREE.MathUtils.clamp(chSec / c.dur, 0.0, 1.0);
+                    return { idx: i, ch: c, chSec: chSec, locT: locT };
+                }
+            }
+            var last = EXHIBITION_CHAPTERS[EXHIBITION_CHAPTERS.length - 1];
+            return { idx: EXHIBITION_CHAPTERS.length - 1, ch: last, chSec: last.dur, locT: 1.0 };
+        }
 
         var exhibitionState = {
             elapsedSec: 0.0,
@@ -15360,6 +15607,10 @@
             var ch = EXHIBITION_CHAPTERS[chIdx];
             if (!ch) return;
             exhibitionState.spokenChapterIdx = chIdx;
+            if (ch.isPrologue || !ch.narration) {
+                stopExhibitionNarration();
+                return;
+            }
             if (!params.exhibitionVoice || params.userMuted) {
                 setExhibitionSpeechDuck(1.0);
                 return;
@@ -15443,7 +15694,49 @@
             var list = window.__vgEasels || [];
             var px = 0, py = 14.2, pz = 82.0, lx = 2.2, ly = 16.3, lz = -42.0;
 
-            if (ch.kind === 'hill_sketch') {
+            if (ch.kind === 'prologue') {
+                var holdSplit = 0.63; // 0.00s -> 5.04s: Balanced Starry Night pitch (~+9.6 deg midpoint: full glowing village + spire + swirling sky & moon); 5.04s -> 8.00s: C2 glide into Gallery I
+                var pyHill0 = Math.max(getGroundY(-14.5, 88.0) + 2.6, 15.8);
+                if (locT <= holdSplit) {
+                    var uH = THREE.MathUtils.clamp(locT / holdSplit, 0.0, 1.0);
+                    var eH = uH * uH * (3.0 - 2.0 * uH);
+                    px = 0.0;
+                    py = 14.5;
+                    pz = 82.8 + (81.3 - 82.8) * eH;
+                    lx = 2.2;
+                    ly = 34.8 + (36.4 - 34.8) * eH;
+                    lz = -42.0;
+                    return {
+                        px: px, py: py, pz: pz,
+                        lx: lx, ly: ly, lz: lz,
+                        fov: 45.0 + (44.2 - 45.0) * eH,
+                        day: 0.00,
+                        ink: 0.80,
+                        yel: 1.18,
+                        swirl: 0.54,
+                        OutdoorCheck: false
+                    };
+                } else {
+                    var uM = THREE.MathUtils.clamp((locT - holdSplit) / (1.0 - holdSplit), 0.0, 1.0);
+                    var eM = uM * uM * uM * (uM * (uM * 6.0 - 15.0) + 10.0);
+                    px = 0.0 + (-14.5 - 0.0) * eM;
+                    pz = 81.3 + (88.0 - 81.3) * eM;
+                    py = Math.max(getGroundY(px, pz) + (1.45 + 1.15 * eM), 14.5 + (pyHill0 - 14.5) * eM);
+                    lx = 2.2 + (-6.0 - 2.2) * eM;
+                    ly = 36.4 + (18.2 - 36.4) * eM;
+                    lz = -42.0 + (-32.0 - (-42.0)) * eM;
+                    return {
+                        px: px, py: py, pz: pz,
+                        lx: lx, ly: ly, lz: lz,
+                        fov: 44.2 + (47.5 - 44.2) * eM,
+                        day: 0.00 + (0.05 - 0.00) * eM,
+                        ink: 0.80 + (1.62 - 0.80) * eM,
+                        yel: 1.18 + (0.34 - 1.18) * eM,
+                        swirl: 0.54 + (0.32 - 0.54) * eM,
+                        OutdoorCheck: false
+                    };
+                }
+            } else if (ch.kind === 'hill_sketch') {
                 px = -14.5 + (4.2 - (-14.5)) * e;
                 pz =  88.0 + (77.5 - 88.0) * e;
                 py = Math.max(getGroundY(px, pz) + 2.6, 15.8 + (13.8 - 15.8) * e);
@@ -15496,7 +15789,8 @@
                 day: ch.day0 + (ch.day1 - ch.day0) * e,
                 ink: ch.ink0 + (ch.ink1 - ch.ink0) * e,
                 yel: ch.yel0 + (ch.yel1 - ch.yel0) * e,
-                OutdoorCheck: (ch.kind !== 'studio' && ch.kind !== 'finale_wall')
+                swirl: ch.swirl,
+                OutdoorCheck: (ch.kind !== 'studio' && ch.kind !== 'finale_wall' && ch.kind !== 'prologue')
             };
         }
 
@@ -15506,9 +15800,10 @@
                 window.__vgEaselGroup.visible = (mode === 'easels');
             }
             if (window.__vgExhibitionPortals) {
-                var exhHideFrames = (params.tourActive && params.tourPreset === 'exhibition' &&
-                    exhibitionState.chapterIdx >= 0 && EXHIBITION_CHAPTERS[exhibitionState.chapterIdx] &&
-                    EXHIBITION_CHAPTERS[exhibitionState.chapterIdx].kind !== 'easel');
+                var activeExhCh = (params.tourActive && params.tourPreset === 'exhibition')
+                    ? getExhibitionChapterInfo(exhibitionState.elapsedSec).ch
+                    : null;
+                var exhHideFrames = Boolean(activeExhCh && activeExhCh.kind !== 'easel');
                 window.__vgExhibitionPortals.visible = (mode === 'frames') && !tourModState.finaleActive && !exhHideFrames;
             }
             var mBtns = document.querySelectorAll('.field-marker-btn');
@@ -15572,22 +15867,45 @@
         }
         window.__setFieldMarkersMode = setFieldMarkersMode;
 
-        function stepExhibitionChapter(deltaStep) {
-            if (!params.tourActive || params.tourPreset !== 'exhibition') {
-                startTourPreset('exhibition', true);
-                return;
-            }
-            var curIdx = Math.floor(exhibitionState.elapsedSec / EXHIBITION_CHAPTER_DUR);
-            var nextIdx = (curIdx + deltaStep + EXHIBITION_CHAPTERS.length) % EXHIBITION_CHAPTERS.length;
-            exhibitionState.elapsedSec = nextIdx * EXHIBITION_CHAPTER_DUR + 0.02;
-            exhibitionState.chapterIdx = -1;
+        function jumpToExhibitionChapterIndex(targetIdx) {
+            var nextIdx = ((targetIdx % EXHIBITION_CHAPTERS.length) + EXHIBITION_CHAPTERS.length) % EXHIBITION_CHAPTERS.length;
             var ch = EXHIBITION_CHAPTERS[nextIdx];
+            exhibitionState.elapsedSec = ch.tStart + 0.02;
+            exhibitionState.chapterIdx = -1;
             var smp0 = sampleExhibitionChapterCamera(ch, 0.0);
             camCtrl.pos.set(smp0.px, smp0.py, smp0.pz);
             camCtrl.target.set(smp0.lx, smp0.ly, smp0.lz);
             camCtrl.desiredPos.copy(camCtrl.pos);
             camCtrl.desiredTarget.copy(camCtrl.target);
+            camCtrl.fov = smp0.fov;
+            camCtrl.desiredFov = smp0.fov;
+            camera.fov = smp0.fov;
+            camera.updateProjectionMatrix();
+            uDaylight.value    = THREE.MathUtils.clamp(smp0.day, 0.0, 1.0);
+            uBlackInk.value    = THREE.MathUtils.clamp(smp0.ink, 0.1, 2.0);
+            uYellowBoost.value = params.yellowBoost * smp0.yel;
+            if (window.__vincentCutscene && window.__vincentCutscene.syncExhibitionPrologue) {
+                window.__vincentCutscene.syncExhibitionPrologue(Boolean(ch.isPrologue), 0.02, 0.0, false, params.uiHidden);
+            }
             skyCacheState.dirty = true;
+        }
+
+        function skipExhibitionPrologue() {
+            if (!params.tourActive || params.tourPreset !== 'exhibition') return;
+            var info = getExhibitionChapterInfo(exhibitionState.elapsedSec);
+            if (info.ch && info.ch.isPrologue && EXHIBITION_CHAPTERS.length > 1) {
+                jumpToExhibitionChapterIndex(1);
+            }
+        }
+        window.__skipExhibitionPrologue = skipExhibitionPrologue;
+
+        function stepExhibitionChapter(deltaStep) {
+            if (!params.tourActive || params.tourPreset !== 'exhibition') {
+                startTourPreset('exhibition', true);
+                return;
+            }
+            var curInfo = getExhibitionChapterInfo(exhibitionState.elapsedSec);
+            jumpToExhibitionChapterIndex(curInfo.idx + deltaStep);
         }
 
         function toggleExhibitionVoice() {
@@ -15608,10 +15926,11 @@
 
             if (params.tourPreset === 'exhibition') {
                 exhibitionState.elapsedSec = r * EXHIBITION_TOTAL_DUR;
-                var chIdx = Math.min(EXHIBITION_CHAPTERS.length - 1, Math.floor(exhibitionState.elapsedSec / EXHIBITION_CHAPTER_DUR));
-                var chSec = exhibitionState.elapsedSec - chIdx * EXHIBITION_CHAPTER_DUR;
-                var locT  = THREE.MathUtils.clamp(chSec / EXHIBITION_CHAPTER_DUR, 0.0, 1.0);
-                var chObj = EXHIBITION_CHAPTERS[chIdx];
+                var infoS = getExhibitionChapterInfo(exhibitionState.elapsedSec);
+                var chIdx = infoS.idx;
+                var chSec = infoS.chSec;
+                var locT  = infoS.locT;
+                var chObj = infoS.ch;
                 var smpE  = sampleExhibitionChapterCamera(chObj, locT);
 
                 exhibitionState.chapterIdx = chIdx;
@@ -15622,12 +15941,17 @@
                 setFloatingFrameRevealImmediate((chObj && chObj.kind === 'easel') ? chObj.easelIdx : -1, scrubRev);
                 syncExhibitionArtworkSubForReveal(chObj, scrubRev);
 
+                var isPro = Boolean(chObj.isPrologue);
+                if (window.__vincentCutscene && window.__vincentCutscene.syncExhibitionPrologue) {
+                    window.__vincentCutscene.syncExhibitionPrologue(isPro, chSec, 0.0, !isCommitRelease, params.uiHidden);
+                }
+
                 var qCard = document.getElementById('exh-quote-card');
                 var sWrap = document.getElementById('exh-artwork-script-wrap');
                 var dBar  = document.getElementById('exh-docent-bar');
-                if (qCard) qCard.classList.toggle('exh-stage-hidden', chObj.kind === 'easel' && chSec > 8.8);
-                if (sWrap) sWrap.classList.remove('exh-stage-hidden');
-                if (dBar)  dBar.classList.remove('exh-stage-hidden');
+                if (qCard) qCard.classList.toggle('exh-stage-hidden', isPro || (chObj.kind === 'easel' && chSec > 8.8));
+                if (sWrap) sWrap.classList.toggle('exh-stage-hidden', isPro);
+                if (dBar)  dBar.classList.toggle('exh-stage-hidden', isPro);
 
                 camCtrl.desiredPos.set(smpE.px, smpE.py, smpE.pz);
                 camCtrl.desiredTarget.set(smpE.lx, smpE.ly, smpE.lz);
@@ -15764,7 +16088,7 @@
 
             var stLbl = document.getElementById('tour-drawer-status');
             if (stLbl) {
-                stLbl.textContent = params.tourActive ? 'Playing · Exhibition' : '7 Chapters';
+                stLbl.textContent = params.tourActive ? 'Playing · Exhibition' : 'Intro + 7 Chapters';
             }
 
             var hud = document.getElementById('tour-director-hud');
@@ -15777,6 +16101,12 @@
             if (exhOv) {
                 exhOv.classList.toggle('hidden', !(params.tourActive && isExh) || tourModState.finaleActive);
             }
+            if (params.tourActive && isExh && !tourModState.finaleActive) {
+                var uiInfo = getExhibitionChapterInfo(exhibitionState.elapsedSec);
+                if (uiInfo.ch && uiInfo.ch.isPrologue && window.__vincentCutscene && window.__vincentCutscene.syncExhibitionPrologue) {
+                    window.__vincentCutscene.syncExhibitionPrologue(true, uiInfo.chSec, 0.0, tourScrubState.dragging, params.uiHidden);
+                }
+            }
             var motes = document.getElementById('exh-motes-layer');
             if (motes) {
                 motes.classList.toggle('hidden', Boolean(params.safeShaders || params.activeTier === 'lite'));
@@ -15786,6 +16116,9 @@
 
         function syncModePills() {
             var nowExhActive = Boolean(params.tourActive && params.tourPreset === 'exhibition');
+            if (!nowExhActive && window.__vincentCutscene && window.__vincentCutscene.syncExhibitionPrologue) {
+                window.__vincentCutscene.syncExhibitionPrologue(false, 0.0, 0.0, false, params.uiHidden);
+            }
             if (exhibitionState.wasExhibitionActive && !nowExhActive) {
                 stopExhibitionNarration();
                 setFloatingFrameRevealImmediate(-1, 0.0);
@@ -15955,7 +16288,21 @@
                 camCtrl.target.set(sInit.lx, sInit.ly, sInit.lz);
                 camCtrl.desiredPos.copy(camCtrl.pos);
                 camCtrl.desiredTarget.copy(camCtrl.target);
+                camCtrl.fov = sInit.fov;
                 camCtrl.desiredFov = sInit.fov;
+                camera.up.set(0, 1, 0);
+                camera.fov = sInit.fov;
+                camera.updateProjectionMatrix();
+                camera.position.copy(camCtrl.pos);
+                camera.lookAt(camCtrl.target);
+                uDaylight.value    = THREE.MathUtils.clamp(sInit.day, 0.0, 1.0);
+                uBlackInk.value    = THREE.MathUtils.clamp(sInit.ink, 0.1, 2.0);
+                uYellowBoost.value = params.yellowBoost * sInit.yel;
+                uChaos.value       = ch0.chaos;
+                uRelief.value      = ch0.rel;
+                if (window.__vincentCutscene && window.__vincentCutscene.syncExhibitionPrologue) {
+                    window.__vincentCutscene.syncExhibitionPrologue(Boolean(ch0.isPrologue), 0.0, 0.0, false, params.uiHidden);
+                }
                 skyCacheState.dirty = true;
             } else if (targetPreset === 'vivaldi') {
                 if (exhibitionState.autoSwitchedFrames) {
@@ -16336,15 +16683,19 @@
                 if (params.tourPreset === 'exhibition') {
                     exhibitionState.elapsedSec += dt;
                     if (exhibitionState.elapsedSec >= EXHIBITION_TOTAL_DUR) {
+                        if (window.__vincentCutscene && window.__vincentCutscene.syncExhibitionPrologue) {
+                            window.__vincentCutscene.syncExhibitionPrologue(false, 0.0, 0.0, false, params.uiHidden);
+                        }
                         exhibitionState.lastPresetReplay = 'exhibition';
                         triggerVivaldiTourFinale();
                         return;
                     }
 
-                    var chIdx = Math.min(EXHIBITION_CHAPTERS.length - 1, Math.floor(exhibitionState.elapsedSec / EXHIBITION_CHAPTER_DUR));
-                    var chSec = exhibitionState.elapsedSec - chIdx * EXHIBITION_CHAPTER_DUR;
-                    var locT  = THREE.MathUtils.clamp(chSec / EXHIBITION_CHAPTER_DUR, 0.0, 1.0);
-                    var chObj = EXHIBITION_CHAPTERS[chIdx];
+                    var liveInfo = getExhibitionChapterInfo(exhibitionState.elapsedSec);
+                    var chIdx = liveInfo.idx;
+                    var chSec = liveInfo.chSec;
+                    var locT  = liveInfo.locT;
+                    var chObj = liveInfo.ch;
                     var smpE  = sampleExhibitionChapterCamera(chObj, locT);
 
                     if (chIdx !== exhibitionState.chapterIdx) {
@@ -16352,7 +16703,9 @@
                         exhibitionState.chapterIdx = chIdx;
                         updateExhibitionOverlayChapter(chIdx);
                         speakExhibitionChapter(chIdx);
-                        if (prevIdx >= 0) {
+                        // Hard-snap camera only across distinct gallery teleports (never across the continuous Prologue -> Gallery I shot!)
+                        var isContinuousPrologueHandoff = (prevIdx === 0 && chIdx === 1);
+                        if (prevIdx >= 0 && !isContinuousPrologueHandoff) {
                             camCtrl.pos.set(smpE.px, smpE.py, smpE.pz);
                             camCtrl.target.set(smpE.lx, smpE.ly, smpE.lz);
                             camCtrl.fov = smpE.fov;
@@ -16367,11 +16720,17 @@
                         skyCacheState.dirty = true;
                     }
 
+                    var isPrologueNow = Boolean(chObj.isPrologue);
+                    if (window.__vincentCutscene && window.__vincentCutscene.syncExhibitionPrologue) {
+                        window.__vincentCutscene.syncExhibitionPrologue(isPrologueNow, chSec, dt, false, params.uiHidden);
+                    }
+
+                    // Smooth gallery cross-dissolve between distinct chapters (skipped across the continuous 1-shot Prologue -> Gallery I morph)
                     var veilAlpha = 0.0;
-                    if (chIdx > 0 && chSec < 0.68) {
+                    if (chIdx >= 2 && chSec < 0.68) {
                         veilAlpha = Math.pow(1.0 - chSec / 0.68, 1.5) * 0.92;
-                    } else if (chIdx < EXHIBITION_CHAPTERS.length - 1 && chSec > EXHIBITION_CHAPTER_DUR - 0.62) {
-                        veilAlpha = Math.pow((chSec - (EXHIBITION_CHAPTER_DUR - 0.62)) / 0.62, 1.5) * 0.92;
+                    } else if (!isPrologueNow && chIdx < EXHIBITION_CHAPTERS.length - 1 && chSec > chObj.dur - 0.62) {
+                        veilAlpha = Math.pow((chSec - (chObj.dur - 0.62)) / 0.62, 1.5) * 0.92;
                     }
                     var veilEl = document.getElementById('exh-dissolve-veil');
                     if (veilEl) veilEl.style.opacity = veilAlpha.toFixed(3);
@@ -16380,7 +16739,7 @@
                     setFloatingFrameRevealImmediate((chObj.kind === 'easel') ? chObj.easelIdx : -1, liveExhRev);
                     syncExhibitionArtworkSubForReveal(chObj, liveExhRev);
 
-                    var textHidden = (chSec < 0.45) || (chSec > EXHIBITION_CHAPTER_DUR - 0.55);
+                    var textHidden = isPrologueNow || (chSec < 0.45) || (chSec > chObj.dur - 0.55);
                     var quoteClearForPaintZoom = (chObj.kind === 'easel' && chSec > 8.8);
                     var qCard = document.getElementById('exh-quote-card');
                     var sWrap = document.getElementById('exh-artwork-script-wrap');
@@ -16399,9 +16758,10 @@
                     camCtrl.desiredFov = smpE.fov;
                     tourModState.rollRad += (0.0 - tourModState.rollRad) * Math.min(1.0, dt * 4.0);
 
+                    var effChSwirl = (typeof smpE.swirl === 'number') ? smpE.swirl : chObj.swirl;
                     tourModState.active = true;
-                    tourModState.liveSwirlSpeed = chObj.swirl;
-                    tourModState.cypressSwayMult = 0.95 + chObj.swirl * 0.65;
+                    tourModState.liveSwirlSpeed = effChSwirl;
+                    tourModState.cypressSwayMult = 0.95 + effChSwirl * 0.65;
                     var prevDay = uDaylight.value;
                     var prevInk = uBlackInk.value;
                     uDaylight.value    = THREE.MathUtils.clamp(smpE.day, 0.0, 1.0);
@@ -16830,11 +17190,18 @@
                 })(easelJumpBtns[ej]);
             }
             document.getElementById('btn-sky-brush').addEventListener('click', toggleSkyBrushMode);
+            function replayStandaloneBootCutscene() {
+                if (params.tourActive) {
+                    params.tourActive = false;
+                    stopExhibitionNarration();
+                    restoreTourSceneModulation();
+                    syncModePills();
+                }
+                if (window.__vincentCutscene) window.__vincentCutscene.replay();
+            }
             var replayCutBtn = document.getElementById('btn-replay-cutscene');
             if (replayCutBtn) {
-                replayCutBtn.addEventListener('click', function () {
-                    if (window.__vincentCutscene) window.__vincentCutscene.replay();
-                });
+                replayCutBtn.addEventListener('click', replayStandaloneBootCutscene);
             }
             document.getElementById('btn-matte').addEventListener('click', function () {
                 params.matteActive = !params.matteActive;
@@ -17296,7 +17663,7 @@
                         }
                         break;
                     case 'ShiftLeft': case 'ShiftRight': keys.shift = true; break;
-                    case 'KeyI': if (window.__vincentCutscene) window.__vincentCutscene.replay(); break;
+                    case 'KeyI': replayStandaloneBootCutscene(); break;
                     case 'KeyH': toggleCleanUI(); break;
                     case 'KeyF':
                     case 'Space':
