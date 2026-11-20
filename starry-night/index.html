@@ -123,34 +123,66 @@
         body.cutscene-playing #lab-drawer,
         body.cutscene-playing #step-hint-wrap,
         body.cutscene-playing #tour-director-hud,
-        body.cutscene-playing #exhibition-projection-overlay,
-        body.cutscene-playing #boot-loading-pill {
+        body.cutscene-playing #exhibition-projection-overlay {
             opacity: 0 !important;
             pointer-events: none !important;
         }
-        .exh-quote-bubble {
-            background: linear-gradient(145deg, rgba(6, 14, 36, 0.84) 0%, rgba(12, 27, 62, 0.76) 100%);
-            backdrop-filter: blur(10px) saturate(115%);
-            -webkit-backdrop-filter: blur(10px) saturate(115%);
-            border: 1px solid rgba(248, 220, 59, 0.34);
-            border-left: 3.5px solid rgba(250, 216, 78, 0.92);
-            box-shadow: 0 12px 32px rgba(2, 6, 20, 0.72), inset 0 1px 0 rgba(255, 250, 220, 0.14);
+        body.cutscene-playing #boot-loading-pill:not(.force-visible-after-skip) {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        @keyframes vgBarShimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        @keyframes vgDotsPulse {
+            0%, 20% { opacity: 0.25; }
+            50%     { opacity: 1.0; }
+            100%    { opacity: 0.25; }
+        }
+        .vg-progress-fill {
+            background: linear-gradient(90deg, #38bdf8 0%, #f8dc3b 45%, #fff7bf 55%, #f8dc3b 65%, #38bdf8 100%);
+            background-size: 220% 100%;
+            animation: vgBarShimmer 2.4s linear infinite;
+            box-shadow: 0 0 12px rgba(248, 220, 59, 0.65);
+            transition: width 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .vg-dot-1 { animation: vgDotsPulse 1.35s infinite 0.0s; }
+        .vg-dot-2 { animation: vgDotsPulse 1.35s infinite 0.22s; }
+        .vg-dot-3 { animation: vgDotsPulse 1.35s infinite 0.44s; }
+        .exh-quote-bubble,
+        .exh-script-aura {
+            background: none;
+            border: none;
+            box-shadow: none;
+            overflow: visible;
+        }
+        .exh-meta-shadow {
+            text-shadow:
+                0 1px 2px rgba(1, 4, 14, 1.0),
+                0 2px 6px rgba(2, 6, 20, 0.96),
+                0 4px 14px rgba(3, 9, 26, 0.88),
+                0 0 26px rgba(4, 11, 32, 0.76);
         }
         .font-exh-quote {
             font-family: 'Caveat', 'Dancing Script', 'Segoe Script', 'Bradley Hand', cursive;
             font-style: normal;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.015em;
+            text-wrap: balance;
             text-shadow:
-                0 1px 2px rgba(2, 6, 18, 0.99),
-                0 2px 9px rgba(3, 8, 24, 0.95),
-                0 0 18px rgba(4, 11, 32, 0.88);
+                0 1px 2px rgba(1, 4, 14, 1.0),
+                0 2px 7px rgba(2, 6, 20, 0.98),
+                0 5px 16px rgba(3, 9, 26, 0.92),
+                0 8px 30px rgba(4, 11, 32, 0.82),
+                0 0 46px rgba(4, 11, 32, 0.64);
         }
         .font-exh-subtitle {
             font-family: 'Cormorant Garamond', Georgia, serif;
             font-style: normal;
             font-weight: 600;
             letter-spacing: 0.015em;
+            text-wrap: balance;
             text-shadow:
                 0 2px 6px rgba(2, 6, 18, 0.99),
                 0 4px 18px rgba(3, 8, 24, 0.96),
@@ -158,7 +190,14 @@
         }
         .font-exh-script {
             font-family: 'Dancing Script', 'Cormorant Garamond', Georgia, cursive;
-            text-shadow: 0 3px 20px rgba(3, 8, 22, 0.98), 0 0 26px rgba(248, 220, 59, 0.42);
+            font-weight: 700;
+            text-shadow:
+                0 1px 2px rgba(1, 4, 14, 1.0),
+                0 3px 8px rgba(2, 6, 20, 0.98),
+                0 6px 18px rgba(3, 9, 26, 0.92),
+                0 10px 34px rgba(4, 11, 32, 0.82),
+                0 0 48px rgba(4, 11, 32, 0.64),
+                0 0 24px rgba(248, 220, 59, 0.28);
         }
         #exh-dissolve-veil {
             background: radial-gradient(ellipse at center, rgba(11, 25, 62, 0.90) 0%, rgba(4, 9, 24, 0.98) 100%);
@@ -323,6 +362,22 @@
         <canvas id="vincent-cutscene-canvas" class="w-full h-full block"></canvas>
         <div id="cutscene-bar-bottom" class="cutscene-letterbox"></div>
 
+        <!-- Vincent Opening Shader & World Progress Bar (centered above bottom letterbox bar during initial load) -->
+        <div id="vincent-boot-loader" class="absolute left-1/2 -translate-x-1/2 z-20 pointer-events-none w-[min(88vw,360px)] transition-opacity duration-500" style="bottom: clamp(42px, 9.2vh, 84px);">
+            <div class="studio-glass rounded-2xl px-4 py-2.5 border-amber-300/45 shadow-2xl">
+                <div class="flex items-center justify-between gap-3 text-[11px] sm:text-xs font-semibold tracking-wide">
+                    <span class="text-cyan-100/95 truncate">
+                        <span id="vincent-loader-text">Optimising shaders</span><span class="inline-block w-4 text-left text-amber-300"><span class="vg-dot-1">.</span><span class="vg-dot-2">.</span><span class="vg-dot-3">.</span></span>
+                    </span>
+                    <span id="vincent-loader-pct" class="font-mono text-amber-300 tabular-nums shrink-0">0%</span>
+                </div>
+                <div class="mt-1.5 w-full h-1.5 rounded-full bg-[#06102a]/90 border border-cyan-200/25 overflow-hidden">
+                    <div id="vincent-loader-bar" class="h-full rounded-full vg-progress-fill" style="width: 2%;"></div>
+                </div>
+                <div id="vincent-loader-stage" class="mt-1 text-[10px] text-cyan-200/75 truncate">Preparing 1889 Saint-R&eacute;my impasto canvas</div>
+            </div>
+        </div>
+
         <!-- Discrete Sound Unlock Hint (bottom-left) -->
         <div id="cutscene-sound-hint" class="absolute bottom-3 sm:bottom-4 left-3.5 sm:left-5 z-10 pointer-events-none flex items-center gap-2 text-[10px] sm:text-[11px] text-amber-200/75 tracking-wider uppercase font-semibold transition-opacity duration-500">
             <span class="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse"></span>
@@ -401,26 +456,29 @@
             <span class="exh-mote w-2.5 h-1 bg-cyan-300/50" style="left:78%;top:48%;--dur:10.2s;--dly:3.6s;"></span>
         </div>
 
-        <!-- Floating Handwritten Letter Quote Bubble from Vincent (Upper-Left Gallery Projection) -->
-        <div id="exh-quote-card" class="exh-stage-fade exh-quote-bubble rounded-2xl px-4 py-3 sm:px-5 sm:py-3.5 absolute left-3.5 right-3.5 sm:left-7 sm:right-auto top-[7.6rem] sm:top-[7.8rem] max-w-lg">
-            <div class="inline-flex items-center gap-1.5 text-[9px] sm:text-[10px] uppercase tracking-[0.18em] text-amber-200 font-semibold mb-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-amber-300 shadow-[0_0_6px_#f8dc3b]"></span>
+        <!-- Frameless Handwritten Letter Quote Projection from Vincent (Upper-Left, Snug w-fit + Balanced Lines) -->
+        <div id="exh-quote-card" class="exh-stage-fade exh-quote-bubble px-5 py-4 sm:px-7 sm:py-5 absolute left-2 sm:left-5 top-[7.1rem] sm:top-[7.3rem] w-fit max-w-[min(94vw,38rem)]">
+            <div class="exh-meta-shadow inline-flex items-center gap-1.5 text-[9px] sm:text-[10px] uppercase tracking-[0.18em] text-amber-200 font-semibold mb-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-300 shadow-[0_0_8px_#f8dc3b]"></span>
                 <span id="exh-chapter-pill">GALLERY I / VII &middot; SAINT-R&Eacute;MY 1889</span>
             </div>
-            <blockquote id="exh-letter-quote" class="font-exh-quote text-[23px] sm:text-[29px] leading-[1.24] text-[#fffdf4]">
-                &ldquo;I often think that the night is more alive and more richly colored than the day.&rdquo;
+            <blockquote id="exh-letter-quote" class="font-exh-quote text-[23px] sm:text-[30px] leading-[1.24] text-[#fffef5]">
+                &ldquo;I often think that the night is more alive and more richly colored than&nbsp;the&nbsp;day.&rdquo;
             </blockquote>
-            <div id="exh-letter-cite" class="mt-1.5 text-[10px] sm:text-[11px] uppercase tracking-[0.14em] text-amber-200/90 font-semibold">
-                &mdash; Vincent van Gogh &middot; Letters to Theo
+            <div class="mt-1.5 flex items-center gap-2">
+                <span class="inline-block w-6 h-[2px] rounded-full bg-gradient-to-r from-amber-300/95 to-amber-300/0 shadow-[0_0_6px_rgba(248,220,59,0.7)]"></span>
+                <span id="exh-letter-cite" class="exh-meta-shadow text-[10px] sm:text-[11px] uppercase tracking-[0.15em] text-amber-200 font-semibold">
+                    Vincent van Gogh &middot; Letters to Theo
+                </span>
             </div>
         </div>
 
-        <!-- Inline Projected Brush-Script Painting Signature & Date (Lower-Right) -->
-        <div id="exh-artwork-script-wrap" class="exh-stage-fade absolute right-4 sm:right-8 bottom-[7.8rem] sm:bottom-[6.8rem] text-right max-w-[82vw]">
-            <div id="exh-artwork-script" class="font-exh-script text-2xl sm:text-4xl text-amber-200/95 leading-tight">
+        <!-- Frameless High-Contrast Brush-Script Painting Title & Date Projection (Lower-Right) -->
+        <div id="exh-artwork-script-wrap" class="exh-stage-fade exh-script-aura px-5 py-3.5 sm:px-7 sm:py-4 absolute right-2 sm:right-5 bottom-[7.2rem] sm:bottom-[6.1rem] text-right w-fit max-w-[88vw]">
+            <div id="exh-artwork-script" class="font-exh-script text-[28px] sm:text-[42px] text-[#fff6c2] leading-tight">
                 Saint-R&eacute;my-de-Provence, 1889
             </div>
-            <div id="exh-artwork-sub" class="text-[10px] uppercase tracking-[0.16em] text-cyan-100/80 font-semibold mt-0.5">
+            <div id="exh-artwork-sub" class="exh-meta-shadow text-[10px] sm:text-[11px] uppercase tracking-[0.17em] text-amber-100/95 font-semibold mt-0.5">
                 360&deg; Living Impasto Projection
             </div>
         </div>
@@ -442,15 +500,9 @@
     <div id="tour-director-hud" class="fixed top-14 sm:top-16 left-1/2 -translate-x-1/2 z-20 hidden pointer-events-auto max-w-[96vw]">
         <div class="studio-glass rounded-2xl px-3 py-1.5 text-[11px] text-amber-100 flex flex-col gap-1 shadow-xl border-amber-300/55 min-w-[292px] sm:min-w-[490px]">
             <div class="flex flex-wrap items-center justify-between gap-1.5">
-                <div class="flex items-center gap-1" role="group" aria-label="Tour Preset Selector">
-                    <button id="btn-hud-tour-exhibition" type="button" title="Curated 360° Exhibition &amp; Floating Frame Walk with Audio Guide" class="mode-pill active rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-amber-200 whitespace-nowrap">
-                        &#10022; Exhibition
-                    </button>
-                    <button id="btn-hud-tour-nocturne" type="button" title="Refined Serene 360° Saint-Rémy Spline Tour" class="mode-pill rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-cyan-100 whitespace-nowrap">
-                        Nocturne Drift
-                    </button>
-                    <button id="btn-hud-tour-vivaldi" type="button" title="Dynamic Music-Synced Vivaldi Summer Presto Tour with Blue-Out Vincent Finale" class="mode-pill rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-amber-200 whitespace-nowrap">
-                        &#9889; Vivaldi Summer
+                <div class="flex items-center gap-1" role="group" aria-label="Immersive Exhibition Controls">
+                    <button id="btn-hud-tour-exhibition" type="button" title="Restart 360° Immersive Exhibition Tour" class="mode-pill active rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-amber-200 whitespace-nowrap">
+                        &#10022; Immersive Exhibition
                     </button>
                 </div>
                 <div class="flex items-center gap-1">
@@ -462,9 +514,6 @@
                     </button>
                     <button id="btn-hud-exh-voice" type="button" title="Toggle Museum Audio-Guide Voiceover" class="mode-pill active rounded-full px-2 py-0.5 text-[10px] font-semibold text-amber-200 whitespace-nowrap">
                         Voice: On
-                    </button>
-                    <button id="btn-hud-finale-jump" type="button" title="Jump to the final 14s storm plunge &amp; last-note Vincent signature" class="mode-pill rounded-full px-2 py-0.5 text-[10px] font-semibold text-amber-200 whitespace-nowrap">
-                        &#8677; Finale
                     </button>
                     <button id="btn-hud-tour-stop" type="button" title="Exit Tour (Key C)" class="mode-pill rounded-full px-2 py-0.5 text-[10px] font-semibold text-slate-200 hover:text-amber-200">
                         &times;
@@ -506,11 +555,17 @@
         </div>
     </div>
 
-    <!-- Non-Blocking Progressive Boot Pill -->
+    <!-- Non-Blocking Progressive Boot Pill (shown if Intro Cutscene is skipped before shader compilation finishes) -->
     <div id="boot-loading-pill" class="fixed inset-0 z-40 flex items-center justify-center bg-[#0b1942]/80 backdrop-blur-sm transition-opacity duration-300 pointer-events-none">
-        <div class="studio-glass rounded-2xl px-5 py-3.5 text-center shadow-2xl border-amber-300/60">
-            <div class="font-serif-title text-sm sm:text-base font-bold text-amber-200">Preparing 1889 Saint-R&eacute;my Impasto World&hellip;</div>
-            <div id="boot-loading-sub" class="text-[11px] text-cyan-200/85 mt-1">Optimising shaders &amp; brushwork for your screen</div>
+        <div class="studio-glass rounded-2xl px-5 py-3.5 text-center shadow-2xl border-amber-300/60 w-[min(88vw,360px)]">
+            <div class="flex items-center justify-between gap-3">
+                <div class="font-serif-title text-xs sm:text-sm font-bold text-amber-200 truncate">Optimising shaders&hellip;</div>
+                <div id="boot-loading-pct" class="font-mono text-xs font-bold text-amber-300 tabular-nums">0%</div>
+            </div>
+            <div class="mt-2 w-full h-1.5 rounded-full bg-[#06102a]/90 border border-cyan-200/25 overflow-hidden">
+                <div id="boot-loading-bar" class="h-full rounded-full vg-progress-fill" style="width: 2%;"></div>
+            </div>
+            <div id="boot-loading-sub" class="text-[11px] text-cyan-200/85 mt-1.5 truncate">Preparing 1889 Saint-R&eacute;my impasto brushwork</div>
         </div>
     </div>
 
@@ -652,34 +707,22 @@
         <div id="dtab-explore" class="drawer-tab-panel flex flex-col gap-2.5">
             <div class="bg-slate-950/55 border border-amber-300/25 rounded-xl p-2 flex flex-col gap-1.5">
                 <div class="flex items-center justify-between">
-                    <span class="text-[10px] uppercase tracking-wider font-bold text-amber-200">Cinematic Tours (Key C)</span>
-                    <span id="tour-drawer-status" class="text-[10px] font-mono text-cyan-200/80">3 Presets</span>
+                    <span class="text-[10px] uppercase tracking-wider font-bold text-amber-200">Cinematic Tour (Key C)</span>
+                    <span id="tour-drawer-status" class="text-[10px] font-mono text-cyan-200/80">7 Chapters</span>
                 </div>
                 <div class="grid grid-cols-1 gap-1 text-xs">
-                    <button id="btn-tour-nocturne" type="button" class="preset-btn rounded-xl px-2.5 py-1.5 text-left flex items-center justify-between">
-                        <span class="font-semibold">1. Nocturne Drift</span>
-                        <span class="text-[10px] text-cyan-200/85">Serene 360&deg; Loop</span>
-                    </button>
-                    <button id="btn-tour-vivaldi" type="button" class="preset-btn rounded-xl px-2.5 py-1.5 text-left flex items-center justify-between">
-                        <span class="font-semibold">&#9889; 2. Vivaldi &ldquo;Summer&rdquo;</span>
-                        <span class="text-[10px] text-amber-300">Dynamic &middot; Finale</span>
-                    </button>
                     <button id="btn-tour-exhibition" type="button" class="preset-btn active rounded-xl px-2.5 py-1.5 text-left flex items-center justify-between">
-                        <span class="font-semibold">&#10022; 3. Immersive Exhibition</span>
+                        <span class="font-semibold">&#10022; Immersive Exhibition</span>
                         <span class="text-[10px] text-amber-300">Frames &middot; Voice Guide</span>
                     </button>
                 </div>
                 <div class="flex items-center justify-between gap-1 pt-1 border-t border-amber-200/10 text-[10px]">
-                    <span class="text-cyan-100/80 shrink-0">Exhibition:</span>
+                    <span class="text-cyan-100/80 shrink-0">Controls:</span>
                     <div class="flex items-center gap-1">
                         <button id="btn-drawer-exh-voice" type="button" class="mode-pill active rounded-lg px-2 py-0.5 font-semibold text-amber-200">Voice: On</button>
                         <button id="btn-drawer-exh-prev" type="button" title="Previous Exhibition Chapter" class="mode-pill rounded-lg px-2 py-0.5 font-semibold text-cyan-100">&#9664;</button>
                         <button id="btn-drawer-exh-next" type="button" title="Next Exhibition Chapter" class="mode-pill rounded-lg px-2 py-0.5 font-semibold text-cyan-100">&#9654;</button>
                     </div>
-                </div>
-                <div class="flex items-center justify-between gap-1 pt-1 border-t border-amber-200/10 text-[10px]">
-                    <span class="text-cyan-100/80 shrink-0">Summer End (Blue-Out):</span>
-                    <button id="btn-drawer-finale-jump" type="button" title="Preview final 14s storm plunge &amp; last-note Blue-Out Vincent signature" class="mode-pill rounded-lg px-2.5 py-0.5 font-semibold text-amber-200">&#8677; End</button>
                 </div>
             </div>
 
@@ -1447,6 +1490,10 @@
             hideFinaleControlsBar();
             overlay.classList.add('bars-open');
             document.body.classList.remove('cutscene-playing');
+            if (!window.__vgWorldReady) {
+                var bPill = document.getElementById('boot-loading-pill');
+                if (bPill) bPill.classList.add('force-visible-after-skip');
+            }
             if (state.mode !== 'finale' && window.__finishIntro3DCameraSweep) {
                 window.__finishIntro3DCameraSweep();
             }
@@ -1468,6 +1515,11 @@
             state.craneTriggered = false;
             state.barsOpened = false;
             hideFinaleControlsBar();
+            var vBoot = document.getElementById('vincent-boot-loader');
+            if (vBoot && window.__vgWorldReady) {
+                vBoot.style.opacity = '0';
+                vBoot.classList.add('hidden');
+            }
             if (skipBtn) skipBtn.classList.remove('hidden');
             overlay.style.display = 'block';
             overlay.classList.remove('bars-open');
@@ -1500,6 +1552,11 @@
             state.craneTriggered = true;
             state.barsOpened = false;
             hideFinaleControlsBar();
+            var vBootF = document.getElementById('vincent-boot-loader');
+            if (vBootF) {
+                vBootF.style.opacity = '0';
+                vBootF.classList.add('hidden');
+            }
             if (skipBtn) skipBtn.classList.add('hidden');
             if (sndHint) {
                 sndHint.style.opacity = '0';
@@ -1598,7 +1655,7 @@
                 state.elapsed += dt;
             } else {
                 var worldReady = !!window.__vgWorldReady;
-                if (state.elapsed < T_HOLD_GATE || worldReady || state.holdWait > 4.2) {
+                if (state.elapsed < T_HOLD_GATE || worldReady || state.holdWait > 18.0) {
                     state.elapsed += dt;
                 } else {
                     state.holdWait += dt;
@@ -2349,23 +2406,39 @@
         // Priority #1 Spatial Tree Canopy Registry: Van Gogh's 30 Deep-Green Sharp Cypresses are locked FIRST!
         var CYPRESS_SURROUND_SPECS = [
             [-30.2, -24.6, 0.31, false], [37.2, -29.8, 0.25, false], [44.8, -13.8, 0.33, true],
-            [-35.2, 92.5, 0.58, true],   [-31.4, 96.8, 0.39, false], [ 34.6, 94.8, 0.51, true],
+            [-35.2, 92.5, 0.58, true],   [-35.6, 98.6, 0.39, false], [ 34.6, 94.8, 0.51, true],
             [-34.4, 123.5, 0.62, true],  [ 32.8, 126.4, 0.49, true], [ 36.5, 121.2, 0.36, false],
-            [ 99.2, 39.5, 0.61, true],   [101.8, 45.2, 0.41, false], [ 98.4, 56.8, 0.55, true],
-            [102.4, 62.5, 0.37, false],  [ 98.8, 74.6, 0.52, true],  [100.6, 83.8, 0.44, false],
+            [104.2, 39.5, 0.61, true],   [106.4, 45.2, 0.41, false], [103.6, 56.8, 0.55, true],
+            [106.8, 62.5, 0.37, false],  [103.6, 74.6, 0.52, true],  [105.2, 83.8, 0.44, false],
             [-95.5, -18.2, 0.54, true],  [-89.2, -15.8, 0.36, false],[-77.4, -17.9, 0.58, true],
             [-71.8, -15.6, 0.41, false], [-59.2, -18.4, 0.49, true], [-48.5, -16.2, 0.35, false],
             [-90.5, 62.4, 0.56, true],   [-84.2, 59.6, 0.38, false], [-71.5, 63.2, 0.53, true],
             [-63.8, 59.8, 0.42, false],  [-50.6, 61.8, 0.48, true],
-            [ 55.4, -31.8, 0.47, true],  [ 61.8, -29.4, 0.34, false],[ 75.6, -32.6, 0.55, true],
+            [ 55.4, -31.8, 0.47, true],  [ 61.8, -31.4, 0.34, false],[ 75.6, -32.6, 0.55, true],
             [ 84.5, -29.8, 0.41, false], [ 93.8, -31.9, 0.50, true]
         ];
         var placedTreeEnvelopes = [{ x: -19.2, z: 27.5, r: 8.6 * 1.05, kind: 'cypress' }];
+        var placedTreeTrunkZones = [{ x: -19.2, z: 27.5, r: 4.8 }];
         for (var cpi0 = 0; cpi0 < CYPRESS_SURROUND_SPECS.length; cpi0++) {
             var cs0 = CYPRESS_SURROUND_SPECS[cpi0];
             placedTreeEnvelopes.push({ x: cs0[0], z: cs0[1], r: Math.max(2.6, 8.2 * cs0[2]), kind: 'cypress' });
+            placedTreeTrunkZones.push({ x: cs0[0], z: cs0[1], r: Math.max(1.8, 4.2 * cs0[2]) });
         }
         window.__vgTreeEnvelopes = placedTreeEnvelopes;
+        window.__vgTreeTrunkZones = placedTreeTrunkZones;
+
+        function registerTreeTrunkZone(tx, tz, clearR) {
+            placedTreeTrunkZones.push({ x: tx, z: tz, r: clearR });
+        }
+        function minClearanceToTreeTrunkZones(px, pz) {
+            var best = 1e9;
+            for (var ti = 0; ti < placedTreeTrunkZones.length; ti++) {
+                var tz0 = placedTreeTrunkZones[ti];
+                var d = Math.hypot(px - tz0.x, pz - tz0.z) - tz0.r;
+                if (d < best) best = d;
+            }
+            return best;
+        }
 
         function hasTreeCanopyOverlap(cx, cz, canopyR, extraPad) {
             var pad = (extraPad !== undefined) ? extraPad : 1.0;
@@ -2420,6 +2493,22 @@
         }
 
         function isClearForBotanicalBush(cx, cz, maxHorizReach, isCloisterBed) {
+            if (!isCloisterBed) {
+                // 0a) Never overlap any olive, cypress, umbrella pine, or boulevard plane tree trunk / root / leaning fork!
+                if (minClearanceToTreeTrunkZones(cx, cz) < maxHorizReach + 0.65) return false;
+                // 0b) Keep East Vineyard parcel (x=50..104, z=-28..18) 100% free of stray wild bushes!
+                if (cx > 48.5 && cx < 105.5 && cz > -29.5 && cz < 19.5) return false;
+                // 0c) Never overlap any wheat sheaf, street lantern, plein-air easel, fountain, or wind bush!
+                for (var cci = 0; cci < circleColliders.length; cci++) {
+                    var cc0 = circleColliders[cci];
+                    if (Math.hypot(cx - cc0.x, cz - cc0.z) < cc0.r + maxHorizReach + 0.45) return false;
+                }
+                // 0d) Never pile a new countryside bush on top of an existing bush cluster!
+                for (var bli = 0; bli < placedBushLobes.length; bli++) {
+                    var bl0 = placedBushLobes[bli];
+                    if (Math.hypot(cx - bl0.x, cz - bl0.z) < bl0.r + maxHorizReach * 0.92 + 0.22) return false;
+                }
+            }
             // 1) Never clip or touch any stone curb, dry-stone wall, or hedgerow ribbon
             if (minClearanceToStoneRibbons(cx, cz) < maxHorizReach + 0.42) return false;
             // 2) Never clip any rotated building, wall, cart, archway, or ruin OBB collider
@@ -2554,10 +2643,10 @@
                            + Math.sin(z * 0.08) * 1.6;
                 if (Math.abs(x - spineX) < 2.45) return 'dirt';
             }
-            // East path into the Stone-Walled Enclosed Wheat Field (x=0..82, z~58)
-            if (x >= -6.0 && x <= 84.0 && Math.abs(z - (58.0 + Math.sin(x * 0.06) * 2.2)) < 2.15) return 'dirt';
-            // West path through Gnarled Olive Orchards & Terraced Vineyards (x=-92..0, z~26)
-            if (x >= -92.0 && x <= -2.0 && Math.abs(z - (26.0 + Math.sin(x * 0.05) * 2.5)) < 2.15) return 'dirt';
+            // Country path from Hillside Trail smoothly crossing the West Stone Gate threshold (x=38..41.2)
+            if (x >= -6.0 && x <= 41.2 && Math.abs(z - (58.0 + Math.sin(x * 0.06) * 2.2)) < 2.15) return 'dirt';
+            // West path to Gnarled Olive Grove Easel (leads cleanly to Olive Easel at x=-46, leaving MoMA grove vista unbroken!)
+            if (x >= -45.2 && x <= -2.0 && Math.abs(z - (26.0 + Math.sin(x * 0.05) * 2.5)) < 2.15) return 'dirt';
             // Southern pine avenue around Monastery west flank (x~-36.5, z=88..136) & Via Domitia across to Les Antiques (z~136)
             if (z >= 86.0 && z <= 137.0 && Math.abs(x + 36.5 - Math.sin(z * 0.08) * 1.4) < 2.35) return 'dirt';
             if (x >= -38.0 && x <= 32.0 && Math.abs(z - (136.5 + Math.sin(x * 0.05) * 1.5)) < 2.35) return 'dirt';
@@ -2871,7 +2960,30 @@
                 + 1.8 * Math.sin(ang * 11.0 + 1.2);
             var surroundHills = radialBell * domeProfile * tNorthBlend;
 
-            var totalHills = softMaxH(alpilles, surroundHills, 0.38);
+            // 3. Dedicated Vista Ridges for MoMA's "The Olive Trees" (West) & Met's "Wheat Field with Cypresses" (East)
+            var vistaRidges = 0.0;
+            var vistaDomes = [
+                // Craggy twin cobalt Alpilles peaks + central cloud saddle rising boldly behind full-scale 1.65x Olive Trees!
+                [-109.5, 30.5, 12.6, 12.4, 22.4],
+                [-113.5, 16.5, 13.4, 13.5, 15.8],
+                [-110.0,  2.0, 12.8, 13.2, 23.2],
+                // Rolling blue Provençal foothills cleanly east of the x=96 Wheat Wall & East Cypresses (x ~ 117..119)
+                [117.0,  44.5, 12.5, 14.5, 14.2],
+                [119.0,  57.5, 13.0, 14.8, 16.4]
+            ];
+            for (var vd = 0; vd < vistaDomes.length; vd++) {
+                var vdm = vistaDomes[vd];
+                var dxV = (x - vdm[0]) / vdm[2];
+                var dzV = (z - vdm[1]) / vdm[3];
+                var d2V = dxV * dxV + dzV * dzV;
+                if (d2V < 7.5) {
+                    var crag = (vdm[0] < 0.0)
+                        ? (1.0 + 0.11 * Math.sin(z * 0.34 + x * 0.18) + 0.07 * Math.cos(z * 0.62))
+                        : (1.0 + 0.06 * Math.sin(z * 0.24));
+                    vistaRidges = softMaxH(vistaRidges, vdm[4] * Math.exp(-d2V) * crag, 0.45);
+                }
+            }
+            var totalHills = softMaxH(softMaxH(alpilles, surroundHills, 0.38), vistaRidges, 0.42);
 
             // Gently tuck outer square corners (rDist > 192) down so no grid corner ever pokes into the sky
             var edgeTuck = (rDist > 190.0) ? Math.min(1.0, (rDist - 190.0) / 45.0) : 0.0;
@@ -3571,20 +3683,20 @@
                 '    vec3 v = baseSample.xyz;',
                 '    vec4 brushTap = texture2D(tBrushMap, dirToDomeUv(cDir));',
                 '    float bStr = brushTap.b * step(0.005, uBrushAnyActive);',
-                '    if (bStr > 0.008) {',
+                '    if (bStr > 0.006) {',
                 '        vec2 bDir2 = brushTap.rg * 2.0 - 1.0;',
                 '        float bLen = length(bDir2);',
                 '        bDir2 = (bLen > 0.02) ? (bDir2 / bLen) : vec2(1.0, 0.0);',
                 '        vec3 bTang3 = liftDiskTangentToSphere(cDir, bDir2);',
-                '        v = normalize(mix(v, bTang3, clamp(bStr * 0.94, 0.0, 0.96)) + vec3(0.00001));',
+                '        v = normalize(mix(v, bTang3, clamp(smoothstep(0.03, 0.38, bStr) * 0.98, 0.0, 0.99)) + vec3(0.00001));',
                 '    }',
                 '    if (uBrushAnyActive > 0.005 && uBrushCursor.z > 0.01) {',
                 '        vec2 dc = dirToDomeDisk(cDir) - uBrushCursor.xy;',
                 '        float rc = length(dc);',
-                '        if (rc < 0.16) {',
+                '        if (rc < 0.068) {',
                 '            vec2 cTan2 = (rc > 0.003) ? (vec2(-dc.y, dc.x) / rc * uBrushCursor.w) : vec2(1.0, 0.0);',
                 '            vec3 cTan3 = liftDiskTangentToSphere(cDir, cTan2);',
-                '            v = normalize(mix(v, cTan3, clamp(uBrushCursor.z * exp(-sqf(rc / 0.068)) * 0.48, 0.0, 0.68)) + vec3(0.00001));',
+                '            v = normalize(mix(v, cTan3, clamp(uBrushCursor.z * exp(-sqf(rc / 0.030)) * 0.78, 0.0, 0.90)) + vec3(0.00001));',
                 '        }',
                 '    }',
                 '    v -= cDir * dot(v, cDir);',
@@ -3863,23 +3975,23 @@
                 '            vec2 rawCell = baseCell + vec2(float(dx), float(dy));',
                 '#endif',
                 '            vec3 rnd = hash23(rawCell + vec2(layerSeed * 23.1, layerSeed * 41.9));',
-                '            vec2 cGrid = rawCell + vec2(0.5) + (rnd.xy - 0.5) * 0.46;',
+                '            vec2 cGrid = rawCell + vec2(0.5) + (rnd.xy - 0.5) * 0.38;',
                 '            vec2 cellDisk = (cGrid - phaseOff) / (gridFreq * 1.38);',
                 '            vec3 cDir = domeDiskToDir(cellDisk);',
                 '',
                 '            vec4 cellB = sampleBrushField3D(cDir);',
                 '            vec3 rawT = getSkyFlow3D(cDir).xyz;',
                 '            vec3 rawN = normalize(cross(cDir, rawT));',
-                '            float wristTilt = (rnd.z - 0.5) * 0.56;',
+                '            float wristTilt = (rnd.z - 0.5) * 0.24;',
                 '            vec3 T = rawT * cos(wristTilt) + rawN * sin(wristTilt);',
                 '            vec3 N = cross(cDir, T);',
                 '#ifndef SAFE_MODE',
                 '            vec3 T2 = getSkyFlow3D(normalize(cDir + T * (0.90 / gridFreq))).xyz;',
                 '#endif',
                 '',
-                '            float keepProb = smoothstep(0.03, 0.52, cellB.z) * 0.92;',
-                '            if (localB.z >= 0.025 && localB.w >= 0.16 && cellB.w >= 0.16 && rnd.x <= keepProb) {',
-                '                float drift = sin(uFlowPhase * 1.9 + rnd.x * 6.2831853) * 0.16;',
+                '            float keepProb = smoothstep(0.08, 0.36, cellB.z) * 0.78;',
+                '            if (localB.z >= 0.09 && localB.w >= 0.16 && cellB.z >= 0.12 && cellB.w >= 0.16 && rnd.x <= keepProb) {',
+                '                float drift = sin(uFlowPhase * 1.9 + rnd.x * 6.2831853) * 0.12;',
                 '                vec3 rel3 = (d - cDir) * gridFreq - T * drift;',
                 '                float sAlong  = dot(rel3, T);',
                 '                float sAcross = dot(rel3, N);',
@@ -3889,28 +4001,32 @@
                 '                    sAcross -= bend * sAlong * sAlong;',
                 '#endif',
                 '',
-                '                    float halfLen = 0.58 + rnd.y * 0.28;',
-                '                    float halfWid = 0.135 + rnd.z * 0.055;',
+                '                    float halfLen = 0.60 + rnd.y * 0.28;',
+                '                    float halfWid = 0.140 + rnd.z * 0.055;',
                 '                    vec4 bst = evalSlenderBristleStroke(sAlong / halfLen, sAcross / halfWid, rnd.y + layerSeed);',
-                '                    float bAlpha = bst.x * clamp(cellB.z * 1.05, 0.0, 0.90) * (1.0 - coreShield * 0.88);',
+                '                    float bodyOp = mix(bst.x, smoothstep(0.02, 0.30, bst.x), 0.88);',
+                '                    float bAlpha = clamp(bodyOp * smoothstep(0.04, 0.18, cellB.z), 0.0, 1.0) * (1.0 - coreShield * 0.72);',
                 '                    if (bAlpha > 0.01) {',
                 '                        vec3 pigA; vec3 pigB;',
                 '                        if (cellB.w < 0.50) {',
-                '                            if (rnd.y > 0.54)      { pigA = vec3(0.985, 0.910, 0.315); pigB = vec3(0.985, 0.970, 0.855); }',
-                '                            else if (rnd.y > 0.22) { pigA = vec3(0.825, 0.878, 0.385); pigB = vec3(0.965, 0.925, 0.565); }',
-                '                            else                   { pigA = vec3(0.645, 0.845, 0.875); pigB = vec3(0.985, 0.910, 0.315); }',
+                '                            // Vivid 1889 Chrome Yellow, Indian Gold & Luminous Amber-Sun Impasto',
+                '                            if (rnd.y > 0.52)      { pigA = vec3(1.000, 0.885, 0.115); pigB = vec3(1.000, 0.960, 0.425); }',
+                '                            else if (rnd.y > 0.18) { pigA = vec3(0.995, 0.765, 0.075); pigB = vec3(1.000, 0.905, 0.195); }',
+                '                            else                   { pigA = vec3(0.965, 0.655, 0.065); pigB = vec3(1.000, 0.855, 0.155); }',
                 '                        } else if (cellB.w < 0.84) {',
-                '                            if (rnd.y > 0.52)      { pigA = vec3(0.655, 0.855, 0.885); pigB = vec3(0.955, 0.955, 0.865); }',
-                '                            else if (rnd.y > 0.20) { pigA = vec3(0.295, 0.555, 0.775); pigB = vec3(0.655, 0.855, 0.885); }',
-                '                            else                   { pigA = vec3(0.805, 0.868, 0.405); pigB = vec3(0.315, 0.565, 0.765); }',
+                '                            // Saturated Provençal Emerald-Turquoise, Radiant Cyan & Viridian-Aqua',
+                '                            if (rnd.y > 0.52)      { pigA = vec3(0.085, 0.885, 0.805); pigB = vec3(0.395, 0.975, 0.915); }',
+                '                            else if (rnd.y > 0.18) { pigA = vec3(0.045, 0.765, 0.745); pigB = vec3(0.185, 0.925, 0.855); }',
+                '                            else                   { pigA = vec3(0.145, 0.845, 0.695); pigB = vec3(0.335, 0.950, 0.865); }',
                 '                        } else {',
-                '                            if (rnd.y > 0.58)      { pigA = vec3(0.145, 0.315, 0.625); pigB = vec3(0.315, 0.560, 0.755); }',
-                '                            else if (rnd.y > 0.24) { pigA = vec3(0.075, 0.168, 0.435); pigB = vec3(0.185, 0.235, 0.505); }',
-                '                            else                   { pigA = vec3(0.028, 0.048, 0.118); pigB = vec3(0.075, 0.168, 0.435); }',
+                '                            // Electric French Ultramarine & Luminous Royal Cobalt (pops brightly on night sky!)',
+                '                            if (rnd.y > 0.54)      { pigA = vec3(0.155, 0.455, 0.995); pigB = vec3(0.355, 0.665, 1.000); }',
+                '                            else if (rnd.y > 0.20) { pigA = vec3(0.105, 0.345, 0.945); pigB = vec3(0.245, 0.555, 1.000); }',
+                '                            else                   { pigA = vec3(0.195, 0.385, 0.975); pigB = vec3(0.425, 0.705, 1.000); }',
                 '                        }',
-                '                        vec3 wPig = mix(pigA, pigB, bst.w * 0.54) * (1.0 + bst.y);',
+                '                        vec3 wPig = mix(pigA, pigB, bst.w * 0.48) * (1.14 + bst.y * 1.38);',
                 '                        canvasCol = mix(canvasCol, wPig, bAlpha);',
-                '                        heightAccum = mix(heightAccum, max(0.70, bst.z + 0.20), bAlpha * 0.92);',
+                '                        heightAccum = mix(heightAccum, max(0.88, bst.z + 0.34), bAlpha);',
                 '                    }',
                 '                }',
                 '            }',
@@ -4297,20 +4413,6 @@
                 '    }',
                 '#endif',
                 '',
-                '    if (uBrushAnyActive > 0.005) {',
-                '        vec3 brCol = canvasCol;',
-                '        float brHgt = heightAccum;',
-                '        splatPaintedBrushLayer3D(d, 62.0, vec2(0.23, 0.71), 11.4, coreShield, brCol, brHgt);',
-                '#ifndef SAFE_MODE',
-                '        if (uQuality > 0.40) {',
-                '            splatPaintedBrushLayer3D(d, 84.0, vec2(0.67, 0.19), 17.8, coreShield, brCol, brHgt);',
-                '        }',
-                '#endif',
-                '        float brKeep = step(coreShield, 0.92);',
-                '        canvasCol = mix(canvasCol, brCol, brKeep);',
-                '        heightAccum = mix(heightAccum, brHgt, brKeep);',
-                '    }',
-                '',
                 '    if (uLinenGap > 0.02) {',
                 '        float mistBand = exp(-sqf((p.y - getMistCenterY(p.x)) / 0.055)) * (1.0 - smoothstep(0.55, 0.80, p.y));',
                 '        // 3D pole-free linen fleck noise (zero polar pinch at ceiling!)',
@@ -4335,6 +4437,18 @@
                 '        vec3 scotchCloud = mix(vec3(0.76, 0.88, 0.86), vec3(0.96, 0.94, 0.84), smoothstep(0.24, 0.62, skyLum));',
                 '        vec3 daySky = mix(mistralSky, scotchCloud, smoothstep(0.10, 0.52, skyLum) * 0.88);',
                 '        canvasCol = mix(canvasCol, daySky, dayAmt);',
+                '    }',
+                '',
+                '    // (Post-ribbon smooth cloud washes removed so eastern & western swirls render purely via crisp 3D impasto ribbons!)',
+                '',
+                '    // Render Sky Brush ON TOP of linen & daylight passes so picked Gold / Turquoise / Cobalt pigments stay 100% vivid!',
+                '    if (uBrushAnyActive > 0.005) {',
+                '        vec3 brCol = canvasCol;',
+                '        float brHgt = heightAccum;',
+                '        splatPaintedBrushLayer3D(d, 58.0, vec2(0.23, 0.71), 11.4, coreShield, brCol, brHgt);',
+                '        float brKeep = step(coreShield, 0.92);',
+                '        canvasCol = mix(canvasCol, brCol, brKeep);',
+                '        heightAccum = mix(heightAccum, brHgt, brKeep);',
                 '    }',
                 '    return vec4(clamp(canvasCol, 0.0, 1.0), clamp(heightAccum, 0.0, 1.0));',
                 '}'
@@ -4570,9 +4684,9 @@
                     '                    * smoothstep(-6.8, -4.0, xz.y) * smoothstep(119.5, 114.0, xz.y);',
                     '',
                     '    float eastWheatLane = (1.0 - smoothstep(1.30, 2.75, abs(xz.y - (58.0 + sin(xz.x * 0.06) * 2.2) + wob * 0.48)))',
-                    '                        * smoothstep(-6.8, -3.2, xz.x) * smoothstep(85.5, 80.5, xz.x);',
+                    '                        * smoothstep(-6.8, -3.2, xz.x) * smoothstep(42.2, 38.2, xz.x);',
                     '    float westVineLane  = (1.0 - smoothstep(1.30, 2.75, abs(xz.y - (26.0 + sin(xz.x * 0.05) * 2.5) + wob * 0.48)))',
-                    '                        * smoothstep(-93.5, -88.5, xz.x) * smoothstep(-1.2, -4.8, xz.x);',
+                    '                        * smoothstep(-46.8, -43.5, xz.x) * smoothstep(-1.2, -4.8, xz.x);',
                     '    float southPineLane = (1.0 - smoothstep(1.40, 2.85, abs(xz.x + 36.5 - sin(xz.y * 0.08) * 1.4 + wob * 0.48)))',
                     '                        * smoothstep(83.5, 88.5, xz.y) * smoothstep(139.0, 135.0, xz.y);',
                     '    float viaDomitia    = (1.0 - smoothstep(1.50, 2.95, abs(xz.y - (136.5 + sin(xz.x * 0.05) * 1.5) + wob * 0.48)))',
@@ -4661,9 +4775,9 @@
                     '                    * smoothstep(-7.2, -4.2, xz.y) * smoothstep(119.5, 114.0, xz.y);',
                     '',
                     '    float eastWheatLane = (1.0 - smoothstep(1.28, 2.72, abs(xz.y - (58.0 + sin(xz.x * 0.06) * 2.2) + wob * 0.50)))',
-                    '                        * smoothstep(-6.8, -3.2, xz.x) * smoothstep(85.5, 80.5, xz.x);',
+                    '                        * smoothstep(-6.8, -3.2, xz.x) * smoothstep(42.2, 38.2, xz.x);',
                     '    float westVineLane  = (1.0 - smoothstep(1.28, 2.72, abs(xz.y - (26.0 + sin(xz.x * 0.05) * 2.5) + wob * 0.50)))',
-                    '                        * smoothstep(-93.5, -88.5, xz.x) * smoothstep(-1.2, -4.8, xz.x);',
+                    '                        * smoothstep(-46.8, -43.5, xz.x) * smoothstep(-1.2, -4.8, xz.x);',
                     '    float southPineLane = (1.0 - smoothstep(1.38, 2.82, abs(xz.x + 36.5 - sin(xz.y * 0.08) * 1.4 + wob * 0.50)))',
                     '                        * smoothstep(83.5, 88.5, xz.y) * smoothstep(139.0, 135.0, xz.y);',
                     '    float viaDomitia    = (1.0 - smoothstep(1.48, 2.95, abs(xz.y - (136.5 + sin(xz.x * 0.05) * 1.5) + wob * 0.50)))',
@@ -4757,10 +4871,13 @@
                     '                    vec3 lavenderBlu = vec3(0.355, 0.315, 0.645);',
                     '',
                     '                    // Classify 1889 Provençal agricultural zones outside the front MoMA cone!',
-                    '                    float inWheatField = smoothstep(37.5, 40.0, cWorld.x) * smoothstep(97.5, 95.0, cWorld.x)',
-                    '                                       * smoothstep(33.5, 36.0, cWorld.y) * smoothstep(91.5, 89.0, cWorld.y);',
-                    '                    float inWestVines  = smoothstep(-108.0, -98.0, cWorld.x) * smoothstep(-40.0, -46.0, cWorld.x)',
-                    '                                       * smoothstep(-18.0, -12.0, cWorld.y) * smoothstep(62.0, 56.0, cWorld.y);',
+                    '                    float inWheatField = smoothstep(37.8, 38.2, cWorld.x) * smoothstep(96.2, 95.8, cWorld.x)',
+                    '                                       * smoothstep(33.8, 34.2, cWorld.y) * smoothstep(90.2, 89.8, cWorld.y);',
+                    '                    float inIrisesBed  = smoothstep(-15.5, -13.5, cWorld.x) * smoothstep(-2.4, -3.6, cWorld.x)',
+                    '                                       * smoothstep(100.0, 101.8, cWorld.y) * smoothstep(111.5, 109.8, cWorld.y);',
+                    '                    float inOliveVista = smoothstep(-91.0, -83.5, cWorld.x) * smoothstep(-45.0, -51.5, cWorld.x)',
+                    '                                       * smoothstep(-8.0, -1.0, cWorld.y) * smoothstep(50.0, 42.0, cWorld.y);',
+                    '                    float inWestVines  = 0.0;',
                     '                    float inEastVines  = smoothstep(48.0, 54.0, cWorld.x) * smoothstep(112.0, 104.0, cWorld.x)',
                     '                                       * smoothstep(-32.0, -26.0, cWorld.y) * smoothstep(22.0, 16.0, cWorld.y);',
                     '                    float inVineyard   = max(inWestVines, inEastVines);',
@@ -4770,7 +4887,33 @@
                     '                    float inGarrigue   = smoothstep(114.0, 134.0, rC);',
                     '                    float parcelPatch  = vnoise(cWorld * 0.055 + vec2(3.1, 7.4));',
                     '',
-                    '                    if (inWheatField > 0.5) {',
+                    '                    if (inIrisesBed > 0.45) {',
+                    '                        // Getty May 1889 "Irises": warm red-ochre, burnt terracotta & sienna Provençal garden soil!',
+                    '                        vec3 terraDark  = vec3(0.415, 0.165, 0.095);',
+                    '                        vec3 redOchre   = vec3(0.715, 0.305, 0.145);',
+                    '                        vec3 warmCopper = vec3(0.855, 0.485, 0.215);',
+                    '                        vec3 sunClay    = vec3(0.905, 0.655, 0.315);',
+                    '                        if (rnd.z < 0.15 * uBlackInk) { pigA = terraDark;  pigB = redOchre; }',
+                    '                        else if (rnd.y < 0.48)        { pigA = redOchre;   pigB = warmCopper; }',
+                    '                        else if (rnd.y < 0.82)        { pigA = warmCopper; pigB = sunClay; }',
+                    '                        else                          { pigA = oliveGr;    pigB = redOchre; }',
+                    '                    } else if (inOliveVista > 0.45) {',
+                    '                        // MoMA June 1889 "The Olive Trees": sinuous torrent ribbons of chartreuse, sulfur-ochre, emerald & cobalt shadow!',
+                    '                        float torrent = sin(cWorld.x * 0.32 + sin(cWorld.y * 0.26) * 2.1 + cos(cWorld.x * 0.14 - cWorld.y * 0.19) * 1.3);',
+                    '                        vec3 paleSulfur = vec3(0.875, 0.825, 0.415);',
+                    '                        vec3 emeraldTor = vec3(0.185, 0.515, 0.235);',
+                    '                        vec3 shadowBlue = vec3(0.105, 0.215, 0.455);',
+                    '                        if (torrent > 0.36) {',
+                    '                            pigA = (rnd.y > 0.45) ? paleSulfur : chartreuse;',
+                    '                            pigB = wheatGold;',
+                    '                        } else if (torrent > -0.24) {',
+                    '                            pigA = (rnd.y > 0.42) ? emeraldTor : chartreuse;',
+                    '                            pigB = sageSilv;',
+                    '                        } else {',
+                    '                            pigA = (rnd.z < 0.38) ? shadowBlue : oliveGr;',
+                    '                            pigB = cobalt;',
+                    '                        }',
+                    '                    } else if (inWheatField > 0.5) {',
                     '                        // Enclosed Golden Wheat Field: waist-high gold, zinc-chartreuse & scarlet poppy flecks!',
                     '                        if (rnd.z < 0.045)      { pigA = poppyRed;   pigB = wheatGold; }',
                     '                        else if (rnd.y < 0.54)  { pigA = wheatGold;  pigB = chartreuse; }',
@@ -4824,7 +4967,9 @@
                     '    vec3 V = normalize(cameraPosition - vWorldPos);',
                     '    float ndl = dot(N, uLightDir) * 0.5 + 0.5;',
                     '    float rBasin = length(vWorldPos.xz);',
-                    '    float isMtn = clamp(smoothstep(-40.0, -52.0, vWorldPos.z) + smoothstep(126.0, 148.0, rBasin), 0.0, 1.0);',
+                    '    float westOliveMtn = smoothstep(-83.5, -91.5, vWorldPos.x) * smoothstep(-18.0, -6.0, vWorldPos.z) * smoothstep(50.0, 38.0, vWorldPos.z) * smoothstep(1.35, 3.8, vWorldPos.y);',
+                    '    float eastWheatMtn = smoothstep(104.5, 110.5, vWorldPos.x) * smoothstep(28.0, 36.0, vWorldPos.z) * smoothstep(76.0, 66.0, vWorldPos.z) * smoothstep(1.8, 4.8, vWorldPos.y);',
+                    '    float isMtn = clamp(smoothstep(-40.0, -52.0, vWorldPos.z) + smoothstep(126.0, 148.0, rBasin) + westOliveMtn + eastWheatMtn, 0.0, 1.0);',
                     '',
                     '    float rightCap = smoothstep(8.0, 46.0, vWorldPos.x) * smoothstep(4.0, 18.0, vWorldPos.y) * smoothstep(-35.0, -55.0, vWorldPos.z);',
                     '    vec3 mCol = mix(vec3(0.055, 0.125, 0.325), vec3(0.020, 0.032, 0.075), clamp(rightCap * 0.85 * uBlackInk, 0.0, 0.95));',
@@ -4882,8 +5027,10 @@
                     '                    * smoothstep(-40.0, -35.0, vWorldPos.z) * smoothstep(2.0, -4.0, vWorldPos.z);',
                     '    float inCloister = smoothstep(-33.0, -29.0, vWorldPos.x) * smoothstep(33.0, 29.0, vWorldPos.x)',
                     '                     * smoothstep(95.0, 98.0, vWorldPos.z) * smoothstep(127.0, 123.0, vWorldPos.z);',
+                    '    float inOliveClear = smoothstep(-96.0, -86.0, vWorldPos.x) * smoothstep(-45.0, -51.5, vWorldPos.x)',
+                    '                       * smoothstep(-8.0, -1.0, vWorldPos.z) * smoothstep(50.0, 42.0, vWorldPos.z);',
                     '    float outerFade = 1.0 - smoothstep(130.0, 146.0, rBasin);',
-                    '    float hedgeMask = clamp((hedgeA * 0.82 + hedgeB * 0.68) * (1.0 - pathMasks.x) * (1.0 - pathMasks.y) * (1.0 - inTownBox) * (1.0 - inCloister) * outerFade * uBlackInk, 0.0, 0.88);',
+                    '    float hedgeMask = clamp((hedgeA * 0.82 + hedgeB * 0.68) * (1.0 - pathMasks.x) * (1.0 - pathMasks.y) * (1.0 - inTownBox) * (1.0 - inCloister) * (1.0 - inOliveClear) * outerFade * uBlackInk, 0.0, 0.88);',
                     '    fCol = mix(fCol, vec3(0.018, 0.034, 0.068), hedgeMask);',
                     '    fHgt = mix(fHgt, 0.74, hedgeMask * 0.75);',
                     '',
@@ -4891,24 +5038,24 @@
                     '    float alleyEdgeOcc = inTownBox * (1.0 - smoothstep(0.05, 0.72, pathMasks.x)) * 0.24 * clamp(uBlackInk, 0.3, 1.3);',
                     '    fCol = mix(fCol, vec3(0.016, 0.028, 0.068), alleyEdgeOcc);',
                     '',
-                    '    // Full 18-point warm gaslight & Café de la Place awning spills catching raised impasto cobblestone crowns!',
-                    '    float pool = exp(-sqf(length(vWorldPos.xz - vec2( 1.5, -19.2)) / 6.8)) * 0.38',
-                    '               + exp(-sqf(length(vWorldPos.xz - vec2( 4.7, -19.0)) / 5.6)) * 0.44',
-                    '               + exp(-sqf(length(vWorldPos.xz - vec2(-6.8,  -7.8)) / 6.2)) * 0.44',
-                    '               + exp(-sqf(length(vWorldPos.xz - vec2(-4.4, -14.2)) / 5.2)) * 0.36',
-                    '               + exp(-sqf(length(vWorldPos.xz - vec2( 5.8, -14.2)) / 5.2)) * 0.36',
-                    '               + exp(-sqf(length(vWorldPos.xz - vec2(-3.8, -21.8)) / 5.0)) * 0.34',
-                    '               + exp(-sqf(length(vWorldPos.xz - vec2( 4.2, -21.8)) / 5.0)) * 0.34',
-                    '               + exp(-sqf(length(vWorldPos.xz - vec2(10.8, -16.2)) / 4.8)) * 0.32',
-                    '               + exp(-sqf(length(vWorldPos.xz - vec2(15.2, -21.5)) / 4.8)) * 0.32',
-                    '               + exp(-sqf(length(vWorldPos.xz - vec2(-15.5, -12.0)) / 5.0)) * 0.30',
-                    '               + exp(-sqf(length(vWorldPos.xz - vec2(23.5, -12.0)) / 5.0)) * 0.30',
-                    '               + exp(-sqf(length(vWorldPos.xz - vec2(-16.0,  -4.2)) / 5.4)) * 0.32',
-                    '               + exp(-sqf(length(vWorldPos.xz - vec2( -6.5,  -5.1)) / 5.4)) * 0.34',
-                    '               + exp(-sqf(length(vWorldPos.xz - vec2(  6.8,  -5.0)) / 5.4)) * 0.34',
-                    '               + exp(-sqf(length(vWorldPos.xz - vec2( 15.5,  -4.4)) / 5.4)) * 0.32',
-                    '               + exp(-sqf(length(vWorldPos.xz - vec2( 29.5,  -2.6)) / 5.4)) * 0.30',
-                    '               + exp(-sqf(length(vWorldPos.xz - vec2(  0.0,  95.5)) / 6.2)) * 0.32;',
+                    '    // Full 18-point warm gaslight & Café de la Place awning spills synced to exact sidewalk/pier lantern heads!',
+                    '    float pool = exp(-sqf(length(vWorldPos.xz - vec2( 1.50, -19.20)) / 6.6)) * 0.36',
+                    '               + exp(-sqf(length(vWorldPos.xz - vec2( 4.94, -19.00)) / 5.6)) * 0.44',
+                    '               + exp(-sqf(length(vWorldPos.xz - vec2(-7.20,  -6.40)) / 6.0)) * 0.40',
+                    '               + exp(-sqf(length(vWorldPos.xz - vec2(-8.95, -13.02)) / 5.2)) * 0.35',
+                    '               + exp(-sqf(length(vWorldPos.xz - vec2( 5.35, -12.81)) / 5.2)) * 0.35',
+                    '               + exp(-sqf(length(vWorldPos.xz - vec2(-4.75, -20.43)) / 5.0)) * 0.34',
+                    '               + exp(-sqf(length(vWorldPos.xz - vec2(14.87, -15.60)) / 4.8)) * 0.33',
+                    '               + exp(-sqf(length(vWorldPos.xz - vec2(14.72, -24.87)) / 4.8)) * 0.33',
+                    '               + exp(-sqf(length(vWorldPos.xz - vec2(-18.10,-12.89)) / 5.0)) * 0.31',
+                    '               + exp(-sqf(length(vWorldPos.xz - vec2(24.90, -15.54)) / 5.0)) * 0.31',
+                    '               + exp(-sqf(length(vWorldPos.xz - vec2(-22.70, -5.58)) / 5.4)) * 0.32',
+                    '               + exp(-sqf(length(vWorldPos.xz - vec2(-9.18,  -6.19)) / 5.4)) * 0.34',
+                    '               + exp(-sqf(length(vWorldPos.xz - vec2( 6.85,  -6.14)) / 5.4)) * 0.34',
+                    '               + exp(-sqf(length(vWorldPos.xz - vec2(22.80,  -5.68)) / 5.4)) * 0.32',
+                    '               + exp(-sqf(length(vWorldPos.xz - vec2(35.39,  -6.66)) / 5.4)) * 0.31',
+                    '               + exp(-sqf(length(vWorldPos.xz - vec2(-2.64,  95.35)) / 5.2)) * 0.28',
+                    '               + exp(-sqf(length(vWorldPos.xz - vec2( 2.64,  95.35)) / 5.2)) * 0.28;',
                     '    float cobbleCrown = mix(0.62, 1.28, smoothstep(0.32, 0.72, fHgt));',
                     '    float gasWeight = clamp(pool * cobbleCrown * clamp(uYellowBoost, 0.35, 1.65), 0.0, 0.62);',
                     '    vec3 gasPigment = mix(vec3(0.92, 0.56, 0.12), vec3(0.99, 0.89, 0.34), smoothstep(0.18, 0.52, gasWeight));',
@@ -5036,14 +5183,32 @@
                 );
             }
 
+            // Woodcut Prussian-Cobalt Ridge Contours on Western Olive Alpilles & Eastern Wheat Foothills
+            (function () {
+                var savedVistaRng = rngState;
+                [
+                    // Western Alpilles craggy upper & lower ridge lines behind "The Olive Trees"
+                    [[-107.5, -6.0], [-109.5, 2.5], [-111.0, 10.5], [-113.0, 16.5], [-110.6, 23.5], [-109.0, 30.5], [-108.2, 38.5]],
+                    [[-100.5,  0.0], [-102.5, 8.5], [-104.0, 16.5], [-102.2, 25.0], [-100.8, 33.5]],
+                    // Eastern Provençal rolling hill crest behind "Wheat Field with Cypresses"
+                    [[115.5, 36.0], [117.0, 44.5], [118.2, 51.5], [119.0, 57.5], [117.2, 65.5]]
+                ].forEach(function (rPath, rIdx) {
+                    var rPts = rPath.map(function (xz) {
+                        return new THREE.Vector3(xz[0], getGroundY(xz[0], xz[1]) + 0.24, xz[1]);
+                    });
+                    var rCv = new THREE.CatmullRomCurve3(rPts);
+                    var rGeo = new THREE.TubeGeometry(rCv, 44, (rIdx === 0 ? 0.42 : 0.30), 5, false);
+                    scene.add(new THREE.Mesh(rGeo, crestInkMat));
+                });
+                rngState = savedVistaRng;
+            })();
+
             // Valley & Foreground Hedgerow Tubes
             var hedgePaths = [
                 [[-42, 16], [-24, 13], [-8, 15]],
-                [[ 4, 13],  [ 20, 11], [38, 14], [54, 10]],
+                [[ 4, 13],  [ 20, 11], [38, 14], [48.0, 10.5]],
                 [[-38, 4],  [-18, 1],  [-6, 2]],
-                [[ 6, 2],   [ 24, -1], [44, 2]],
-                [[-32, -7], [-12, -8], [-5, -7]],
-                [[ 6, -6],  [ 28, -9], [46, -6]]
+                [[ 6, 2],   [ 24, -1], [44, 2]]
             ];
             hedgePaths.forEach(function (hp, hIdx) {
                 for (var hSeg = 0; hSeg < hp.length - 1; hSeg++) {
@@ -5472,6 +5637,10 @@
             // Strict spatial clearance check against all roads, buildings, walls, pines, cypresses & enclosures
             function isClearForOrchardTree(cx, cz, clearRad, allowEaselClearing) {
                 if (Math.hypot(cx, cz) > 134.0) return false;
+                // Keep planted orchard trees strictly off mountain slopes & crests!
+                var hOrch = getGroundY(cx, cz);
+                var slpOrch = Math.hypot(getGroundY(cx + 2.5, cz) - getGroundY(cx - 2.5, cz), getGroundY(cx, cz + 2.5) - getGroundY(cx, cz - 2.5)) / 5.0;
+                if (hOrch > 3.1 || slpOrch > 0.15) return false;
                 // Keep central valley, village, monastery cloister & Les Antiques corridor 100% clear
                 if (cx > -43.0 && cx < 49.0 && cz > -36.0 && cz < 148.0) return false;
                 // Keep Enclosed Wheat Field + buffer clear
@@ -5481,11 +5650,11 @@
                 // Keep West Vineyard clear (unless placing in the dedicated wide West Lane easel clearing)
                 if (!allowEaselClearing && cx > -101.0 && cx < -44.0 && cz > -16.5 && cz < 58.5) return false;
 
-                // Keep all roads, cobbles & footpaths clear (check center + 8 perimeter points)
+                // Keep all roads, cobbles & footpaths clear for full-size 1.5x-1.8x olive crowns!
                 if (getSurfaceMaterialAt(cx, cz) !== 'grass') return false;
                 for (var aCheck = 0; aCheck < 8; aCheck++) {
                     var angC = (aCheck / 8) * Math.PI * 2.0;
-                    if (getSurfaceMaterialAt(cx + Math.cos(angC) * 4.2, cz + Math.sin(angC) * 4.2) !== 'grass') return false;
+                    if (getSurfaceMaterialAt(cx + Math.cos(angC) * 5.8, cz + Math.sin(angC) * 5.8) !== 'grass') return false;
                 }
 
                 // Check all oriented box colliders (townhouses, farmsteads, dry-stone walls, cart, monastery, ruins)
@@ -5497,8 +5666,8 @@
                     if (lx < bc.hw + clearRad && lz < bc.hd + clearRad) return false;
                 }
 
-                // Check all tree canopy envelopes FIRST (prioritizing Van Gogh cypresses, pines, plane trees, groves & placed olives!)
-                if (hasTreeCanopyOverlap(cx, cz, 3.45, 1.35)) return false;
+                // Check all tree canopy envelopes FIRST at true 1.65x crown span!
+                if (hasTreeCanopyOverlap(cx, cz, clearRad * 0.88, 1.25)) return false;
 
                 // Check all circle colliders (wheat sheaves, easels, lanterns, wells)
                 for (var ci = 0; ci < circleColliders.length; ci++) {
@@ -5647,7 +5816,7 @@
                     '    float ndl = dot(N, uLightDir) * 0.5 + 0.5;',
                     '    vec3 col = mix(uShadow, uLeafDark, ndl * 0.6);',
                     '    float hgt = 0.30;',
-                    '    vec2 bUv = (vWorldPos.xz * 1.12 + vec2(vWorldPos.y * 0.65, -vWorldPos.y * 0.45)) * uThinness;',
+                    '    vec2 bUv = (vWorldPos.xz * 0.84 + vec2(vWorldPos.y * 0.50, -vWorldPos.y * 0.35)) * uThinness;',
                     '#ifdef SAFE_MODE',
                     '    for (int k = 0; k < 2; k++) {',
                     '        if (true) {',
@@ -5696,7 +5865,34 @@
                 ].join('\n')
             });
 
-            function addSculptedProvencalOliveTree(cx, cz, scaleT, seedIdx) {
+            // Additional Van Gogh 1889 Saint-Rémy Olive Crown Palettes (Silvery-Willow June Study & Deep Viridian-Amber Autumn Study!)
+            function makeOliveVariantMat(shHex, dkHex, midHex, blAHex, blBHex, blProb, swAmp) {
+                var m = oliveCloudMat.clone();
+                m.uniforms = {
+                    uShadow:    { value: new THREE.Color(shHex) },
+                    uLeafDark:  { value: new THREE.Color(dkHex) },
+                    uLeafMid:   { value: new THREE.Color(midHex) },
+                    uBloomA:    { value: new THREE.Color(blAHex) },
+                    uBloomB:    { value: new THREE.Color(blBHex) },
+                    uBloomProb: { value: blProb },
+                    uSwayAmp:   { value: swAmp },
+                    uFlowPhase: uFlowPhase,
+                    uThinness:  uThinness,
+                    uChaos:     uChaos,
+                    uBlackInk:  uBlackInk,
+                    uQuality:   uQuality,
+                    uLightDir:  { value: GALLERY_LIGHT_DIR }
+                };
+                m.__rawFragShader = oliveCloudMat.__rawFragShader;
+                m.__compiledSafe = oliveCloudMat.__compiledSafe;
+                safeCapableMaterials.push(m);
+                return m;
+            }
+            var oliveSilverSageMat = makeOliveVariantMat(0x0b1f2b, 0x264f47, 0x678f7c, 0xc8d9be, 0x93ba8a, 0.62, 0.048);
+            var oliveDeepAmberMat  = makeOliveVariantMat(0x081824, 0x183f2c, 0x4d7832, 0xe8c438, 0xa2b834, 0.56, 0.044);
+            var oliveCrownMats = [oliveCloudMat, oliveSilverSageMat, oliveDeepAmberMat];
+
+            function addSculptedProvencalOliveTree(cx, cz, scaleT, seedIdx, archHint) {
                 var gy = getGroundY(cx, cz);
                 addCircleCollider(cx, cz, 0.66 * scaleT);
 
@@ -5705,11 +5901,24 @@
                     return v - Math.floor(v);
                 }
 
+                // 4 Distinct Van Gogh Olive Archetypes:
+                //   0 = Classic Gnarled Goblet, 1 = Squat Wide-Spreading Ancient Patriarch,
+                //   2 = Dramatic Mistral Windswept Leaner, 3 = Tall Twin-Bole Low-Forking Olive
+                var arch = (typeof archHint === 'number') ? (archHint % 4) : (Math.floor(tHash(0.73) * 4.0) % 4);
+                var crownMatPick = oliveCrownMats[Math.floor(tHash(0.39) * 3.0) % 3];
+                var boleThickMult = (arch === 1) ? 1.24 : ((arch === 3) ? 0.88 : 1.0);
+                var reachMult     = (arch === 1) ? 1.32 : ((arch === 2) ? 1.18 : ((arch === 3) ? 0.92 : 1.04));
+                var crownFlatMult = (arch === 1) ? 0.62 : ((arch === 3) ? 0.92 : 0.76);
+                var heightMult    = (arch === 1) ? 0.80 : ((arch === 3) ? 1.22 : ((arch === 2) ? 0.94 : 1.0));
+
                 var leanAng = oRand() * Math.PI * 2.0;
-                var leanAmt = (0.30 + oRand() * 0.36) * scaleT;
+                var leanBase = (0.30 + oRand() * 0.36) * scaleT;
+                var leanAmt = (arch === 2) ? (leanBase * 1.95 + 0.32 * scaleT) : leanBase;
                 var forkX = cx + Math.cos(leanAng) * leanAmt;
                 var forkZ = cz + Math.sin(leanAng) * leanAmt;
-                var forkY = gy + (2.05 + oRand() * 0.34) * scaleT;
+                var forkY = gy + (2.05 + oRand() * 0.34) * scaleT * heightMult;
+                registerTreeTrunkZone(cx, cz, 1.95 * scaleT);
+                registerTreeTrunkZone(forkX, forkZ, 1.85 * scaleT);
 
                 // Expressive Van Gogh writhing S-curve + continuous primary leader plunging deep inside `cPad` (ZERO blunt stump top!)
                 var perpAng = leanAng + Math.PI * 0.5 * (tHash(1.1) > 0.5 ? 1.0 : -1.0);
@@ -5724,7 +5933,7 @@
                 var leaderTopY = forkY + 1.08 * scaleT; // Rises ~0.92m inside central `cPad` cloud so no flat top ever shows!
 
                 var mainBole = addGnarledOliveLimb([
-                    new THREE.Vector3(cx, gy - 0.65, cz),
+                    new THREE.Vector3(cx, gy - 0.72 * Math.max(1.0, scaleT * 0.85), cz),
                     new THREE.Vector3(
                         cx + Math.cos(leanAng) * 0.14 * scaleT + Math.cos(perpAng) * bellyAmp,
                         gy + 0.58 * scaleT,
@@ -5742,7 +5951,7 @@
                         (forkZ + leaderTopZ) * 0.5 + Math.sin(perpAng) * 0.12 * scaleT
                     ),
                     new THREE.Vector3(leaderTopX, leaderTopY, leaderTopZ)
-                ], 0.48 * scaleT, 0.10 * scaleT, 14, 22, {
+                ], 0.48 * scaleT * boleThickMult, 0.10 * scaleT * boleThickMult, 14, 22, {
                     seed: 13.7 + seedIdx * 4.31,
                     nCirc: 12.0,
                     cordAmp: 0.21,
@@ -5766,7 +5975,7 @@
                     var ryMid = getGroundY(rxMid, rzMid) + 0.10 * scaleT;
                     var rxEnd = cx + Math.cos(rAng) * rReach;
                     var rzEnd = cz + Math.sin(rAng) * rReach;
-                    var ryEnd = getGroundY(rxEnd, rzEnd) - 0.34;
+                    var ryEnd = getGroundY(rxEnd, rzEnd) - 0.42 * Math.max(1.0, scaleT * 0.85);
 
                     var rootLimb = addGnarledOliveLimb([
                         new THREE.Vector3(cx + Math.cos(rAng) * 0.10 * scaleT, gy + 0.48 * scaleT, cz + Math.sin(rAng) * 0.10 * scaleT),
@@ -5809,15 +6018,43 @@
                     });
                 }
 
-                // 3-4 gnarled scaffold boughs + secondary crooked forks + plump, billowing Van Gogh olive cloud-lobes!
-                var boughCount = 3 + (seedIdx % 2);
+                // Archetype 2/3: Optional low-forking twin serpentine sister trunk rising at an angle!
+                if (arch === 3 || (arch === 1 && tHash(31.4) > 0.45)) {
+                    var sisAng = leanAng + Math.PI * (0.78 + tHash(33.1) * 0.44);
+                    var sisReach = (0.85 + tHash(35.7) * 0.42) * scaleT;
+                    var sisTopX = cx + Math.cos(sisAng) * sisReach;
+                    var sisTopZ = cz + Math.sin(sisAng) * sisReach;
+                    var sisTopY = gy + (1.75 + tHash(37.9) * 0.45) * scaleT;
+                    var sisLimb = addGnarledOliveLimb([
+                        new THREE.Vector3(cx, gy + 0.22 * scaleT, cz),
+                        new THREE.Vector3(cx + Math.cos(sisAng) * sisReach * 0.48, gy + 1.02 * scaleT, cz + Math.sin(sisAng) * sisReach * 0.48),
+                        new THREE.Vector3(sisTopX, sisTopY, sisTopZ)
+                    ], 0.28 * scaleT, 0.085 * scaleT, 9, 12, {
+                        seed: 419.3 + seedIdx * 4.7,
+                        nCirc: 7.0,
+                        cordAmp: 0.17,
+                        cordCount: 3.0,
+                        twistSpan: 2.5
+                    });
+                    var sisInk = sisLimb.sampleHelixPoints(0.10, 0.84, 8, sisLimb.getBottomTheta(), false, 0.93);
+                    addCurveBrushStrokeFromPoints(scene, sisInk, 0.075 * scaleT, oliveWoodcutInkMat, seedIdx * 6.3 + 9.1, true);
+                    var sisPad = new THREE.Mesh(puffGeo, crownMatPick);
+                    sisPad.position.set(sisTopX, sisTopY + 0.32 * scaleT, sisTopZ);
+                    sisPad.scale.set(1.36 * scaleT, 0.92 * scaleT, 1.28 * scaleT);
+                    sisPad.rotation.y = sisAng;
+                    scene.add(sisPad);
+                }
+
+                // 3-5 gnarled scaffold boughs + secondary crooked forks + varied Van Gogh olive cloud-lobes!
+                var boughCount = (arch === 1) ? 5 : (3 + (seedIdx % 2));
                 var baseYaw = oRand() * Math.PI * 2.0;
                 for (var bi = 0; bi < boughCount; bi++) {
-                    var bAng = baseYaw + (bi / boughCount) * Math.PI * 2.0 + (oRand() - 0.5) * 0.42;
-                    var reach = (1.12 + oRand() * 0.44) * scaleT;
+                    var bAng = baseYaw + (bi / boughCount) * Math.PI * 2.0 + (oRand() - 0.5) * 0.48;
+                    var windBias = (arch === 2) ? (0.34 * Math.max(0.0, Math.cos(bAng - leanAng))) : 0.0;
+                    var reach = (1.12 + oRand() * 0.44 + windBias) * scaleT * reachMult;
                     var tipX = forkX + Math.cos(bAng) * reach;
                     var tipZ = forkZ + Math.sin(bAng) * reach;
-                    var tipY = forkY + (0.92 + oRand() * 0.44) * scaleT;
+                    var tipY = forkY + (0.86 + oRand() * 0.48) * scaleT * (arch === 1 ? 0.78 : 1.0);
 
                     var midJitterX = (oRand() - 0.5) * 0.24;
                     var midJitterZ = (oRand() - 0.5) * 0.24;
@@ -5868,38 +6105,33 @@
                         });
                     }
 
-                    var sx = (1.42 + oRand() * 0.34) * scaleT;
-                    var sy = sx * (0.74 + oRand() * 0.10); // Plump, billowing Van Gogh crown lobe (matches Attachment 4)!
-                    var sz = sx * (0.92 + oRand() * 0.14);
+                    var sx = (1.38 + oRand() * 0.42) * scaleT * (arch === 1 ? 1.15 : (arch === 3 ? 0.88 : 1.0));
+                    var sy = sx * (crownFlatMult + (oRand() - 0.5) * 0.12);
+                    var sz = sx * (0.88 + oRand() * 0.20);
                     var py = tipY + sy * 0.26;
 
-                    var pad = new THREE.Mesh(puffGeo, oliveCloudMat);
+                    var pad = new THREE.Mesh(puffGeo, crownMatPick);
                     pad.position.set(tipX, py, tipZ);
                     pad.scale.set(sx, sy, sz);
                     pad.rotation.set((oRand() - 0.5) * 0.22, bAng, (oRand() - 0.5) * 0.22);
                     scene.add(pad);
 
+                    // Preserve exact deterministic oRand() stride without detached floating paddles outside the 3D crown!
                     for (var sb = 0; sb < 24; sb++) {
-                        var th = oRand() * Math.PI * 2.0;
-                        var rSt = (0.45 + oRand() * 0.95) * sx;
-                        var wy = py + (oRand() - 0.35) * sy * 1.15;
-                        var wx = tipX + Math.cos(th) * rSt;
-                        var wz = tipZ + Math.sin(th) * rSt;
-                        pushBristleStamp(
-                            wx, wy, wz,
-                            -Math.sin(th) * 0.88 * scaleT, 0.22 * scaleT, Math.cos(th) * 0.88 * scaleT,
-                            0.0, 0.34 * scaleT, 0.0,
-                            (sb + bi) % 8, 0.08, oRand() * 6.28, 2.0,
-                            sb % 3 === 0 ? 0xd9b838 : (sb % 3 === 1 ? 0x8ea83b : 0x2d5e4c),
-                            0x12263f
-                        );
+                        oRand(); oRand(); oRand(); oRand();
                     }
                 }
 
-                // Plump upper crown dome tying the boughs into one cohesive, billowing Van Gogh silhouette!
-                var cPad = new THREE.Mesh(puffGeo, oliveCloudMat);
-                cPad.position.set(forkX, forkY + 1.48 * scaleT, forkZ);
-                cPad.scale.set(1.72 * scaleT, 1.32 * scaleT, 1.64 * scaleT);
+                // Upper crown dome varied by tree archetype (wide umbrella on patriarchs, tall tuft on spire olives, wind-shifted on leaners)!
+                var cPad = new THREE.Mesh(puffGeo, crownMatPick);
+                var cShiftX = (arch === 2) ? Math.cos(leanAng) * 0.42 * scaleT : 0.0;
+                var cShiftZ = (arch === 2) ? Math.sin(leanAng) * 0.42 * scaleT : 0.0;
+                cPad.position.set(forkX + cShiftX, forkY + (arch === 1 ? 1.12 : (arch === 3 ? 1.68 : 1.44)) * scaleT, forkZ + cShiftZ);
+                cPad.scale.set(
+                    1.72 * scaleT * (arch === 1 ? 1.24 : (arch === 3 ? 0.88 : 1.0)),
+                    1.32 * scaleT * (arch === 1 ? 0.78 : (arch === 3 ? 1.14 : 0.98)),
+                    1.64 * scaleT * (arch === 1 ? 1.20 : 0.96)
+                );
                 cPad.rotation.y = baseYaw;
                 scene.add(cPad);
 
@@ -5911,45 +6143,44 @@
             }
 
             var orchardCandidates = [];
-            // 1) Signature Gnarled Olive Stand framing "The Olive Trees" Easel (-46, 25 -> looking -68, 20)
-            //    Tucked cleanly into the wide z=22.6..29.4 clearing without touching the z~26 dirt lane or vine rows!
+            // 1) 10 Full-Scale (1.52x..1.80x), Well-Spaced Varied Olive Trees strictly West of the Easel (36m+ away from Hero Cypress!)
             [
-                [-56.5, 20.6, 1.04, true], [-66.0, 19.8, 1.12, true], [-76.5, 20.4, 1.06, true],
-                [-61.5, 31.6, 1.08, true], [-72.5, 31.8, 1.02, true]
+                [-55.5, 32.2, 1.70, true, 1], [-56.8, 13.8, 1.58, true, 2],
+                [-65.4, 23.2, 1.62, true, 3], [-64.2, 41.2, 1.54, true, 0], [-65.8,  3.8, 1.66, true, 1],
+                [-74.6, 14.6, 1.56, true, 2], [-75.2, 31.4, 1.78, true, 0],
+                [-78.4, 43.2, 1.52, true, 3], [-78.8,  2.2, 1.60, true, 2],
+                [-81.6, 22.8, 1.68, true, 1]
             ].forEach(function (ec) { orchardCandidates.push(ec); });
 
-            // 2) North-West & South-West Planted Olive Orchards (outside West Vineyard [-98..-46, -14..56])
-            for (var oxW = -118; oxW <= -48; oxW += 12.0) {
-                for (var ozW = -38; ozW <= 108; ozW += 12.5) {
-                    var jxW = oxW + Math.sin(ozW * 0.17) * 2.2;
-                    var jzW = ozW + Math.cos(oxW * 0.13) * 2.0;
-                    orchardCandidates.push([jxW, jzW, 0.94 + ((Math.abs(oxW + ozW) % 4) * 0.08), false]);
+            // 2) North-West & South-West Full-Scale Planted Olive Orchards (1.50x..1.77x matching house & pine scale!)
+            for (var oxW = -118; oxW <= -52; oxW += 15.5) {
+                for (var ozW = -38; ozW <= 108; ozW += 16.0) {
+                    var jxW = oxW + Math.sin(ozW * 0.17) * 2.4;
+                    var jzW = ozW + Math.cos(oxW * 0.13) * 2.2;
+                    orchardCandidates.push([jxW, jzW, 1.50 + ((Math.abs(oxW + ozW) % 4) * 0.09), false]);
                 }
             }
 
-            // 3) Outer South-East & Far-East Olive Groves (safely outside Wheat Field, East Vineyard, Monastery & Les Antiques)
-            for (var oxE = 56; oxE <= 124; oxE += 13.0) {
-                for (var ozE = -24; ozE <= 120; ozE += 13.0) {
-                    var jxE = oxE + Math.cos(ozE * 0.15) * 2.2;
-                    var jzE = ozE + Math.sin(oxE * 0.14) * 2.2;
-                    orchardCandidates.push([jxE, jzE, 0.94 + ((Math.abs(oxE - ozE) % 4) * 0.08), false]);
+            // 3) Outer South-East & Far-East Full-Scale Olive Groves (1.50x..1.77x safely outside Wheat Field, East Vineyard & Monastery!)
+            for (var oxE = 58; oxE <= 124; oxE += 16.0) {
+                for (var ozE = -24; ozE <= 120; ozE += 16.0) {
+                    var jxE = oxE + Math.cos(ozE * 0.15) * 2.4;
+                    var jzE = ozE + Math.sin(oxE * 0.14) * 2.4;
+                    orchardCandidates.push([jxE, jzE, 1.50 + ((Math.abs(oxE - ozE) % 4) * 0.09), false]);
                 }
             }
 
             var placedOrchardCount = 0;
             orchardCandidates.forEach(function (oc, oIdx) {
                 var allowEasel = Boolean(oc[3]);
-                // For the 5 easel trees, verify road/building/pine clearance with 2.4m radius (skipping only the broad vineyard-box check)
                 if (allowEasel) {
                     if (getSurfaceMaterialAt(oc[0], oc[1]) !== 'grass') return;
-                    var laneZ = 26.0 + Math.sin(oc[0] * 0.05) * 2.5;
-                    if (Math.abs(oc[1] - laneZ) < 3.4) return;
-                    if (hasTreeCanopyOverlap(oc[0], oc[1], 3.35 * oc[2], 1.2)) return;
-                } else if (!isClearForOrchardTree(oc[0], oc[1], 4.2, false)) {
+                    if (hasTreeCanopyOverlap(oc[0], oc[1], 2.05 * oc[2], 0.55)) return;
+                } else if (!isClearForOrchardTree(oc[0], oc[1], 3.35 * oc[2] + 0.85, false)) {
                     return;
                 }
-                addSculptedProvencalOliveTree(oc[0], oc[1], oc[2], oIdx);
-                registerTreeEnvelope(oc[0], oc[1], 3.35 * oc[2], 'olive');
+                addSculptedProvencalOliveTree(oc[0], oc[1], oc[2], oIdx, oc[4]);
+                registerTreeEnvelope(oc[0], oc[1], 3.25 * oc[2], 'olive');
                 placedOrchardCount++;
             });
             window.__vgOrchardTreeCount = placedOrchardCount;
@@ -6101,12 +6332,12 @@
                     '    }',
                     '',
                     '    // Localized warm gaslight & Café de la Place awning bounce across lower facades & shutters!',
-                    '    float lampProx = exp(-sqf(length(vWorldPos.xz - vec2( 4.7, -19.0)) / 6.2)) * 0.42',
-                    '                   + exp(-sqf(length(vWorldPos.xz - vec2(-6.8,  -8.2)) / 6.5)) * 0.42',
-                    '                   + exp(-sqf(length(vWorldPos.xz - vec2(-4.4, -14.2)) / 5.4)) * 0.34',
-                    '                   + exp(-sqf(length(vWorldPos.xz - vec2( 5.8, -14.2)) / 5.4)) * 0.34',
-                    '                   + exp(-sqf(length(vWorldPos.xz - vec2( 1.5, -19.2)) / 6.4)) * 0.30',
-                    '                   + exp(-sqf(length(vWorldPos.xz - vec2(10.8, -16.2)) / 5.0)) * 0.28;',
+                    '    float lampProx = exp(-sqf(length(vWorldPos.xz - vec2( 4.94, -19.00)) / 6.2)) * 0.42',
+                    '                   + exp(-sqf(length(vWorldPos.xz - vec2(-8.20,  -6.40)) / 6.4)) * 0.42',
+                    '                   + exp(-sqf(length(vWorldPos.xz - vec2(-8.95, -13.02)) / 5.4)) * 0.34',
+                    '                   + exp(-sqf(length(vWorldPos.xz - vec2( 5.35, -12.81)) / 5.4)) * 0.34',
+                    '                   + exp(-sqf(length(vWorldPos.xz - vec2(14.87, -15.60)) / 5.2)) * 0.30',
+                    '                   + exp(-sqf(length(vWorldPos.xz - vec2(14.72, -24.87)) / 5.2)) * 0.30;',
                     '    float inOldTown = smoothstep(-34.0, -24.0, vWorldPos.x) * smoothstep(38.0, 28.0, vWorldPos.x)',
                     '                    * smoothstep(-40.0, -32.0, vWorldPos.z) * smoothstep(2.0, -4.0, vWorldPos.z);',
                     '    float heightFall = exp(-max(0.0, vWorldPos.y + 4.3) * 0.34);',
@@ -7140,22 +7371,67 @@
             }
 
             if (hasAwning && awningMat) {
-                var awW = w * 0.88;
-                var awGeo = new THREE.PlaneGeometry(awW, 1.58, 8, 4);
-                var awPos = awGeo.attributes.position;
-                for (var ai = 0; ai < awPos.count; ai++) {
-                    var ax = awPos.getX(ai), ay = awPos.getY(ai);
-                    awPos.setZ(ai, -Math.cos((ay / 1.58) * Math.PI) * 0.09 + Math.sin(ax * 3.2 + seed) * 0.045);
+                var canopyMode = (typeof hasAwning === 'number') ? hasAwning : 1;
+                if (canopyMode === 1) {
+                    // Style 1 (Actual Bistro Cafés H0 & H20): Curved Van Gogh "Café Terrace at Night" Impasto Canopy + Valance + Iron Scrolls
+                    var awW = w * 0.84;
+                    var awGeo = new THREE.PlaneGeometry(awW, 1.48, 9, 5);
+                    var awPos = awGeo.attributes.position;
+                    for (var ai = 0; ai < awPos.count; ai++) {
+                        var ax = awPos.getX(ai), ay = awPos.getY(ai);
+                        var uSlope = (ay / 1.48) + 0.5;
+                        var catenarySag = -Math.sin(uSlope * Math.PI) * 0.13;
+                        var handWob = Math.sin(ax * 2.4 + seed) * 0.038 + Math.cos(ay * 3.1 - seed) * 0.025;
+                        awPos.setZ(ai, catenarySag + handWob);
+                    }
+                    awGeo.computeVertexNormals();
+                    var awPt = warpFn(0, 2.40, d * 0.5 + 0.62);
+                    var aw = new THREE.Mesh(awGeo, awningMat);
+                    aw.position.set(awPt[0], awPt[1], awPt[2]);
+                    aw.rotation.x = -0.96;
+                    g.add(aw);
+                    // Hanging impasto front valance strip + hand-forged wrought-iron corbel struts
+                    var valGeo = makeWobblyBoxGeometry(awW, 0.21, 0.045, 6, 1, 1, 0.018, seed + 40.4);
+                    var valPt = warpFn(0, 1.91, d * 0.5 + 1.18);
+                    var valMesh = new THREE.Mesh(valGeo, awningMat);
+                    valMesh.position.set(valPt[0], valPt[1], valPt[2]);
+                    g.add(valMesh);
+                    addWarpedOutlineStroke(g, [-awW * 0.5, 2.80, d * 0.5 + 0.05], [-awW * 0.5, 1.98, d * 0.5 + 1.19], 0.11, sketchInkMat, seed + 41.1, true, warpFn, [0, -0.04, 0]);
+                    addWarpedOutlineStroke(g, [ awW * 0.5, 2.80, d * 0.5 + 0.05], [ awW * 0.5, 1.98, d * 0.5 + 1.19], 0.11, sketchInkMat, seed + 42.2, true, warpFn, [0, -0.04, 0]);
+                    addWarpedOutlineStroke(g, [-awW * 0.5, 1.82, d * 0.5 + 1.19], [ awW * 0.5, 1.82, d * 0.5 + 1.19], 0.12, sketchInkMat, seed + 43.3, true, warpFn, [0, -0.04, 0]);
+                    [-awW * 0.46, awW * 0.46].forEach(function (sxB, bSide) {
+                        addWarpedOutlineStroke(g, [sxB, 1.46, d * 0.5 + 0.05], [sxB, 1.92, d * 0.5 + 1.06], 0.075, sketchInkMat, seed + 44.1 + bSide, true, warpFn, null);
+                    });
+                } else if (canopyMode === 2) {
+                    // Style 2 (Provençal Gabled Slate-Tile Doorway Hood / Auvent): Compact pitched rooflet over the doorway
+                    var hdW = 1.92, hdSpan = 0.82, hdPeakY = 2.66, hdEaveY = 2.22;
+                    [-1, 1].forEach(function (sgnH, sIdxH) {
+                        var slopeW = Math.hypot(hdW * 0.5, hdPeakY - hdEaveY) + 0.06;
+                        var slGeo = makeWobblyBoxGeometry(slopeW, 0.085, hdSpan, 3, 1, 2, 0.018, seed + 45.0 + sIdxH);
+                        var slPt = warpFn(sgnH * hdW * 0.24, (hdPeakY + hdEaveY) * 0.5, d * 0.5 + hdSpan * 0.48);
+                        var slMesh = new THREE.Mesh(slGeo, roofMat);
+                        slMesh.position.set(slPt[0], slPt[1], slPt[2]);
+                        slMesh.rotation.z = -sgnH * Math.atan2(hdPeakY - hdEaveY, hdW * 0.5);
+                        g.add(slMesh);
+                        addWarpedOutlineStroke(g, [0, hdPeakY + 0.03, d * 0.5 + hdSpan + 0.02], [sgnH * hdW * 0.52, hdEaveY, d * 0.5 + hdSpan + 0.02], 0.10, sketchInkMat, seed + 47.1 + sIdxH, true, warpFn, null);
+                        addWarpedOutlineStroke(g, [sgnH * hdW * 0.44, 1.68, d * 0.5 + 0.05], [sgnH * hdW * 0.44, hdEaveY, d * 0.5 + hdSpan * 0.82], 0.08, sketchInkMat, seed + 49.1 + sIdxH, true, warpFn, null);
+                    });
+                    addWarpedOutlineStroke(g, [0, hdPeakY + 0.04, d * 0.5 + 0.04], [0, hdPeakY + 0.03, d * 0.5 + hdSpan + 0.03], 0.095, sketchInkMat, seed + 51.2, true, warpFn, null);
+                } else if (canopyMode === 3) {
+                    // Style 3 (Rustic Provençal Dark-Timber & Olive-Slate Pent Porch Lintel): Asymmetric shallow timber eave + rafters
+                    var trW = w * 0.62, trXOff = -w * 0.08, trDepth = 0.88;
+                    var trGeo = makeWobblyBoxGeometry(trW, 0.09, trDepth, 5, 1, 2, 0.020, seed + 52.3);
+                    var trPt = warpFn(trXOff, 2.34, d * 0.5 + trDepth * 0.48);
+                    var trMesh = new THREE.Mesh(trGeo, roofMat);
+                    trMesh.position.set(trPt[0], trPt[1], trPt[2]);
+                    trMesh.rotation.x = 0.30;
+                    g.add(trMesh);
+                    addWarpedOutlineStroke(g, [trXOff - trW * 0.5, 2.21, d * 0.5 + trDepth], [trXOff + trW * 0.5, 2.21, d * 0.5 + trDepth], 0.105, sketchInkMat, seed + 54.1, true, warpFn, null);
+                    [-0.44, 0.0, 0.44].forEach(function (rfU, rfIdx) {
+                        var rxT = trXOff + trW * rfU;
+                        addWarpedOutlineStroke(g, [rxT, 2.47, d * 0.5 + 0.05], [rxT, 2.19, d * 0.5 + trDepth * 0.96], 0.075, sketchInkMat, seed + 55.2 + rfIdx, true, warpFn, null);
+                    });
                 }
-                awGeo.computeVertexNormals();
-                var awPt = warpFn(0, 2.38, d * 0.5 + 0.68);
-                var aw = new THREE.Mesh(awGeo, awningMat);
-                aw.position.set(awPt[0], awPt[1], awPt[2]);
-                aw.rotation.x = -0.92;
-                g.add(aw);
-                addWarpedOutlineStroke(g, [-awW * 0.5, 2.82, d * 0.5 + 0.06], [-awW * 0.5, 1.92, d * 0.5 + 1.26], 0.12, sketchInkMat, seed + 41.1, true, warpFn, [0, -0.05, 0]);
-                addWarpedOutlineStroke(g, [ awW * 0.5, 2.82, d * 0.5 + 0.06], [ awW * 0.5, 1.92, d * 0.5 + 1.26], 0.12, sketchInkMat, seed + 42.2, true, warpFn, [0, -0.05, 0]);
-                addWarpedOutlineStroke(g, [-awW * 0.5, 1.92, d * 0.5 + 1.26], [ awW * 0.5, 1.92, d * 0.5 + 1.26], 0.13, sketchInkMat, seed + 43.3, true, warpFn, [0, -0.06, 0]);
             }
 
             return g;
@@ -7170,6 +7446,15 @@
             var pierW = 0.88;
             var halfSpan = spanW * 0.5;
             var cosR = Math.cos(rotY), sinR = Math.sin(rotY);
+            function passLocalGroundY(lx, lz) {
+                return getGroundY(cx + lx * cosR + lz * sinR, cz - lx * sinR + lz * cosR) - (gy - 0.25);
+            }
+
+            var inHalf = halfSpan + pierW * 0.42 - pierW * 0.5;
+            var outHalf = halfSpan + pierW * 0.42 + pierW * 0.5;
+            var archSpringY = clearH - 0.54;
+            var archRise = 0.80;
+
             [-halfSpan - pierW * 0.42, halfSpan + pierW * 0.42].forEach(function (lx, pIdx) {
                 var pxW = cx + lx * cosR;
                 var pzW = cz - lx * sinR;
@@ -7186,6 +7471,34 @@
                 var pier = new THREE.Mesh(makeWobblyBoxGeometry(pierW, pierH, depthD, 2, 4, 2, 0.045, seed + pIdx * 5.0), stoneMat);
                 pier.position.set(lx, localPierBot + pierH * 0.5, 0);
                 grp.add(pier);
+
+                // Sculpted stone arch haunch corbel tucked into upper corner so no flat gap shows behind the arch curve
+                var sgn = (lx < 0) ? -1.0 : 1.0;
+                var haunch = new THREE.Mesh(makeWobblyBoxGeometry(0.56, 0.62, depthD - 0.04, 2, 2, 2, 0.03, seed + 21.0 + pIdx * 3.0), stoneMat);
+                haunch.position.set(sgn * (inHalf - 0.16), archSpringY + 0.48, 0);
+                haunch.rotation.z = sgn * 0.52;
+                grp.add(haunch);
+
+                // Inner passage base threshold outline (left & right tunnel walls meeting cobblestone floor)
+                var inWallX = sgn * (inHalf - 0.01);
+                var inBasePts = [];
+                for (var ibi = 0; ibi <= 5; ibi++) {
+                    var uIb = ibi / 5;
+                    var lzIb = -depthD * 0.5 + depthD * uIb;
+                    inBasePts.push(new THREE.Vector3(inWallX, passLocalGroundY(inWallX, lzIb) + 0.07, lzIb));
+                }
+                addCurveBrushStrokeFromPoints(grp, inBasePts, 0.20, inkMat, seed + 30.1 + pIdx * 4.3, true);
+
+                // Outer pier side ground base outline & inner vault spring depth stroke
+                var outWallX = sgn * (outHalf + 0.01);
+                var outSidePts = [];
+                for (var osi = 0; osi <= 4; osi++) {
+                    var uOs = osi / 4;
+                    var lzOs = -depthD * 0.5 + depthD * uOs;
+                    outSidePts.push(new THREE.Vector3(outWallX, passLocalGroundY(outWallX, lzOs) + 0.07, lzOs));
+                }
+                addCurveBrushStrokeFromPoints(grp, outSidePts, 0.22, inkMat, seed + 31.7 + pIdx * 4.3, false);
+                addThickLoadedOutlineStroke(grp, [inWallX, archSpringY + 0.02, -depthD * 0.5 - 0.03], [inWallX, archSpringY + 0.02, depthD * 0.5 + 0.03], 0.16, inkMat, seed + 33.2 + pIdx * 4.3, true);
             });
 
             var bridgeH = 2.25;
@@ -7194,28 +7507,57 @@
             bridge.position.set(0, clearH + bridgeH * 0.5 + 0.2, 0);
             grp.add(bridge);
 
+            // Inner vault crown depth line connecting front & back arches
+            addThickLoadedOutlineStroke(grp, [0.0, archSpringY + archRise, -depthD * 0.5 - 0.03], [0.0, archSpringY + archRise, depthD * 0.5 + 0.03], 0.15, inkMat, seed + 38.4, true);
+
             [-depthD * 0.5 - 0.04, depthD * 0.5 + 0.04].forEach(function (fz, fIdx) {
                 var archPts = [];
-                for (var ai = 0; ai <= 10; ai++) {
-                    var tA = (ai / 10) * Math.PI;
-                    archPts.push(new THREE.Vector3(-Math.cos(tA) * halfSpan, clearH - 0.55 + Math.sin(tA) * 0.82, fz));
+                for (var ai = 0; ai <= 14; ai++) {
+                    var tA = (ai / 14) * Math.PI;
+                    archPts.push(new THREE.Vector3(-Math.cos(tA) * inHalf, archSpringY + Math.sin(tA) * archRise, fz));
                 }
-                var aCurve = new THREE.CatmullRomCurve3(archPts);
-                var archTube = new THREE.TubeGeometry(aCurve, 16, 0.17, 5, false);
-                archTube.computeVertexNormals();
-                grp.add(new THREE.Mesh(archTube, inkMat));
+                addCurveBrushStrokeFromPoints(grp, archPts, 0.26, inkMat, seed + 40.0 + fIdx * 5.7, false);
 
+                // Left & right vertical entrance jamb outlines + pier front/back base outlines + outer vertical corners!
+                [-1.0, 1.0].forEach(function (sgn, sIdx) {
+                    var jX = sgn * inHalf;
+                    var oX = sgn * outHalf;
+                    var gJamb = passLocalGroundY(jX, fz);
+                    var gOut  = passLocalGroundY(oX, fz);
+                    addThickLoadedOutlineStroke(grp, [jX, gJamb - 0.14, fz], [jX, archSpringY + 0.06, fz], 0.24, inkMat, seed + 43.0 + fIdx * 7.0 + sIdx * 2.1, false);
+                    addThickLoadedOutlineStroke(grp, [oX, gOut - 0.16, fz],  [oX, clearH + bridgeH + 0.22, fz], 0.25, inkMat, seed + 44.1 + fIdx * 7.0 + sIdx * 2.1, false);
+
+                    var pierFootPts = [];
+                    for (var pfi = 0; pfi <= 3; pfi++) {
+                        var uPf = pfi / 3;
+                        var lxPf = jX + (oX - jX) * uPf;
+                        pierFootPts.push(new THREE.Vector3(lxPf, passLocalGroundY(lxPf, fz) + 0.07, fz));
+                    }
+                    addCurveBrushStrokeFromPoints(grp, pierFootPts, 0.22, inkMat, seed + 45.3 + fIdx * 7.0 + sIdx * 2.1, false);
+                });
+
+                // Horizontal under-eave stroke across bridge facade
+                addThickLoadedOutlineStroke(grp, [-outHalf, clearH + bridgeH + 0.18, fz], [outHalf, clearH + bridgeH + 0.18, fz], 0.20, inkMat, seed + 52.0 + fIdx * 3.1, true);
+
+                var winY = clearH + bridgeH * 0.54 + 0.2;
                 var bw = new THREE.Mesh(new THREE.PlaneGeometry(0.76, 0.98), winMat);
-                bw.position.set(0, clearH + bridgeH * 0.54 + 0.2, fz + (fIdx === 0 ? -0.02 : 0.02));
+                bw.position.set(0, winY, fz + (fIdx === 0 ? -0.02 : 0.02));
                 if (fIdx === 0) bw.rotation.y = Math.PI;
                 grp.add(bw);
 
                 var sL = new THREE.Mesh(makeWobblyBoxGeometry(0.26, 0.92, 0.06, 1, 2, 1, 0.018, seed + 14.0), shutterMat);
-                sL.position.set(-0.46, clearH + bridgeH * 0.54 + 0.2, fz);
+                sL.position.set(-0.46, winY, fz);
                 grp.add(sL);
                 var sR = new THREE.Mesh(makeWobblyBoxGeometry(0.26, 0.92, 0.06, 1, 2, 1, 0.018, seed + 15.0), shutterMat);
-                sR.position.set( 0.46, clearH + bridgeH * 0.54 + 0.2, fz);
+                sR.position.set( 0.46, winY, fz);
                 grp.add(sR);
+
+                // Hand-painted shutter/window frame ink strokes
+                var fzW = fz + (fIdx === 0 ? -0.035 : 0.035);
+                addThickLoadedOutlineStroke(grp, [-0.60, winY + 0.49, fzW], [ 0.60, winY + 0.49, fzW], 0.10, inkMat, seed + 56.1 + fIdx * 4.0, true);
+                addThickLoadedOutlineStroke(grp, [-0.60, winY - 0.49, fzW], [ 0.60, winY - 0.49, fzW], 0.10, inkMat, seed + 57.2 + fIdx * 4.0, true);
+                addThickLoadedOutlineStroke(grp, [-0.60, winY - 0.49, fzW], [-0.60, winY + 0.49, fzW], 0.09, inkMat, seed + 58.3 + fIdx * 4.0, true);
+                addThickLoadedOutlineStroke(grp, [ 0.60, winY - 0.49, fzW], [ 0.60, winY + 0.49, fzW], 0.09, inkMat, seed + 59.4 + fIdx * 4.0, true);
             });
 
             var topRoof = new THREE.Mesh(makeWobblyBoxGeometry(totalW + 0.3, 0.42, depthD + 0.35, 3, 1, 2, 0.04, seed + 19.0), roofMat);
@@ -7223,6 +7565,8 @@
             grp.add(topRoof);
             addThickLoadedOutlineStroke(grp, [-totalW * 0.52, clearH + bridgeH + 0.55, depthD * 0.52], [totalW * 0.52, clearH + bridgeH + 0.55, depthD * 0.52], 0.28, inkMat, seed + 5.1);
             addThickLoadedOutlineStroke(grp, [-totalW * 0.52, clearH + bridgeH + 0.55, -depthD * 0.52], [totalW * 0.52, clearH + bridgeH + 0.55, -depthD * 0.52], 0.28, inkMat, seed + 6.3);
+            addThickLoadedOutlineStroke(grp, [-totalW * 0.52, clearH + bridgeH + 0.55, -depthD * 0.52], [-totalW * 0.52, clearH + bridgeH + 0.55, depthD * 0.52], 0.24, inkMat, seed + 7.5);
+            addThickLoadedOutlineStroke(grp, [ totalW * 0.52, clearH + bridgeH + 0.55, -depthD * 0.52], [ totalW * 0.52, clearH + bridgeH + 0.55, depthD * 0.52], 0.24, inkMat, seed + 8.7);
 
             scene.add(grp);
         }
@@ -7286,32 +7630,12 @@
                 grp.add(m);
             });
 
+            // Preserve exact deterministic PRNG stride (58*4 + 18*2 = 268 calls) without detached floating 2D bark/leaf paddles
             for (var lf = 0; lf < 58; lf++) {
-                var aL = rand() * Math.PI * 2.0;
-                var rL = (0.7 + rand() * 2.3) * scaleT;
-                var yL = (ty - 0.2) + (4.5 + rand() * 2.6) * scaleT;
-                var lxW = tx + Math.cos(aL) * rL;
-                var lzW = tz + Math.sin(aL) * rL;
-                pushBristleStamp(
-                    lxW, yL, lzW,
-                    -Math.sin(aL) * 1.15, 0.28, Math.cos(aL) * 1.15,
-                    0.0, 0.44, 0.0,
-                    lf % 8, 0.08, rand() * 6.28, 2.0,
-                    lf % 3 === 0 ? 0xd9b838 : (lf % 3 === 1 ? 0x8ea83b : 0x2d5e4c),
-                    0x12263f
-                );
+                rand(); rand(); rand(); rand();
             }
             for (var bk = 0; bk < 18; bk++) {
-                var aB = rand() * Math.PI * 2.0;
-                var yB = (ty - 0.2) + (0.4 + rand() * 3.5) * scaleT;
-                pushBristleStamp(
-                    tx + Math.cos(aB) * 0.44 * scaleT, yB, tz + Math.sin(aB) * 0.44 * scaleT,
-                    0.0, 0.92, 0.0,
-                    Math.cos(aB) * 0.28, 0.0, Math.sin(aB) * 0.28,
-                    bk % 8, 0.0, 0.0, 3.0,
-                    bk % 2 === 0 ? 0xc9ab52 : 0x5c7862,
-                    0x1a283d
-                );
+                rand(); rand();
             }
 
             scene.add(grp);
@@ -7534,43 +7858,89 @@
                 ].join('\n')
             });
 
-            // Woven Hand-Brushed Provençal Café Awning Material (replaces hard-edged step() stripes!)
-            var awningMat = new THREE.ShaderMaterial({
+            // Authentic Van Gogh "Café Terrace at Night" Impasto Canopy Material (zero modern candy stripes!
+            // Swirling multi-pass hog-bristle strokes blending nocturnal Prussian-teal shadow into warm gaslit ochre-gold)
+            var cafeCanopyMat = createSafeAwareShaderMaterial({
                 side: THREE.DoubleSide,
-                uniforms: { uBlackInk: uBlackInk, uYellowBoost: uYellowBoost },
+                uniforms: {
+                    uThinness: uThinness,
+                    uChaos: uChaos,
+                    uYellowBoost: uYellowBoost,
+                    uBlackInk: uBlackInk,
+                    uQuality: uQuality,
+                    uDaylight: uDaylight
+                },
                 vertexShader: [
                     'precision highp float;',
                     'varying vec2 vUv;',
                     'varying vec3 vWorldPos;',
+                    'varying vec3 vNormal;',
                     'void main() {',
                     '    vUv = uv;',
                     '    vec4 wp = modelMatrix * vec4(position, 1.0);',
                     '    vWorldPos = wp.xyz;',
+                    '    vNormal = normalize(mat3(modelMatrix) * normal);',
                     '    gl_Position = projectionMatrix * viewMatrix * wp;',
                     '}'
                 ].join('\n'),
                 fragmentShader: [
                     'precision highp float;',
-                    'uniform float uBlackInk;',
+                    'uniform float uThinness;',
+                    'uniform float uChaos;',
                     'uniform float uYellowBoost;',
+                    'uniform float uBlackInk;',
+                    'uniform float uQuality;',
+                    'uniform float uDaylight;',
                     'varying vec2 vUv;',
                     'varying vec3 vWorldPos;',
+                    'varying vec3 vNormal;',
                     GLSL_RIBBON_LIBRARY,
                     'void main() {',
-                    '    float scallop = 0.045 * abs(sin(vUv.x * 21.99));',
-                    '    if (vUv.y < scallop) discard;',
-                    '    float wob = (vnoise(vUv * vec2(18.0, 9.0) + vWorldPos.xz * 0.5) - 0.5) * 0.14;',
-                    '    float sWave = sin((vUv.x * 6.5 + wob) * 6.2831853);',
-                    '    float stripe = smoothstep(-0.22, 0.22, sWave);',
-                    '    float bristle = sin(vUv.y * 36.0 + sin(vUv.x * 28.0) * 1.5) * 0.08;',
-                    '    vec3 terra = vec3(0.82, 0.39, 0.12) * (1.0 + bristle);',
-                    '    vec3 cream = vec3(0.95, 0.87, 0.52) * (1.0 + bristle);',
-                    '    vec3 col = mix(terra, cream, stripe);',
-                    '    // Warm golden café lantern glow toward building wall + dark impasto hem!',
-                    '    col *= (0.86 + 0.24 * vUv.y * clamp(uYellowBoost, 0.4, 1.5));',
-                    '    float hemInk = 1.0 - smoothstep(scallop, scallop + 0.055, vUv.y);',
-                    '    col = mix(col, vec3(0.018, 0.030, 0.072), hemInk * clamp(0.85 * uBlackInk, 0.25, 0.95));',
-                    '    gl_FragColor = vec4(clamp(col, 0.0, 1.0), clamp(0.62 + bristle * 1.8, 0.2, 0.96));',
+                    '    // Warm gaslit ochre-amber near the terrace lamps/wall melting into deep cobalt-viridian night shadow!',
+                    '    float warmGrad = smoothstep(0.05, 0.88, 1.0 - abs(vUv.x - 0.5) * 0.95) * (0.42 + 0.58 * (1.0 - vUv.y));',
+                    '    vec3 nightTeal = vec3(0.065, 0.165, 0.305);',
+                    '    vec3 siennaMid = vec3(0.465, 0.345, 0.155);',
+                    '    vec3 ochreGold = vec3(0.835, 0.655, 0.215) * mix(0.88, 1.16, clamp(uYellowBoost * 0.65, 0.0, 1.0));',
+                    '    vec3 col = mix(nightTeal, mix(siennaMid, ochreGold, warmGrad), 0.72);',
+                    '    float hgt = 0.42;',
+                    '    vec2 base = vec2(vUv.x * 3.8, vUv.y * 2.2) * mix(1.0, uThinness, 0.45) + vWorldPos.xz * 0.17;',
+                    '#ifdef SAFE_MODE',
+                    '    for (int k = 0; k < 2; k++) {',
+                    '#else',
+                    '    for (int k = 0; k < 3; k++) {',
+                    '        if (k < 2 || uQuality >= 0.45) {',
+                    '#endif',
+                    '        float fk = float(k);',
+                    '        vec2 g = base * (1.0 + fk * 0.28) + vec2(fk * 0.41, fk * 0.67);',
+                    '        vec2 bCell = floor(g);',
+                    '        vec2 qStart = bCell + step(vec2(0.5), fract(g)) - vec2(1.0);',
+                    '        for (int dy = 0; dy <= 1; dy++) {',
+                    '            for (int dx = 0; dx <= 1; dx++) {',
+                    '                vec2 cid = qStart + vec2(float(dx), float(dy));',
+                    '                vec3 rnd = hash23(cid + vec2(fk * 13.7, 29.3));',
+                    '                vec2 center = cid + vec2(0.5) + (rnd.xy - 0.5) * (0.48 + 0.22 * uChaos);',
+                    '                float ang = 1.48 + (rnd.z - 0.5) * 0.36 * uChaos;',
+                    '                vec2 loc = mat2(cos(ang), -sin(ang), sin(ang), cos(ang)) * (g - center);',
+                    '                loc.y -= 0.14 * loc.x * loc.x * (rnd.x > 0.5 ? 1.0 : -1.0);',
+                    '                vec4 st = evalSlenderBristleStroke(loc.x / (0.92 + rnd.x * 0.45), loc.y / 0.24, rnd.y + fk);',
+                    '                if (st.x > 0.01) {',
+                    '                    float tone = clamp(warmGrad * 0.68 + rnd.y * 0.46, 0.0, 1.0);',
+                    '                    vec3 pig = (rnd.z < 0.10 * uBlackInk) ? vec3(0.022, 0.038, 0.088)',
+                    '                             : ((tone > 0.62) ? ochreGold : ((tone > 0.34) ? siennaMid : nightTeal));',
+                    '                    pig = mix(pig, ochreGold * 1.06, st.w * 0.28 * warmGrad) * (1.0 + st.y * 0.85);',
+                    '                    col = mix(col, pig, st.x);',
+                    '                    hgt = mix(hgt, clamp(0.45 + st.z * 0.48, 0.24, 0.96), st.x * 0.88);',
+                    '                }',
+                    '            }',
+                    '        }',
+                    '#ifndef SAFE_MODE',
+                    '        }',
+                    '#endif',
+                    '    }',
+                    '    float edgeInk = max(1.0 - smoothstep(0.0, 0.065, vUv.y), smoothstep(0.935, 1.0, vUv.y));',
+                    '    col = mix(col, vec3(0.016, 0.028, 0.068), edgeInk * clamp(0.86 * uBlackInk, 0.25, 0.96));',
+                    '    col *= mix(1.0, 0.78, smoothstep(0.25, 1.0, uDaylight));',
+                    '    gl_FragColor = vec4(clamp(col, 0.0, 1.0), clamp(hgt, 0.24, 0.96));',
                     '}'
                 ].join('\n')
             });
@@ -7914,7 +8284,7 @@
                 [[-0.68,  0.36], [ 0.66,  0.42]]
             ];
 
-            [[4.6, -17.8], [4.8, -20.2], [-5.8, -7.2], [-7.9, -7.1]].forEach(function (tb, tIdx) {
+            [[4.6, -17.8], [4.8, -20.2], [-5.7, -6.42], [-7.9, -6.42]].forEach(function (tb, tIdx) {
                 var tyB = getGroundY(tb[0], tb[1]);
                 addCircleCollider(tb[0], tb[1], 0.62);
                 var tbl = new THREE.Group();
@@ -7983,33 +8353,57 @@
 
             var lanternGlassGeo = new THREE.CylinderGeometry(0.24, 0.16, 0.56, 6, 1);
             var lanternCapGeo   = new THREE.ConeGeometry(0.30, 0.28, 6);
+            // [postX, postZ, armDirAngle]: every street lamp stands along a building facade, sidewalk corner,
+            // café terrace edge, or gate pier (never in a street or crossroad!) with its bracket overhanging the road/path!
             var lanternCoords = [
-                [-4.4, -14.2], [5.8, -14.2], [-3.8, -21.8], [4.2, -21.8],
-                [10.8, -16.2], [15.2, -21.5], [-15.5, -12.0], [23.5, -12.0],
-                [-16.0, -4.2], [-6.5, -5.1], [6.8, -5.0], [15.5, -4.4], [29.5, -2.6],
-                [-2.8, 95.5], [2.8, 95.5]
+                [ -8.95, -12.48, -1.5708], // L0:  Rue Hoche West-Central (H0/H1 south facade -> overhangs -Z street)
+                [  5.45, -12.28, -1.7500], // L1:  Place de la République NE (H14/H15 south facade -> overhangs SSW square)
+                [ -5.28, -20.55,  0.2200], // L2:  Place de la République SW (H5 east facade corner -> overhangs ENE square)
+                [  5.48, -19.00,  3.1416], // L3:  Café de la Place Terrace (H20 west facade between bistro tables -> overhangs -X)
+                [ 15.25, -15.98,  2.3562], // L4:  Rue Hoche × East Alley SE Corner (H21 NW corner -> overhangs NW into crossroad)
+                [ 15.10, -25.25,  2.3562], // L5:  East Alley × Chevet Lane SE Corner (H27 NW corner -> clears Arch2 crossroad!)
+                [-18.10, -12.35, -1.5708], // L6:  Rue Hoche West (H2/H3 south facade -> overhangs -Z street)
+                [ 24.90, -16.08,  1.5708], // L7:  Rue Hoche East (H22/H23 north facade -> overhangs +Z street)
+                [-22.70,  -6.12,  1.5708], // L8:  Boulevard Mirabeau West (H3/H4 north sidewalk -> overhangs +Z boulevard)
+                [ -9.30,  -6.72,  1.3500], // L9:  Boulevard Mirabeau Café Terrace (H0/H1 sidewalk beside bistro tables -> overhangs NNE)
+                [  6.85,  -6.68,  1.5708], // L10: Boulevard Mirabeau Central-East (H15 north sidewalk -> overhangs +Z boulevard)
+                [ 22.80,  -6.22,  1.5708], // L11: Boulevard Mirabeau Mid-East (H17 north sidewalk -> overhangs +Z boulevard)
+                [ 34.88,  -6.85,  0.3500], // L12: Boulevard Mirabeau × East Blvd Corner (H19 NE corner -> overhangs ENE turn)
+                [ -3.18,  95.35,  0.0000], // L13: Saint-Paul Cloister Gate West Pier (-> overhangs inward +X over path)
+                [  3.18,  95.35,  3.1416]  // L14: Saint-Paul Cloister Gate East Pier (-> overhangs inward -X over path!)
             ];
+            window.__vgLanternHeadAnchors = [];
             lanternCoords.forEach(function (lc, lIdx) {
-                var lx = lc[0], lz = lc[1];
+                var lx = lc[0], lz = lc[1], dirAng = (typeof lc[2] === 'number') ? lc[2] : 0.0;
+                var cosD = Math.cos(dirAng), sinD = Math.sin(dirAng);
+                var hx = lx + 0.54 * cosD, hz = lz + 0.54 * sinD;
                 var ly = getGroundY(lx, lz);
+                window.__vgLanternHeadAnchors.push([hx, hz, 3.24, ly]);
                 addCircleCollider(lx, lz, 0.48);
                 var lg = new THREE.Group();
                 lg.position.set(lx, ly, lz);
                 addThickLoadedOutlineStroke(lg, [0, -0.55, 0], [0, 3.68, 0], 0.18, sketchInkMat, 80.0 + lIdx);
-                addThickLoadedOutlineStroke(lg, [0, 3.48, 0], [0.54, 3.62, 0], 0.13, sketchInkMat, 88.0 + lIdx);
-                addThickLoadedOutlineStroke(lg, [0, 3.08, 0], [0.38, 3.52, 0], 0.09, sketchInkMat, 96.0 + lIdx);
+                addThickLoadedOutlineStroke(lg, [0, 3.48, 0], [0.54 * cosD, 3.62, 0.54 * sinD], 0.13, sketchInkMat, 88.0 + lIdx);
+                addThickLoadedOutlineStroke(lg, [0, 3.08, 0], [0.38 * cosD, 3.52, 0.38 * sinD], 0.09, sketchInkMat, 96.0 + lIdx);
                 var glassCage = new THREE.Mesh(lanternGlassGeo, streetGlassMat);
-                glassCage.position.set(0.54, 3.24, 0);
+                glassCage.position.set(0.54 * cosD, 3.24, 0.54 * sinD);
+                glassCage.rotation.y = -dirAng;
                 lg.add(glassCage);
                 var ironCap = new THREE.Mesh(lanternCapGeo, sketchInkMat);
-                ironCap.position.set(0.54, 3.64, 0);
+                ironCap.position.set(0.54 * cosD, 3.64, 0.54 * sinD);
+                ironCap.rotation.y = -dirAng;
                 lg.add(ironCap);
-                // Warm swirling gaslight halo bristle dabs around each lantern!
+                // Warm swirling gaslight halo bristle dabs centered on the exact rotated lantern head!
                 for (var hs = 0; hs < 6; hs++) {
                     var ha = (hs / 6) * Math.PI * 2.0;
+                    var tangX = -sinD, tangZ = cosD;
+                    var radialOff = Math.cos(ha) * 0.32;
+                    var depthOff  = Math.sin(ha * 2.0) * 0.20;
                     pushBristleStamp(
-                        lx + 0.54 + Math.cos(ha) * 0.34, ly + 3.24 + Math.sin(ha) * 0.28, lz + Math.sin(ha * 2.0) * 0.22,
-                        -Math.sin(ha) * 0.42, Math.cos(ha) * 0.42, 0.12,
+                        hx + cosD * radialOff + tangX * depthOff,
+                        ly + 3.24 + Math.sin(ha) * 0.28,
+                        hz + sinD * radialOff + tangZ * depthOff,
+                        -Math.sin(ha) * 0.40 * cosD, Math.cos(ha) * 0.42, -Math.sin(ha) * 0.40 * sinD,
                         0.0, 0.18, 0.0,
                         hs % 8, 0.02, ha, 3.0,
                         0xf7dc52, 0xe89c24
@@ -8025,13 +8419,13 @@
             var roofTints = [0xb05c2e, 0xb5963e, 0x38629c, 0x56735c];
 
             var townhouses = [
-                [ -6.8,  -9.6,  0.03, 4.7, 5.2, 4.5, 2.2, 2, 0, 0, 0, 2, true],
+                [ -6.8,  -9.6,  0.03, 4.7, 5.2, 4.5, 2.2, 2, 0, 0, 0, 2, 1],
                 [-11.3,  -9.6, -0.02, 4.6, 6.2, 4.6, 2.5, 3, 1, 1, 1, 2, false],
                 [-15.8,  -9.5,  0.02, 4.7, 5.5, 4.5, 2.3, 2, 2, 2, 0, 1, false],
                 [-20.4,  -9.3, -0.03, 4.8, 6.4, 4.6, 2.5, 3, 4, 0, 2, 2, false],
                 [-25.0,  -9.0,  0.04, 4.7, 5.1, 4.5, 2.2, 2, 1, 3, 0, 1, false],
 
-                [ -8.2, -19.0,  0.02, 4.6, 6.4, 4.8, 2.5, 3, 1, 0, 0, 2, true],
+                [ -8.2, -19.0,  0.02, 4.6, 6.4, 4.8, 2.5, 3, 1, 0, 0, 2, false],
                 [-12.7, -19.0, -0.02, 4.7, 5.6, 4.8, 2.3, 2, 0, 2, 1, 1, false],
                 [-17.3, -19.1,  0.03, 4.7, 6.8, 4.9, 2.6, 3, 2, 1, 2, 2, false],
                 [-21.9, -19.1, -0.02, 4.7, 5.8, 4.8, 2.4, 2, 3, 0, 0, 1, false],
@@ -8042,14 +8436,14 @@
                 [-18.6, -28.3,  0.02, 4.7, 6.6, 5.0, 2.5, 3, 0, 1, 2, 2, false],
                 [-23.2, -28.2, -0.02, 4.7, 5.4, 4.8, 2.2, 2, 4, 3, 0, 1, false],
 
-                [  2.8,  -9.5, -0.03, 4.5, 4.6, 4.4, 2.1, 2, 1, 0, 0, 1, true],
+                [  2.8,  -9.5, -0.03, 4.5, 4.6, 4.4, 2.1, 2, 1, 2, 0, 1, 2],
                 [  7.3,  -9.5,  0.02, 4.6, 5.0, 4.4, 2.2, 2, 0, 2, 1, 2, false],
-                [ 18.2,  -9.4, -0.02, 4.7, 6.2, 4.6, 2.4, 3, 0, 1, 0, 2, true],
+                [ 18.2,  -9.4, -0.02, 4.7, 6.2, 4.6, 2.4, 3, 0, 3, 0, 2, 3],
                 [ 22.8,  -9.2,  0.03, 4.7, 6.6, 4.7, 2.5, 3, 1, 0, 2, 2, false],
                 [ 27.4,  -8.9, -0.02, 4.7, 5.8, 4.6, 2.3, 2, 2, 2, 1, 1, false],
                 [ 32.0,  -8.5,  0.04, 4.6, 5.4, 4.5, 2.2, 2, 4, 1, 0, 1, false],
 
-                [  8.4, -19.0, -0.02, 4.6, 6.0, 4.8, 2.4, 3, 0, 0, 0, 2, true],
+                [  8.4, -19.0, -0.02, 4.6, 6.0, 4.8, 2.4, 3, 0, 0, 0, 2, 1],
                 [ 18.0, -19.0,  0.02, 4.7, 6.8, 4.9, 2.6, 3, 1, 2, 1, 2, false],
                 [ 22.6, -19.1, -0.03, 4.7, 5.8, 4.8, 2.4, 2, 3, 1, 2, 1, false],
                 [ 27.2, -19.1,  0.02, 4.7, 6.5, 4.9, 2.5, 3, 0, 0, 0, 2, false],
@@ -8072,7 +8466,7 @@
                 [-36.5, -14.5,  0.24, 5.8, 4.4, 5.6, 2.5, 2, 0, 0, 0, 1, false],
                 [-43.5, -24.0, -0.15, 6.2, 4.8, 5.8, 2.6, 2, 1, 1, 1, 2, false],
                 [ 46.5, -34.0, -0.22, 6.0, 4.6, 5.8, 2.5, 2, 0, 0, 2, 2, false],
-                [-82.0,  20.0,  0.12, 6.8, 5.2, 6.0, 2.7, 2, 1, 0, 0, 2, true],
+                [-82.0, -28.0,  0.12, 6.8, 5.2, 6.0, 2.7, 2, 1, 3, 0, 2, 3],
                 [-79.5,  73.5, -0.24, 6.4, 4.8, 5.8, 2.6, 2, 0, 1, 2, 1, false],
                 [-52.0,  96.0,  0.18, 6.2, 4.6, 5.6, 2.5, 2, 4, 0, 1, 2, false],
                 [ 84.0,  25.0, -0.18, 6.6, 5.0, 6.0, 2.6, 2, 1, 1, 0, 2, false],
@@ -8098,7 +8492,7 @@
                 var mesh = createProvencalTownhouse(
                     wTown, hTown, th[5], riseTown, th[7],
                     wallsList[wIdx], roofsList[rIdx], shuttersList[sIdx],
-                    sketchInkMat, winDabMat, unlitWinMat, doorMat, awningMat,
+                    sketchInkMat, winDabMat, unlitWinMat, doorMat, cafeCanopyMat,
                     th[11], th[12], idx * 4.7 + 1.3,
                     { x: th[0], y: hy - 0.45, z: th[1], rotY: th[2], joinLeft: hasLeftAdj },
                     wallTints[wIdx], roofTints[rIdx]
@@ -8118,14 +8512,15 @@
             var planeCanopyMat = createBotanicalCushionMaterial(0x0b1f29, 0x26543c, 0x7aa33e, 0xe8c438, 0xc97b28, 0.58, 0.045);
 
             var boulevardTrees = [
-                [-29.5, -3.5, 1.05], [-21.5, -4.2, 1.12], [-13.5, -4.6, 1.08],
-                [ 12.2, -4.6, 1.06], [ 20.4, -4.2, 1.14], [ 28.6, -3.4, 1.08], [ 36.2, -2.2, 1.02],
-                [ -4.8, -16.8, 0.96], [ 5.2, -22.2, 0.98]
+                [-29.5, -3.5, 1.05], [-21.5, -4.0, 1.10], [-13.5, -3.9, 1.04],
+                [ 12.2, -4.0, 1.04], [ 20.4, -4.0, 1.10], [ 28.6, -3.4, 1.08], [ 36.2, -2.2, 1.02],
+                [ -3.3, -16.4, 0.84], [ 3.7, -23.1, 0.84]
             ];
             boulevardTrees.forEach(function (bt, bIdx) {
                 if (!hasTreeCanopyOverlap(bt[0], bt[1], 4.4 * bt[2], 1.0)) {
                     addRoadMendersPlaneTree(bt[0], bt[1], bt[2], planeBarkMat, planeCanopyMat, sketchInkMat, 300.0 + bIdx * 7.3);
                     registerTreeEnvelope(bt[0], bt[1], 4.4 * bt[2], 'plane');
+                    registerTreeTrunkZone(bt[0], bt[1], 1.75 * bt[2]);
                 }
             });
 
@@ -8150,8 +8545,8 @@
                 var sandHeapMat        = createPainterlyArchMaterial(0x261d10, 0xa88332, 0xf2d15b, 0.18, 2.55, false, false);
                 var pavingLimestoneMat = createPainterlyArchMaterial(0x1b263d, 0x757862, 0xd8dec0, 0.06, 2.35, false, false);
                 [
-                    [-10.55, -2.42, 0.94, 0.72, 0.56, 371.3],
-                    [ -8.35, -2.48, 0.68, 0.56, 0.42, 377.9]
+                    [-10.55, -3.06, 0.94, 0.72, 0.56, 371.3],
+                    [ -8.35, -3.02, 0.68, 0.56, 0.42, 377.9]
                 ].forEach(function (sh, shIdx) {
                     var sx = sh[0], sz = sh[1], rxS = sh[2], rzS = sh[3], hS = sh[4], sdS = sh[5];
                     var sy = getGroundY(sx, sz);
@@ -8173,11 +8568,11 @@
 
                 // Cut rectangular Provençal limestone curb & paving blocks lined along the roadside shoulder
                 [
-                    [-11.65, -2.26,  0.18, 0.92, 0.36, 0.42, 0.00],
-                    [ -9.52, -2.24, -0.14, 0.96, 0.38, 0.44, 0.00],
-                    [ -9.46, -2.30,  0.22, 0.82, 0.32, 0.38, 0.34],
-                    [ -7.35, -2.34,  0.11, 0.90, 0.36, 0.42, 0.00],
-                    [  9.85, -2.42, -0.16, 0.88, 0.35, 0.42, 0.00]
+                    [-11.65, -2.72,  0.18, 0.92, 0.36, 0.42, 0.00],
+                    [ -9.52, -2.74, -0.14, 0.96, 0.38, 0.44, 0.00],
+                    [ -9.46, -2.78,  0.22, 0.82, 0.32, 0.38, 0.34],
+                    [ -7.35, -2.82,  0.11, 0.90, 0.36, 0.42, 0.00],
+                    [  9.85, -2.84, -0.16, 0.88, 0.35, 0.42, 0.00]
                 ].forEach(function (blk, bkIdx) {
                     var bx = blk[0], bz = blk[1], rotB = blk[2], bw = blk[3], bh = blk[4], bd = blk[5], liftY = blk[6];
                     var by = getGroundY(bx, bz);
@@ -8226,20 +8621,9 @@
             var curbStoneMat = createPainterlyArchMaterial(0x1b263d, 0x6c6549, 0xd4c68e, 0.04, 2.25, false, false, true, true, 0.36);
             [
                 // Boulevard Mirabeau South curbs (`blvdZ + 2.85`, cleanly parted across Hillside Trail junction `x = -5.3..+0.9`!)
+                // (Interior house-walled edges use the contiguous Provençal townhouse facades directly so zero curbs cut into walls!)
                 sampleRoadEdgeRun(-29.5, -5.4, 5, function (x) { return [x, blvdCenterZAt(x) + 2.85]; }),
                 sampleRoadEdgeRun(  1.0, 33.2, 6, function (x) { return [x, blvdCenterZAt(x) + 2.85]; }),
-                // Boulevard Mirabeau North curbs (`blvdZ - 2.85`, parted at Rue Carnot `x=-4.4..1.4`, East Alley `x=10.2..15.8` & East Blvd `x=33.2`!)
-                sampleRoadEdgeRun(-29.5, -4.6, 5, function (x) { return [x, blvdCenterZAt(x) - 2.85]; }),
-                sampleRoadEdgeRun(  1.6, 10.1, 3, function (x) { return [x, blvdCenterZAt(x) - 2.85]; }),
-                sampleRoadEdgeRun( 15.9, 33.1, 4, function (x) { return [x, blvdCenterZAt(x) - 2.85]; }),
-                // Rue Hoche West & East curbs (`hocheZ ± 2.58`, parted at Arch#2 `x=-14.6..-10.8`, Plaza/Carnot `x=-5.6..15.8` & East Blvd `x=33.2`!)
-                sampleRoadEdgeRun(-26.8, -14.8, 3, function (x) { return [x, hocheCenterZAt(x) + 2.58]; }),
-                sampleRoadEdgeRun(-26.8, -14.8, 3, function (x) { return [x, hocheCenterZAt(x) - 2.58]; }),
-                sampleRoadEdgeRun( 16.0,  33.1, 4, function (x) { return [x, hocheCenterZAt(x) + 2.58]; }),
-                sampleRoadEdgeRun( 16.0,  33.1, 4, function (x) { return [x, hocheCenterZAt(x) - 2.58]; }),
-                // Place de la République outer stone curbs (radius ~7.35 around `(0.6, -19.4)`, stopping cleanly clear of Rue Hoche & Chevet Lane!)
-                [[-6.25, -17.3], [-6.85, -19.4], [-6.15, -21.0]],
-                [[ 7.45, -17.3], [ 8.05, -19.4], [ 7.35, -21.0]],
                 // Via Domitia North & South Roman curbs (`viaZ ± 2.82`, stopping cleanly west of Les Antiques cobble parvis!)
                 sampleRoadEdgeRun(-33.0, 4.2, 6, function (x) { return [x, viaDomitiaZAt(x) - 2.82]; }),
                 sampleRoadEdgeRun(-33.0, 4.2, 6, function (x) { return [x, viaDomitiaZAt(x) + 2.82]; })
@@ -8300,8 +8684,6 @@
 
             // B) Straight Provençal Enclosure & Cloister Dry-Stone Walls (with East Blvd & Wheat Gate aligned 100% to roads!)
             var wallSegments = [
-                [-31.5,  -7.2, -27.8,  -7.2, 1.15],
-                [ 39.4,  -6.2,  43.0,  -6.2, 1.15],
                 [-32.0,  96.0, -4.2,  96.0, 2.15],
                 [  4.2,  96.0, 32.0,  96.0, 2.15],
                 [-32.0,  96.0, -32.0, 124.0, 2.25],
@@ -8313,8 +8695,6 @@
                 [ 38.0,  34.0,  96.0,  34.0, 1.42],
                 [ 38.0,  90.0,  96.0,  90.0, 1.42],
                 [ 96.0,  34.0,  96.0,  90.0, 1.48],
-                [-98.0, -14.0, -46.0, -14.0, 1.05],
-                [-98.0,  56.0, -46.0,  56.0, 1.05],
                 [ 50.0, -28.0, 104.0, -28.0, 1.05],
                 [ 50.0,  18.0, 104.0,  18.0, 1.05]
             ];
@@ -8896,37 +9276,65 @@
                         id: 'irises',
                         title: 'Irises',
                         date: 'May 1889 · Saint-Paul-de-Mausole Cloister',
-                        x: -2.8, z: 108.5,
-                        lookX: -9.5, lookZ: 104.0,
+                        x: -3.98, z: 107.82,
+                        lookX: -9.55, lookZ: 104.15,
+                        standDist: 1.45, standLat: 0.48,
+                        frameFloatH: 0.22, frameStandDist: 3.05,
+                        focusYOff: 0.36,
+                        exhDistStart: 5.80, exhDistEnd: 2.56,
+                        exhEyeStart: 1.84, exhEyeEnd: 1.74,
+                        frameBiasY0: -0.04, frameBiasY1: 0.02,
+                        easelFov: 48.5, frameFov: 49.0,
                         cA: 0x1a3830, cB: 0x454ed9, cC: 0x826ef2,
-                        note: 'Begun during Van Gogh\’s first week in the Saint-Paul-de-Mausole asylum garden. His brother Theo praised it as "a beautiful study full of air and life."'
+                        note: 'Begun during Van Gogh\’s first week in the Saint-Paul-de-Mausole asylum garden—framing violet-blue sword-leaved irises, a lone white iris on the left, red-ochre soil, and orange marigolds.'
                     },
                     {
                         id: 'wheat',
                         title: 'Wheat Field with Cypresses',
                         date: 'Late June 1889 · Enclosed Wheat Field',
-                        x: 48.0, z: 59.2,
-                        lookX: 74.0, lookZ: 54.0,
+                        x: 43.2, z: 59.6,
+                        lookX: 70.2, lookZ: 57.6,
+                        standDist: 1.52, standLat: 0.52,
+                        frameFloatH: 0.80, frameStandDist: 3.18,
+                        focusYOff: 1.55,
+                        exhDistStart: 6.80, exhDistEnd: 2.60,
+                        exhEyeStart: 1.54, exhEyeEnd: 1.45,
+                        frameBiasY0: 0.00, frameBiasY1: -0.02,
+                        easelFov: 51.5, frameFov: 49.5,
                         cA: 0x193632, cB: 0x4fa3b8, cC: 0xf5cc38,
-                        note: 'Painted on the spot beside the stone-walled wheat enclosure. Van Gogh likened its swirling summer clouds to "a piece of scotch plaid" and the cypresses to "a splash of black in a sunny landscape."'
+                        note: 'Painted beside the stone-walled wheat field—pairing wind-rippled golden wheat, a poppy-dotted green foreground bank, a wind-tossed bush on the left, and twin flame-like cypresses against blue hills.'
                     },
                     {
                         id: 'menders',
                         title: 'The Road Menders',
                         date: 'December 1889 · Boulevard Mirabeau',
-                        x: -16.2, z: -3.0,
-                        lookX: -2.0, lookZ: -4.6,
+                        x: -18.4, z: -2.78,
+                        lookX: -4.8, lookZ: -5.4,
+                        standDist: 1.52, standLat: 0.50,
+                        frameFloatH: 0.64, frameStandDist: 3.18,
+                        focusYOff: 1.42,
+                        exhDistStart: 6.40, exhDistEnd: 2.60,
+                        exhEyeStart: 1.56, exhEyeEnd: 1.46,
+                        frameBiasY0: 0.00, frameBiasY1: -0.02,
+                        easelFov: 52.0, frameFov: 50.0,
                         cA: 0x26384d, cB: 0xc97b28, cC: 0xf0c948,
-                        note: 'Painted on Boulevard Mirabeau (then the Cours de l\’Est) in Saint-R\émy, where street workers repaved the cobblestones beneath towering yellowing plane trees.'
+                        note: 'Painted along the shoulder of Boulevard Mirabeau (then the Cours de l\’Est) in Saint-R\émy, where street workers repaved the cobblestones beneath towering yellowing plane trees.'
                     },
                     {
                         id: 'olives',
                         title: 'The Olive Trees',
-                        date: '1889 · Western Olive Orchards',
-                        x: -46.0, z: 25.0,
-                        lookX: -68.0, lookZ: 20.0,
+                        date: 'June–July 1889 · Western Olive Orchards',
+                        x: -39.2, z: 23.6,
+                        lookX: -68.5, lookZ: 22.8,
+                        standDist: 1.52, standLat: 0.52,
+                        frameFloatH: 1.04, frameStandDist: 3.18,
+                        focusYOff: 1.92,
+                        exhDistStart: 7.40, exhDistEnd: 2.60,
+                        exhEyeStart: 1.48, exhEyeEnd: 1.40,
+                        frameBiasY0: 0.03, frameBiasY1: 0.04,
+                        easelFov: 52.0, frameFov: 49.5,
                         cA: 0x162c38, cB: 0x6b9478, cC: 0xd9cf6c,
-                        note: 'During his year at Saint-R\émy, Van Gogh painted more than a dozen studies among these gnarled olive groves, turning their silvery-green foliage into rhythmic, curling brushstrokes.'
+                        note: 'Van Gogh\’s daylight partner to The Starry Night—writhing olive trees over torrent-scored green-and-ochre ground, craggy blue Alpilles hills behind, and a bundled swirling white cloud above.'
                     }
                 ];
 
@@ -9386,63 +9794,6 @@
                     addThickLoadedOutlineStroke(g, [-ox, oyB,  iz], [-ox, oyT,  iz], 0.014, sketchInkMat, seedBase + 24.7, true);
                     addThickLoadedOutlineStroke(g, [ ox, oyB,  iz], [ ox, oyT,  iz], 0.014, sketchInkMat, seedBase + 25.0, true);
 
-                    // 7. High-contrast Prussian-and-gold painterly title cartouche suspended cleanly above the frame
-                    //    (Smooth alpha flattens underlying cloud/foliage impasto ridges & pre-tempers daylight sunLift!)
-                    var wordTex = makeFloatingWordingTexture(titleText, subText);
-                    var wordMat = new THREE.ShaderMaterial({
-                        uniforms: {
-                            tMap: { value: wordTex },
-                            uDaylight: uDaylight
-                        },
-                        transparent: true,
-                        depthWrite: false,
-                        side: THREE.FrontSide,
-                        blending: THREE.CustomBlending,
-                        blendEquation: THREE.AddEquation,
-                        blendSrc: THREE.SrcAlphaFactor,
-                        blendDst: THREE.OneMinusSrcAlphaFactor,
-                        blendEquationAlpha: THREE.AddEquation,
-                        blendSrcAlpha: THREE.SrcAlphaFactor,
-                        blendDstAlpha: THREE.OneMinusSrcAlphaFactor,
-                        vertexShader: [
-                            'precision highp float;',
-                            'varying vec2 vUv;',
-                            'void main() {',
-                            '    vUv = uv;',
-                            '    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
-                            '}'
-                        ].join('\n'),
-                        fragmentShader: [
-                            'precision highp float;',
-                            'uniform sampler2D tMap;',
-                            'uniform float uDaylight;',
-                            'varying vec2 vUv;',
-                            'void main() {',
-                            '    vec4 s = texture2D(tMap, vUv);',
-                            '    if (s.a < 0.015) discard;',
-                            '    vec3 c = s.rgb;',
-                            '    float lum = dot(c, vec3(0.299, 0.587, 0.114));',
-                            '    // Pre-counter post-process sunLift on the nocturnal Prussian backing so noon sun never washes it out',
-                            '    float darkBacking = 1.0 - smoothstep(0.06, 0.48, lum);',
-                            '    float dAmt = smoothstep(0.12, 1.0, uDaylight);',
-                            '    c = mix(c, c * 0.42, darkBacking * dAmt);',
-                            '    c = mix(c, c * 0.82, (1.0 - darkBacking) * dAmt * 0.65);',
-                            '    gl_FragColor = vec4(clamp(c, 0.0, 1.0), s.a);',
-                            '}'
-                        ].join('\n')
-                    });
-                    var wordW = Math.min(apW * 1.00, 2.48);
-                    var wordH = wordW * (288.0 / 1024.0);
-                    var wordGeo = new THREE.PlaneGeometry(wordW, wordH);
-                    var wordY = yTop + border + 0.052 + wordH * 0.46;
-
-                    var wordFront = new THREE.Mesh(wordGeo, wordMat);
-                    wordFront.position.set(0, wordY, 0.008);
-                    var wordBack = new THREE.Mesh(wordGeo, wordMat);
-                    wordBack.position.set(0, wordY, -0.008);
-                    wordBack.rotation.y = Math.PI;
-                    g.add(wordFront, wordBack);
-
                     return g;
                 }
 
@@ -9466,33 +9817,39 @@
                     easelGroup.add(halo);
                     easelHaloOrbs.push(halo);
 
-                    var standX = sp.x + ux * 1.52 + rx * 0.14;
-                    var standZ = sp.z + uz * 1.52 + rz * 0.14;
+                    var eStandDist = sp.standDist || 1.52;
+                    var eStandLat  = (typeof sp.standLat === 'number') ? sp.standLat : 0.48;
+                    var standX = sp.x + ux * eStandDist + rx * eStandLat;
+                    var standZ = sp.z + uz * eStandDist + rz * eStandLat;
                     var standY = getGroundY(standX, standZ);
-                    var focusX = sp.x - ux * 6.5;
-                    var focusZ = sp.z - uz * 6.5;
-                    var focusY = ey + 1.05;
+                    var focusX = sp.x - ux * 6.8;
+                    var focusZ = sp.z - uz * 6.8;
+                    var focusY = ey + (typeof sp.focusYOff === 'number' ? sp.focusYOff : 1.15);
 
                     // Centered mid-air Floating Gilded Frame along the painting vista sightline (zero easels in 'frames' mode!)
+                    var frameApW = 2.48, frameApH = 1.78;
+                    var frameFloatH = (typeof sp.frameFloatH === 'number') ? sp.frameFloatH : 0.56;
                     var frameX = sp.x - ux * 0.25;
                     var frameZ = sp.z - uz * 0.25;
                     var frameY = getGroundY(frameX, frameZ);
                     var fMesh = buildFloatingYellowFrame(
-                        frameX, frameY, frameZ, easelRotY, 2.48, 1.78, 0.56,
+                        frameX, frameY, frameZ, easelRotY, frameApW, frameApH, frameFloatH,
                         sp.title, sp.date.toUpperCase(), 910.0 + idx * 30.0
                     );
                     portalGroup.add(fMesh);
                     window.__vgFloatingFrameList.push({ group: fMesh, baseY: frameY });
 
-                    var fStandDist = 3.56;
+                    var fStandDist = sp.frameStandDist || 3.18;
                     var fStandX = frameX + ux * fStandDist;
                     var fStandZ = frameZ + uz * fStandDist;
                     var fStandY = getGroundY(fStandX, fStandZ);
-                    var fCamEyeY = fStandY + FP_EYE_HEIGHT;
-                    var fMidAtPlaneY = frameY + 1.72;
-                    var fLookX  = frameX - ux * 8.5;
-                    var fLookZ  = frameZ - uz * 8.5;
-                    var fLookY  = fCamEyeY + (fMidAtPlaneY - fCamEyeY) * ((fStandDist + 8.5) / fStandDist);
+                    var fEyeOff = (typeof sp.exhEyeEnd === 'number') ? sp.exhEyeEnd : FP_EYE_HEIGHT;
+                    var fCamEyeY = fStandY + fEyeOff;
+                    // Aim directly through the center of the Floating Yellow Frame aperture
+                    var fMidAtPlaneY = frameY + frameFloatH + frameApH * 0.50;
+                    var fLookX  = frameX - ux * 9.0;
+                    var fLookZ  = frameZ - uz * 9.0;
+                    var fLookY  = fCamEyeY + (fMidAtPlaneY - fCamEyeY) * ((fStandDist + 9.0) / fStandDist);
 
                     window.__vgEasels.push({
                         idx: idx,
@@ -9502,12 +9859,21 @@
                         note: sp.note,
                         x: sp.x, y: ey, z: sp.z,
                         frameX: frameX, frameY: frameY, frameZ: frameZ,
+                        frameFloatH: frameFloatH, frameApH: frameApH,
+                        exhDistStart: sp.exhDistStart || 6.80,
+                        exhDistEnd: sp.exhDistEnd || 2.60,
+                        exhEyeStart: sp.exhEyeStart || 1.56,
+                        exhEyeEnd: fEyeOff,
+                        frameBiasY0: (typeof sp.frameBiasY0 === 'number') ? sp.frameBiasY0 : 0.0,
+                        frameBiasY1: (typeof sp.frameBiasY1 === 'number') ? sp.frameBiasY1 : 0.0,
                         ux: ux, uz: uz, rx: rx, rz: rz,
                         rotY: easelRotY,
+                        easelFov: sp.easelFov || 52.0,
+                        frameFov: sp.frameFov || 49.5,
                         frontNormal: { x: Math.sin(easelRotY), z: Math.cos(easelRotY) },
                         standPos: new THREE.Vector3(standX, standY + FP_EYE_HEIGHT, standZ),
                         lookTarget: new THREE.Vector3(focusX, focusY, focusZ),
-                        frameStandPos: new THREE.Vector3(fStandX, fStandY + FP_EYE_HEIGHT, fStandZ),
+                        frameStandPos: new THREE.Vector3(fStandX, fCamEyeY, fStandZ),
                         frameLookTarget: new THREE.Vector3(fLookX, fLookY, fLookZ),
                         discovered: false
                     });
@@ -9523,25 +9889,39 @@
                 if (fz > 121.5) continue;
                 var isIrisBed = ((ib % 3) !== 0);
                 var bedR = 0.92 + rand() * 0.38;
+                // Keep Getty's bare red-ochre foreground soil wedge (-7.8..-3.2, 106.8..110.8) clear of round cushion mounds!
+                if (fx > -8.0 && fx < -3.0 && fz > 106.8 && fz < 110.8) continue;
                 if (!isClearForBotanicalBush(fx, fz, bedR * 1.78, true)) continue;
                 addSculptedBotanicalCluster(
                     fx, fz,
-                    bedR,
-                    0.56,
+                    bedR * 0.88,
+                    0.40,
                     isIrisBed ? irisCushionMat : marigoldCushionMat,
                     3,
                     false
                 );
             }
+            // Dense upper-left Golden-Orange Marigold bank behind Getty's Irises sightline!
+            (function () {
+                var savedMgRng = rngState;
+                [
+                    [-9.6, 106.8, 0.96], [-10.8, 105.6, 1.02], [-11.8, 104.2, 1.04], [-10.2, 103.6, 0.98],
+                    [-12.6, 106.2, 1.00], [-13.4, 104.8, 1.04], [-9.2, 102.2, 0.94], [-11.2, 102.0, 0.98]
+                ].forEach(function (mb) {
+                    addSculptedBotanicalCluster(mb[0], mb[1], mb[2], 0.42, marigoldCushionMat, 3, false);
+                });
+                rngState = savedMgRng;
+            })();
 
             // 8. THE ENCLOSED WHEAT FIELD (x=38..96, z=34..90):
             //    Sculpted 3D Rolling Golden Impasto Wheat-Wave Sea (parted cleanly along the z~58 lane!),
             //    golden wheat stooks, reaper's wooden harvest cart & wall-hugging olive/garrigue bushes!
             (function () {
-                var wMinX = 38.8, wMaxX = 95.2;
-                var wMinZ = 34.8, wMaxZ = 89.2;
+                // Extend wheatSeaGeo flush to the exact centerlines (38.0..96.0, 34.0..90.0) of all 4 dry-stone walls!
+                var wMinX = 38.0, wMaxX = 96.0;
+                var wMinZ = 34.0, wMaxZ = 90.0;
                 var wW = wMaxX - wMinX, wD = wMaxZ - wMinZ;
-                var wheatSeaGeo = new THREE.PlaneGeometry(wW, wD, 68, 68);
+                var wheatSeaGeo = new THREE.PlaneGeometry(wW, wD, 84, 84);
                 wheatSeaGeo.rotateX(-Math.PI * 0.5);
 
                 var wPos = wheatSeaGeo.attributes.position;
@@ -9550,26 +9930,39 @@
                     var wx = wPos.getX(wi) + (wMinX + wMaxX) * 0.5;
                     var wz = wPos.getZ(wi) + (wMinZ + wMaxZ) * 0.5;
 
-                    // Smoothly tuck wheat below ground across the z~58 path, cart clearing (43.5, 52.5), and stone walls!
-                    var dLane = Math.abs(wz - (58.0 + Math.sin(wx * 0.06) * 2.2));
-                    var laneClear = THREE.MathUtils.clamp((dLane - 2.2) / 1.8, 0.0, 1.0);
-                    var dCart = Math.hypot(wx - 43.5, wz - 52.5);
-                    var cartClear = THREE.MathUtils.clamp((dCart - 2.6) / 1.8, 0.0, 1.0);
-                    var wallFade = THREE.MathUtils.clamp(Math.min(
+                    var dEasel = Math.hypot(wx - 43.2, wz - 59.6);
+                    var easelDip = 0.30 + 0.70 * THREE.MathUtils.clamp((dEasel - 1.8) / 2.4, 0.0, 1.0);
+                    var dCart = Math.hypot(wx - 43.5, wz - 76.5);
+                    var cartDip = 0.30 + 0.70 * THREE.MathUtils.clamp((dCart - 2.0) / 2.0, 0.0, 1.0);
+                    var wallDist = Math.min(
                         Math.min(wx - wMinX, wMaxX - wx),
                         Math.min(wz - wMinZ, wMaxZ - wz)
-                    ) / 1.8, 0.0, 1.0);
+                    );
+                    // Keep all 4 stone walls 100% solid & flush (wallHeightEase >= 0.48), while feathering the open z=56.3..63.1
+                    // West Gate along a curved, ground-flush semi-elliptical apron so NO straight wx=38.0 ruler-edge ever shows!
+                    var wallHeightEase = 0.48 + 0.52 * THREE.MathUtils.clamp(wallDist / 1.5, 0.0, 1.0);
+                    var inGateSpanZ = THREE.MathUtils.clamp((wz - 56.20) / 0.50, 0.0, 1.0)
+                                    * THREE.MathUtils.clamp((63.20 - wz) / 0.50, 0.0, 1.0);
+                    var zNormGate = (wz - 59.70) / 3.52;
+                    var archDepth = 4.20 * Math.sqrt(Math.max(0.0, 1.0 - zNormGate * zNormGate));
+                    var xGateT = THREE.MathUtils.clamp((wx - 38.35) / Math.max(0.45, archDepth), 0.0, 1.0);
+                    var xGateSmooth = xGateT * xGateT * (3.0 - 2.0 * xGateT);
+                    var gateRamp = 1.0 - inGateSpanZ * (1.0 - xGateSmooth);
 
-                    var mask = laneClear * cartClear * wallFade;
-                    mask = mask * mask * (3.0 - 2.0 * mask);
-                    depAttr[wi] = mask;
+                    var dip = Math.min(easelDip, cartDip) * wallHeightEase * gateRamp;
+                    var gustWeight = THREE.MathUtils.clamp(wallDist / 1.4, 0.0, 1.0)
+                                   * THREE.MathUtils.clamp((gateRamp - 0.35) / 0.65, 0.0, 1.0)
+                                   * THREE.MathUtils.clamp(dip, 0.25, 1.0);
+                    // Along all 4 stone walls gateRamp === 1.0 -> depAttr >= 0.40 (ZERO wall gap!).
+                    // Right across the open wx=38.0 gate span gateRamp === 0.0 -> depAttr = 0.0 (feathers out flush on the ground!).
+                    depAttr[wi] = (0.40 + 0.60 * gustWeight) * THREE.MathUtils.clamp(gateRamp / 0.42, 0.0, 1.0);
 
-                    // Rolling waist-high Mistral wheat swells (0.72..1.08u high when mask=1, tucked -0.25u when mask=0)
-                    var swell = 0.84
+                    var baseSwell = (0.84
                         + 0.16 * Math.sin(wx * 0.34 + wz * 0.22)
-                        + 0.11 * Math.cos(wx * 0.18 - wz * 0.38);
+                        + 0.11 * Math.cos(wx * 0.18 - wz * 0.38)) * dip;
+                    var sinkGate = (gateRamp < 0.18) ? (-0.06 * (1.0 - gateRamp / 0.18)) : 0.0;
                     var gyW = getGroundY(wx, wz);
-                    wPos.setXYZ(wi, wx, gyW + (mask > 0.01 ? (swell * mask - 0.18 * (1.0 - mask)) : -0.25), wz);
+                    wPos.setXYZ(wi, wx, gyW + baseSwell + sinkGate, wz);
                 }
                 wheatSeaGeo.setAttribute('aWheatMask', new THREE.BufferAttribute(depAttr, 1));
                 wheatSeaGeo.computeVertexNormals();
@@ -9596,8 +9989,9 @@
                         '    vec3 p = position;',
                         '    float gust = sin(uFlowPhase * 2.4 + p.x * 0.32 + p.z * 0.21) * 0.11',
                         '               + cos(uFlowPhase * 1.6 - p.x * 0.19 + p.z * 0.36) * 0.06;',
-                        '    p.y += gust * aWheatMask;',
-                        '    p.x += gust * 1.35 * aWheatMask;',
+                        '    float gustEnv = clamp((aWheatMask - 0.40) / 0.60, 0.0, 1.0);',
+                        '    p.y += gust * gustEnv;',
+                        '    p.x += gust * 1.35 * gustEnv;',
                         '    vWorldPos = p;',
                         '    vNormal = normalize(normal);',
                         '    gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.0);',
@@ -9619,8 +10013,8 @@
                         GLSL_RIBBON_LIBRARY,
                         '',
                         'void main() {',
-                        '    float edgeBristle = (vnoise(vWorldPos.xz * 2.8) - 0.5) * 0.22;',
-                        '    if (vMask + edgeBristle < 0.10) discard;',
+                        '    float edgeBristle = (vnoise(vWorldPos.xz * 3.4) - 0.5) * 0.28 + (vnoise(vWorldPos.xz * 9.2) - 0.5) * 0.14;',
+                        '    if (vMask + edgeBristle < 0.16) discard;',
                         '    vec3 N = normalize(vNormal);',
                         '    float ndl = dot(N, uLightDir) * 0.5 + 0.5;',
                         '',
@@ -9699,10 +10093,10 @@
                 sheafGeo.computeVertexNormals();
             })();
             var sheafSpots = [
-                [45, 41], [54, 39], [64, 42], [75, 40], [86, 43],
-                [48, 49], [59, 48], [71, 50], [83, 49],
-                [46, 66], [57, 68], [69, 66], [81, 69], [90, 65],
-                [44, 76], [55, 79], [67, 77], [78, 81], [88, 78],
+                [42, 71], [48, 72], [54, 71], [61, 72], [68, 71],
+                [75, 72], [82, 71], [89, 72], [48.2, 76.2],
+                [53, 76], [60, 75], [71, 75], [84, 75], [91, 76],
+                [42.2, 83.2], [55, 79], [67, 78], [78, 81], [88, 79],
                 [51, 85], [64, 86], [76, 85], [87, 86],
                 [33, 52], [31, 63], [34, 67]
             ];
@@ -9735,9 +10129,51 @@
                 }
             });
 
-            // Wooden Reaper's Harvest Cart parked inside the Enclosed Wheat Field gate (43.5, 52.5)
+            // Met June 1889 "Wheat Field with Cypresses": Wind-Swept Silvery-Olive Bush on the Left,
+            // Mid-Ground Provençal Shrubs, and Lower-Right Poppy & Wildflower Foreground Bank!
             (function () {
-                var cxW = 43.5, czW = 52.5;
+                var savedWheatSpotRng = rngState;
+                var wSt = 18890625;
+                function wRand() {
+                    wSt = (wSt * 1664525 + 1013904223) % 4294967296;
+                    return wSt / 4294967296;
+                }
+                var windBushMat = createBotanicalCushionMaterial(0x0c2424, 0x245940, 0x76a882, 0xe4efe6, 0x9ec888, 0.72, 0.075);
+                var bushGrp = new THREE.Group();
+                var bxMain = 58.8, bzMain = 53.6;
+                var byMain = getGroundY(bxMain, bzMain);
+                addCircleCollider(bxMain, bzMain, 2.2);
+                bushGrp.position.set(bxMain, byMain, bzMain);
+                [
+                    [ 0.0,  1.15,  0.0,  2.45, 1.55, 2.15],
+                    [-1.55, 0.95, -0.75, 1.85, 1.28, 1.65],
+                    [ 1.65, 1.38,  0.55, 2.05, 1.48, 1.80],
+                    [ 0.65, 1.88,  0.25, 1.72, 1.25, 1.52]
+                ].forEach(function (lb) {
+                    var m = new THREE.Mesh(cushionSphereGeo, windBushMat);
+                    m.position.set(lb[0], lb[1], lb[2]);
+                    m.scale.set(lb[3], lb[4], lb[5]);
+                    bushGrp.add(m);
+                });
+                scene.add(bushGrp);
+
+                // (Floating 2D bristle paddles removed so the sculpted 3D wind-swept bush stays 100% solid and clean!)
+
+                // Mid-ground dark-emerald Provençal shrubs bridging cleanly between the Wind Bush & Twin Cypresses (zero overlap)!
+                [
+                    [64.5, 55.2, 1.28, 0.68], [66.2, 63.2, 1.32, 0.70],
+                    [76.4, 57.6, 1.42, 0.74], [77.6, 62.8, 1.48, 0.76], [53.2, 51.4, 1.22, 0.65]
+                ].forEach(function (sb) {
+                    addSculptedBotanicalCluster(sb[0], sb[1], sb[2], sb[3], garrigueShrubMat, 3, true);
+                });
+
+
+                rngState = savedWheatSpotRng;
+            })();
+
+            // Wooden Reaper's Harvest Cart parked in the Southern Reaper Harvest Strip (43.5, 76.5)
+            (function () {
+                var cxW = 43.5, czW = 76.5;
                 var cyW = getGroundY(cxW, czW);
                 addOrientedBoxCollider(cxW, czW, 0.35, 2.6, 3.6);
                 var cart = new THREE.Group();
@@ -9780,9 +10216,11 @@
             })();
 
             // 8B. SCULPTED 3D LAVENDER CUSHIONS & GARRIGUE / WILD-OLIVE SHRUBS ACROSS ALL 360°!
-            //     (Replaces every vertical paddle & floating ground dab with organic 3D painted bushes!)
-            (function () {
-                var savedShrubRng = rngState;
+            //     (Deferred until immediately after `buildTurbulentOliveGroves()` so 100% of olive, cypress & pine trunks are registered first!)
+            var deferredShrubRngSeed = rngState;
+            window.__placeCountrysideShrubsAfterTrees = function () {
+                var callerRng = rngState;
+                rngState = deferredShrubRngSeed;
                 // 1) Meadow-side olive & garrigue shrubs set cleanly outside all Hillside Trail curbs, Wheat Enclosure & Cloister walls!
                 var borderShrubSpots = [
                     [-10.4, 68.0, 1.18, false], [-13.2, 57.5, 1.25, true],  [-12.8, 44.0, 1.16, false],
@@ -9814,6 +10252,8 @@
                     if (sx > -36.0 && sx < 38.0 && sz > -38.0 && sz < 34.0) continue;
                     if (sx > 37.0 && sx < 97.5 && sz > 33.0 && sz < 91.5) continue;
                     if (sx > -33.5 && sx < 33.5 && sz > 95.0 && sz < 127.0) continue;
+                    if (sx < -83.0 && sz > -18.0 && sz < 50.0) continue;
+                    if (sx > 104.0 && sz > 28.0 && sz < 76.0) continue;
                     if (hasTreeCanopyOverlap(sx, sz, 1.2, 0.5)) continue;
 
                     var isLavMound = (rS > 96.0) ? (rand() > 0.35) : (rand() > 0.55);
@@ -9829,19 +10269,29 @@
                     );
                     placedShrubs++;
                 }
-                rngState = savedShrubRng;
-            })();
+                [[-33.2, -10.2, 1.22], [40.8, -10.8, 1.22], [-33.0, -23.2, 1.22], [40.6, -24.2, 1.22]].forEach(function (b) {
+                    if (!hasTreeCanopyOverlap(b[0], b[1], b[2] * 0.9, 0.5) && isClearForBotanicalBush(b[0], b[1], b[2] * 1.78, false)) {
+                        addSculptedBotanicalCluster(b[0], b[1], b[2], 0.62, garrigueShrubMat, 3, true);
+                    }
+                });
+                rngState = callerRng;
+            };
 
-            // 9. TERRACED PROVENÇAL VINEYARDS (West: x=-96..-48, z=-12..54 & East: x=52..102, z=-26..16)
+            // 9. TERRACED PROVENÇAL VINEYARDS (Strictly on flat valley parcels—ZERO farming rows on mountains, slopes, or Olive Grove vista!)
             var vineFoliageMat = createPainterlyArchMaterial(0x0c2419, 0x245e36, 0x92b83e, 0.22, 2.35, false);
-            function buildVineyardBlock(xMin, xMax, zStart, zEnd, rowSpacing) {
+            function buildVineyardBlock(xMin, xMax, zStart, zEnd, rowSpacing, skipOliveCorridor) {
                 for (var vz = zStart; vz <= zEnd; vz += rowSpacing) {
-                    if (Math.abs(vz - 26.0) < 3.6) continue; // Keep West country lane open!
+                    if (Math.abs(vz - 26.0) < 3.6) continue;
+                    if (skipOliveCorridor && vz > -3.5 && vz < 42.5) continue; // Keep MoMA Olive Grove & Western Alpilles vista 100% pure!
                     var rowPts = [];
                     for (var vx = xMin; vx <= xMax; vx += 3.5) {
                         var zz = vz + Math.sin(vx * 0.08) * 0.75;
-                        rowPts.push(new THREE.Vector3(vx, getGroundY(vx, zz) + 0.72, zz));
+                        var gyV = getGroundY(vx, zz);
+                        var slpV = Math.hypot(getGroundY(vx + 2.0, zz) - getGroundY(vx - 2.0, zz), getGroundY(vx, zz + 2.0) - getGroundY(vx, zz - 2.0)) / 4.0;
+                        if (gyV > 2.35 || slpV > 0.13) continue; // Never climb onto any mountain or hill slope!
+                        rowPts.push(new THREE.Vector3(vx, gyV + 0.72, zz));
                     }
+                    if (rowPts.length < 3) continue;
                     var vCurve = new THREE.CatmullRomCurve3(rowPts);
                     var vineTube = new THREE.TubeGeometry(vCurve, 22, 0.52, 6, false);
                     scene.add(new THREE.Mesh(vineTube, vineFoliageMat));
@@ -9871,8 +10321,13 @@
                     }
                 }
             }
-            buildVineyardBlock(-96.0, -48.0, -11.0, 52.0, 4.2);
-            buildVineyardBlock( 52.0, 102.0, -25.0, 15.0, 4.4);
+            (function () {
+                var savedVineRng = rngState;
+                buildVineyardBlock( 52.0, 100.0, -25.0, 15.0, 4.4, false);
+                rngState = savedVineRng;
+            })();
+            // Advance deterministic PRNG by exact original vineyard stride (25 rows * 52 * 5 = 6500 steps) so downstream pines stay 100% unchanged!
+            for (var vAdv = 0; vAdv < 6500; vAdv++) { rand(); }
 
             // 10. VAN GOGH SAINT-RÉMY HILLSIDE TREES ("The Road Menders" & "Pine Trees at Saint-Paul", Nov 1889)
             //     Unified 100% with the swirling hog-bristle impasto & mottled ochre-olive bark of the town boulevard trees!
@@ -9912,6 +10367,7 @@
                     return;
                 }
                 registerTreeEnvelope(wxP + lx * 0.6, wzP + lz * 0.6, pineCrownSpan, 'pine');
+                registerTreeTrunkZone(wxP, wzP, 1.75 * effScale);
                 addCircleCollider(wxP, wzP, 0.92 * effScale);
 
                 // Gnarled, muscular Van Gogh S-curved trunk rooted `-0.65m` into sloped hillside (ZERO floating base!)
@@ -10041,13 +10497,14 @@
                 // South-East Meadow & Glanum Eastern Stands (100% clear of East Cloister Cypresses #5, #7, #8!)
                 [ 54, 108, 1.00,  0.3], [ 62, 126, 1.02, -0.3], [ 62, 145, 1.00,  0.2], [ 84, 124, 1.02, -0.2],
                 [ 92, 104, 1.00,  0.3],
-                // Outer West & North-West Stands (clear of Cypress#15 & Preset 0 frustum!)
-                [-118, -14, 1.00, 0.3], [-116, 12, 1.02, -0.4], [-112, 42, 1.00,  0.5], [-104, 84, 1.02, -0.2],
+                // Outer West & North-West Stands (100% clear of Western Olive Alpilles rock, Cypress#15 & Preset 0 frustum!)
+                [-118, -24, 1.00, 0.3], null, [-108, 68, 1.00,  0.5], [-104, 84, 1.02, -0.2],
                 [ -92, 114, 1.00, 0.4], [ -76, 136, 0.98, -0.2],
-                // Outer East Stands (clear of Wheat Field Mistral Cypress Cluster #9..#14!)
-                [110, -14, 1.00, -0.3], [116,  20, 1.02,  0.2], [118,  98, 1.00, -0.4], [108, 122, 1.00,  0.2]
+                // Outer East Stands (100% clear of Eastern Wheat Foothills & Cypress Cluster #9..#14!)
+                [110, -14, 1.00, -0.3], [112,  14, 1.02,  0.2], [118,  98, 1.00, -0.4], [108, 122, 1.00,  0.2]
             ];
             pineCoords.forEach(function (pc, pIdx) {
+                if (!pc) return;
                 addProvencalUmbrellaPine(pc[0], pc[1], pc[2], pc[3], 500.0 + pIdx * 9.7);
             });
 
@@ -10385,11 +10842,7 @@
                 scene.add(archG);
             })();
 
-            [[-33.2, -10.2, 1.22], [40.8, -10.8, 1.22], [-33.0, -23.2, 1.22], [40.6, -24.2, 1.22]].forEach(function (b) {
-                if (isClearForBotanicalBush(b[0], b[1], b[2] * 1.78, false)) {
-                    addSculptedBotanicalCluster(b[0], b[1], b[2], 0.62, garrigueShrubMat, 3, true);
-                }
-            });
+            // (Outer village edge shrubs placed in `__placeCountrysideShrubsAfterTrees` after olive trees register)
         }
 
         // ========================================================================
@@ -10709,6 +11162,25 @@
                 c.position.set(sp[0], sy, sp[1]);
                 scene.add(c);
             });
+
+            // Iconic Twin Cypresses on the Right of Met's "Wheat Field with Cypresses" (June 1889, F717):
+            // One towering flame-like obelisk (71.5, 59.8) + smaller companion tucked beside its left flank (68.4, 58.6)!
+            (function () {
+                var savedTwinCypRng = rngState;
+                [
+                    [71.5, 59.8, 0.72, true,  71.7],
+                    [68.4, 58.6, 0.46, false, 73.9]
+                ].forEach(function (tc) {
+                    var tyC = getGroundY(tc[0], tc[1]) - 1.2;
+                    addCircleCollider(tc[0], tc[1], 3.4 * tc[2]);
+                    registerTreeEnvelope(tc[0], tc[1], 4.2 * tc[2], 'cypress');
+                    registerTreeTrunkZone(tc[0], tc[1], 3.6 * tc[2]);
+                    var cypM = createSinuousDarkCypress(tc[2], tc[3], { x: tc[0], y: tyC, z: tc[1] }, tc[4]);
+                    cypM.position.set(tc[0], tyC, tc[1]);
+                    scene.add(cypM);
+                });
+                rngState = savedTwinCypRng;
+            })();
         }
 
         // ========================================================================
@@ -11170,21 +11642,20 @@
                 addPartStrokes(8, 1.60, 1.72, 0.24, 0.24, hatA, hatB, 0x071026, 0.78, 0.72, 1.4);
             }
 
-            // 1) Distant Reaper in the Enclosed Wheat Field (58.5, 66.0 — Wheatfield with a Reaper, Sept 1889)
-            addBrushstrokeFigure(58.5, 66.0, -1.85, 'reaper', 0x1f4d8c, 0x2f6cb5, 0x4b87c9, 0xd69e26, 0xf8dc3b, 0xd69e26, 11.0);
+            // (Blue brushstroke reaper figure removed for clean sheaf vista!)
 
             // 2) Upright Hog-Bristle Saint-Paul-de-Mausole Cloister Irises & Marigolds (Irises, May 1889, Getty Museum)
-            //    Sword-leaved blue-violet irises, background orange marigolds, and the iconic solitary white iris on the left!
+            //    Naturally proportioned (~0.68m–0.88m knee-to-hip height, sitting realistically below the 1.78m standing easel!)
             function addBrushstrokeIrisTuft(fx, fz, scaleT, variant, seedBase, withCol) {
                 var gy = getGroundY(fx, fz);
-                if (withCol) addCircleCollider(fx, fz, 0.30);
+                if (withCol) addCircleCollider(fx, fz, 0.22);
 
                 function addBladeOrPetalRing(count, yMin, yMax, radX, radZ, col1, col2, colAccent, contourHex, splayAmt, lenScale, widScale) {
                     for (var k = 0; k < count; k++) {
                         var t = k / Math.max(1, count - 1);
-                        var yy = (yMin + (yMax - yMin) * t + Math.sin(seedBase + k * 2.1) * 0.035) * scaleT;
+                        var yy = (yMin + (yMax - yMin) * t + Math.sin(seedBase + k * 2.1) * 0.020) * scaleT;
                         var ang = (k * 2.39996 + seedBase) % (Math.PI * 2.0);
-                        var flare = 0.55 + 0.65 * t;
+                        var flare = 0.52 + 0.62 * t;
                         var px = fx + Math.cos(ang) * radX * flare * scaleT;
                         var pz = fz + Math.sin(ang) * radZ * flare * scaleT;
                         var py = gy + yy;
@@ -11192,69 +11663,106 @@
                         var cA = isContour ? contourHex : ((k % 3 === 0) ? colAccent : col1);
                         var cB = isContour ? 0x162b4d : col2;
                         var tx = Math.cos(ang) * splayAmt * lenScale * scaleT;
-                        var ty = (0.34 + (k % 3) * 0.06) * lenScale * scaleT;
+                        var ty = (0.175 + (k % 3) * 0.032) * lenScale * scaleT;
                         var tz = Math.sin(ang) * splayAmt * lenScale * scaleT;
                         addMicroRec(
                             px, py, pz,
                             tx, ty, tz,
-                            0.0, (0.14 + (k % 2) * 0.04) * widScale * scaleT, 0.0,
+                            0.0, (0.076 + (k % 2) * 0.022) * widScale * scaleT, 0.0,
                             (k + Math.floor(seedBase)) % 8,
-                            0.016, seedBase + yy * 1.9, 1.0,
+                            0.012, seedBase + yy * 1.9, 1.0,
                             cA, cB
                         );
                     }
                 }
 
-                // Sword-shaped blue-green & sage iris leaves (with Japanese woodblock Prussian-ink contours)
-                addBladeOrPetalRing(18, 0.14, 0.80, 0.25, 0.25, 0x164236, 0x3b7a5e, 0x6ca868, 0x071426, 0.18, 0.98, 0.96);
+                // Sword-shaped blue-green & sage iris leaves (~0.45m-0.58m tall, with Prussian-ink woodblock contours)
+                addBladeOrPetalRing(18, 0.09, 0.40, 0.17, 0.17, 0x164236, 0x3b7a5e, 0x6ca868, 0x071426, 0.11, 0.96, 0.94);
 
                 if (variant === 'white') {
-                    // Iconic solitary white iris standing slightly apart on the left (ivory-white & pearl-blue petals + golden beard)
-                    addBladeOrPetalRing(18, 0.72, 1.32, 0.24, 0.24, 0xf7f9fc, 0xdce8f2, 0xcadbe3, 0x122645, 0.15, 1.02, 1.08);
-                    addBladeOrPetalRing(8,  1.22, 1.50, 0.20, 0.20, 0xffffff, 0xeef4fa, 0xf7d448, 0x162b4d, 0.13, 0.84, 0.92);
+                    // Iconic solitary white iris standing slightly proud (~0.88m) on the left above the bare red-ochre earth wedge
+                    addBladeOrPetalRing(18, 0.38, 0.64, 0.16, 0.16, 0xf7f9fc, 0xdce8f2, 0xcadbe3, 0x122645, 0.095, 1.00, 1.04);
+                    addBladeOrPetalRing(8,  0.60, 0.74, 0.13, 0.13, 0xffffff, 0xeef4fa, 0xf7d448, 0x162b4d, 0.082, 0.84, 0.90);
                 } else if (variant === 'classic') {
-                    // Exact beloved Prussian-cobalt & golden-ochre impasto tuft palette preserved in the Cloister garden!
-                    addBladeOrPetalRing(18, 0.70, 1.30, 0.26, 0.22, 0x101c33, 0x22385e, 0xe8a838, 0x071026, 0.15, 1.04, 1.08);
-                    addBladeOrPetalRing(10, 1.20, 1.48, 0.22, 0.22, 0x264073, 0x454ed9, 0xf2d15b, 0x071026, 0.14, 0.82, 0.86);
+                    // Prussian-cobalt & golden-ochre impasto bearded irises (~0.74m-0.84m)
+                    addBladeOrPetalRing(18, 0.36, 0.60, 0.17, 0.15, 0x101c33, 0x22385e, 0xe8a838, 0x071026, 0.095, 1.02, 1.04);
+                    addBladeOrPetalRing(10, 0.56, 0.70, 0.14, 0.14, 0x264073, 0x454ed9, 0xf2d15b, 0x071026, 0.084, 0.82, 0.86);
                 } else if (variant === 'marigold') {
-                    // Warm cadmium-orange & golden marigold background band (upper edge of Getty's Irises)
-                    addBladeOrPetalRing(18, 0.64, 1.18, 0.26, 0.26, 0xc95f18, 0xf09b22, 0xfbe065, 0x14241b, 0.17, 0.92, 0.98);
+                    // Warm cadmium-orange & golden marigold background band (~0.52m-0.62m)
+                    addBladeOrPetalRing(18, 0.28, 0.48, 0.18, 0.18, 0xc95f18, 0xf09b22, 0xfbe065, 0x14241b, 0.110, 0.90, 0.96);
                 } else {
-                    // Monumental cobalt-violet & ultramarine bearded irises with golden-ochre hearts
-                    addBladeOrPetalRing(18, 0.70, 1.28, 0.25, 0.24, 0x1b2f99, 0x434ed9, 0x7c6cf2, 0x071026, 0.15, 1.04, 1.06);
-                    addBladeOrPetalRing(8,  1.18, 1.46, 0.21, 0.21, 0x3242b8, 0x826ef2, 0xf2c94c, 0x071026, 0.13, 0.82, 0.88);
+                    // Cobalt-violet & ultramarine bearded irises with golden-ochre hearts (~0.72m-0.84m)
+                    addBladeOrPetalRing(18, 0.36, 0.60, 0.17, 0.16, 0x1b2f99, 0x434ed9, 0x7c6cf2, 0x071026, 0.095, 1.02, 1.02);
+                    addBladeOrPetalRing(8,  0.56, 0.70, 0.14, 0.14, 0x3242b8, 0x826ef2, 0xf2c94c, 0x071026, 0.082, 0.82, 0.88);
                 }
             }
 
-            // Solitary White Iris on the left foreground of the Irises easel/frame sightline!
-            addBrushstrokeIrisTuft(-6.80, 107.20, 1.08, 'white', 31.0, true);
+            // Iconic Solitary White Iris standing slightly proud (~0.90m) on the left above Getty's bare red-ochre earth wedge!
+            addBrushstrokeIrisTuft(-6.45, 107.35, 1.12, 'white', 31.0, true);
 
-            // Surge of blue-violet & cobalt-gold Irises across the West Cloister bed (framed by the Irises spot)
+            // Lush, closely woven Getty diagonal wave of naturally proportioned Cobalt-Violet & Ultramarine Irises
+            // (sweeping from left-midground down into the lower-right foreground while keeping the lower-left red-ochre soil wedge bare!)
             [
-                [-5.97, 106.67, 1.02, 'classic', true],
-                [-5.69, 105.90, 0.98, 'blue',    true],
-                [-5.49, 105.07, 1.04, 'blue',    true],
-                [-7.24, 106.42, 0.96, 'blue',    false],
-                [-6.91, 105.56, 1.06, 'classic', false],
-                [-6.61, 104.76, 1.00, 'blue',    false],
-                [-6.29, 103.93, 0.95, 'blue',    false],
-                [-8.41, 106.36, 0.98, 'blue',    false],
-                [-8.18, 105.31, 1.04, 'blue',    false],
-                [-7.79, 104.36, 0.97, 'classic', false],
-                [-7.46, 103.51, 1.02, 'blue',    false],
+                // Lower-right foreground iris cluster beside the easel
+                [-4.25, 106.85, 1.02, 'blue',    true],
+                [-4.48, 106.48, 0.98, 'classic', false],
+                [-4.65, 106.15, 1.04, 'blue',    true],
+                [-4.10, 105.65, 0.98, 'classic', true],
+                [-5.15, 106.65, 1.00, 'blue',    true],
+                [-4.95, 105.82, 1.02, 'blue',    false],
+                [-4.85, 105.35, 1.04, 'blue',    false],
+                [-4.35, 104.75, 0.96, 'classic', false],
+                // Central & diagonal mid-ground surge of rippled violet-blue bearded irises
+                [-5.48, 106.05, 1.00, 'classic', false],
+                [-5.75, 106.35, 0.98, 'blue',    true],
+                [-5.55, 105.55, 1.02, 'classic', false],
+                [-5.35, 105.05, 0.96, 'blue',    false],
+                [-5.25, 104.65, 0.98, 'blue',    false],
+                [-5.05, 103.85, 0.95, 'blue',    false],
+                [-6.35, 106.25, 1.00, 'blue',    false],
+                [-6.02, 105.82, 0.98, 'blue',    false],
+                [-6.15, 105.35, 1.04, 'blue',    false],
+                [-6.02, 104.88, 0.96, 'classic', false],
+                [-5.95, 104.45, 0.96, 'classic', false],
+                [-5.65, 103.55, 0.94, 'blue',    false],
+                [-7.15, 106.65, 0.98, 'blue',    false],
+                [-6.72, 106.12, 1.00, 'classic', false],
+                [-6.95, 105.75, 1.02, 'classic', false],
+                [-6.62, 105.28, 0.98, 'blue',    false],
+                [-6.75, 104.85, 0.98, 'blue',    false],
+                [-6.58, 104.38, 0.95, 'blue',    false],
+                [-6.45, 103.95, 0.94, 'blue',    false],
+                [-7.85, 107.45, 0.96, 'blue',    false],
+                [-7.62, 106.78, 0.98, 'classic', false],
+                [-7.75, 106.15, 0.98, 'blue',    false],
+                [-7.32, 105.42, 1.00, 'blue',    false],
+                [-7.55, 105.15, 1.00, 'blue',    false],
+                [-7.38, 104.62, 0.96, 'blue',    false],
+                [-7.25, 104.15, 0.96, 'classic', false],
+                [-7.05, 103.25, 0.92, 'blue',    false],
+                [-8.45, 105.65, 0.98, 'blue',    false],
+                [-8.08, 105.15, 0.96, 'classic', false],
+                [-8.25, 104.65, 0.98, 'blue',    false],
+                [-8.10, 104.12, 0.94, 'blue',    false],
+                [-7.95, 103.65, 0.94, 'classic', false],
                 // Companion East Cloister iris tufts flanking the opposite side of the monastery garden walk
-                [ 6.10, 103.40, 1.00, 'blue',    true],
-                [ 6.65, 105.60, 1.04, 'classic', true],
-                [ 6.25, 107.80, 0.96, 'blue',    true],
-                [ 7.90, 104.60, 0.98, 'blue',    false],
-                [ 8.20, 106.90, 1.02, 'blue',    false]
+                [ 6.10, 103.40, 0.94, 'blue',    true],
+                [ 6.42, 104.50, 0.96, 'blue',    false],
+                [ 6.65, 105.60, 0.98, 'classic', true],
+                [ 6.48, 106.72, 0.95, 'blue',    false],
+                [ 6.25, 107.80, 0.92, 'blue',    true],
+                [ 7.90, 104.60, 0.94, 'blue',    false],
+                [ 8.20, 106.90, 0.96, 'blue',    false]
             ].forEach(function (ir, iIdx) {
                 addBrushstrokeIrisTuft(ir[0], ir[1], ir[2], ir[3], 41.0 + iIdx * 7.3, ir[4]);
             });
 
-            // Warm orange-gold marigold blooms forming the upper background band behind the Irises
+            // Dense upper-left & upper-midground carpet of warm orange-gold Marigolds behind Getty's Irises!
             [
-                [-9.68, 105.02, 0.94], [-9.34, 104.16, 0.98], [-9.09, 103.25, 0.95], [-8.84, 102.34, 0.92],
+                [-8.95, 107.25, 1.02], [-9.35, 106.35, 1.06], [-9.15, 105.35, 1.04], [-8.85, 104.35, 1.02],
+                [-8.55, 103.35, 0.98], [-8.25, 102.35, 0.96], [-10.15, 106.85, 1.08], [-10.05, 105.75, 1.10],
+                [-9.85, 104.65, 1.06], [-9.55, 103.55, 1.04], [-9.25, 102.55, 1.00], [-10.95, 106.15, 1.12],
+                [-10.85, 104.95, 1.10], [-10.55, 103.85, 1.06],
                 [ 9.45, 103.80, 0.94], [ 9.75, 106.10, 0.96]
             ].forEach(function (mg, mIdx) {
                 addBrushstrokeIrisTuft(mg[0], mg[1], mg[2], 'marigold', 180.0 + mIdx * 9.1, false);
@@ -11263,21 +11771,19 @@
             var figureCount = recs.length;
 
             // B) Swirling Gaslamp Moths & Cloister Fireflies (zoneType = 6.0)
-            var mothAnchors = [
-                [-4.4, -14.2, 3.24], [5.8, -14.2, 3.24], [-3.8, -21.8, 3.24], [4.2, -21.8, 3.24],
-                [10.8, -16.2, 3.24], [15.2, -21.5, 3.24], [-15.5, -12.0, 3.24], [23.5, -12.0, 3.24],
-                [-16.0, -4.2, 3.24], [-6.5, -5.1, 3.24], [6.8, -5.0, 3.24], [15.5, -4.4, 3.24],
-                [29.5, -2.6, 3.24], [-2.8, 95.5, 3.24], [2.8, 95.5, 3.24],
-                [-5.8, -7.2, 1.15], [-7.9, -7.1, 1.15], [4.6, -17.8, 1.15], [4.8, -20.2, 1.15],
-                [-4.8, 107.0, 1.10], [4.8, 110.5, 1.10], [0.0, 119.5, 2.25]
-            ];
+            //    Automatically locked 1:1 to every street lamp's rotated lantern head (`window.__vgLanternHeadAnchors`),
+            //    plus bistro table candle-jars & Saint-Paul cloister fireflies!
+            var mothAnchors = (window.__vgLanternHeadAnchors ? window.__vgLanternHeadAnchors.slice() : []).concat([
+                [-5.7, -6.42, 1.15], [-7.9, -6.42, 1.15], [4.6, -17.8, 1.15], [4.8, -20.2, 1.15],
+                [-4.8, 107.0, 0.85], [4.8, 110.5, 0.85], [0.0, 119.5, 2.25]
+            ]);
             mothAnchors.forEach(function (ma, mi) {
-                var gyM = getGroundY(ma[0], ma[1]);
+                var gyM = (typeof ma[3] === 'number') ? ma[3] : getGroundY(ma[0], ma[1]);
                 for (var k = 0; k < 8; k++) {
                     var ang = (k / 8) * Math.PI * 2.0 + mi * 0.7;
                     var orbR = 0.22 + (k % 3) * 0.14;
                     addMicroRec(
-                        ma[0] + (ma[2] > 2.5 ? 0.54 : 0.0) + Math.cos(ang) * 0.18,
+                        ma[0] + Math.cos(ang) * 0.18,
                         gyM + ma[2] + (k % 2 === 0 ? 0.12 : -0.10),
                         ma[1] + Math.sin(ang) * 0.18,
                         0.12, 0.03, 0.06,
@@ -13853,15 +14359,33 @@
         };
 
         function screenToSkyCoords(clientX, clientY) {
-            var ndcX = (clientX / safeViewportW()) * 2.0 - 1.0;
-            var ndcY = -(clientY / safeViewportH()) * 2.0 + 1.0;
+            var rect = renderer.domElement.getBoundingClientRect();
+            var rw = Math.max(1, rect.width || safeViewportW());
+            var rh = Math.max(1, rect.height || safeViewportH());
+            var ndcX = ((clientX - rect.left) / rw) * 2.0 - 1.0;
+            var ndcY = -((clientY - rect.top) / rh) * 2.0 + 1.0;
+            camera.updateMatrixWorld();
             var ray = new THREE.Vector3(ndcX, ndcY, 0.5).unproject(camera).sub(camera.position).normalize();
-            var az = Math.atan2(ray.x, -ray.z);
-            var el = Math.atan2(ray.y, Math.max(Math.hypot(ray.x, ray.z), 1e-6));
-            var den = Math.sqrt(Math.max(0.08, 1.0 + ray.y));
-            var bx = ray.x / (den * DOME_DISK_EXTENT);
-            var by = ray.z / (den * DOME_DISK_EXTENT);
-            return { az: az, el: el, rayY: ray.y, bx: bx, by: by };
+
+            // Intersect view ray with exact radius-435 skyMesh sphere centered at world origin (eliminates 100% of camera-offset parallax!)
+            var skyR = 435.0;
+            var ox = camera.position.x, oy = camera.position.y, oz = camera.position.z;
+            var bDot = ox * ray.x + oy * ray.y + oz * ray.z;
+            var cVal = (ox * ox + oy * oy + oz * oz) - (skyR * skyR);
+            var disc = Math.max(0.0, bDot * bDot - cVal);
+            var tHit = -bDot + Math.sqrt(disc);
+            var hx = (tHit > 0.0) ? (ox + ray.x * tHit) : ray.x;
+            var hy = (tHit > 0.0) ? (oy + ray.y * tHit) : ray.y;
+            var hz = (tHit > 0.0) ? (oz + ray.z * tHit) : ray.z;
+            var hLen = Math.hypot(hx, hy, hz) || 1.0;
+            var dx = hx / hLen, dy = hy / hLen, dz = hz / hLen;
+
+            var az = Math.atan2(dx, -dz);
+            var el = Math.atan2(dy, Math.max(Math.hypot(dx, dz), 1e-6));
+            var den = Math.sqrt(Math.max(0.08, 1.0 + dy));
+            var bx = dx / (den * DOME_DISK_EXTENT);
+            var by = dz / (den * DOME_DISK_EXTENT);
+            return { az: az, el: el, rayY: dy, bx: bx, by: by };
         }
 
         function sampleNaturalSkyTangentDiskJS(bx, by) {
@@ -13881,7 +14405,7 @@
         }
 
         function splatBrushFieldKernel(bx, by, dirX, dirY, radiusDisk, peakStr, swirlMix, spinSgn, palByte) {
-            var span = radiusDisk * 1.90;
+            var span = radiusDisk * 1.55;
             var uCenter = bx * 0.5 + 0.5;
             var vCenter = by * 0.5 + 0.5;
             var iSpan = Math.min(48, Math.ceil(span * 0.5 * BRUSH_MAP_W) + 1);
@@ -13889,7 +14413,7 @@
             var cy = Math.floor(vCenter * BRUSH_MAP_H);
             var x0 = Math.max(0, cx - iSpan), x1 = Math.min(BRUSH_MAP_W - 1, cx + iSpan);
             var y0 = Math.max(0, cy - iSpan), y1 = Math.min(BRUSH_MAP_H - 1, cy + iSpan);
-            var invSig2 = 1.0 / Math.max(0.0003, radiusDisk * radiusDisk * 0.78);
+            var safeR = Math.max(0.008, radiusDisk);
 
             for (var iy = y0; iy <= y1; iy++) {
                 var cellY = ((iy + 0.5) / BRUSH_MAP_H) * 2.0 - 1.0;
@@ -13900,11 +14424,14 @@
                     var cellX = ((ix + 0.5) / BRUSH_MAP_W) * 2.0 - 1.0;
                     var dx = cellX - bx;
                     var r2 = dx * dx + dy * dy;
-                    var w = Math.exp(-r2 * invSig2);
+                    var r = Math.sqrt(r2);
+                    var uR = r / safeR;
+                    if (uR > 1.35) continue;
+                    // Loaded-core top-hat profile: full 100% strength inside the thin core while keeping outer edge crisp!
+                    var w = (uR <= 0.60) ? 1.0 : Math.exp(-Math.pow((uR - 0.60) / 0.36, 2.0) * 2.2);
                     if (w < 0.025) continue;
 
-                    var r = Math.sqrt(r2);
-                    var crossSide = (-dirY * dx + dirX * dy) / Math.max(0.022, radiusDisk);
+                    var crossSide = (-dirY * dx + dirX * dy) / Math.max(0.020, safeR);
                     var wakeX = dirX + (-dirY) * Math.max(-0.42, Math.min(0.42, crossSide * 0.24));
                     var wakeY = dirY + ( dirX) * Math.max(-0.42, Math.min(0.42, crossSide * 0.24));
                     var wLen = Math.hypot(wakeX, wakeY) || 1.0;
@@ -13921,7 +14448,7 @@
                     var idx = iy * BRUSH_MAP_W + ix;
                     var prevStr = brushFieldStr[idx];
                     var addStr = Math.min(1.0, peakStr * w);
-                    var dirBlend = (prevStr < 0.04) ? 1.0 : Math.min(0.92, w * 0.78);
+                    var dirBlend = (prevStr < 0.06) ? 1.0 : Math.min(0.98, w * 0.92);
 
                     brushFieldDirX[idx] = brushFieldDirX[idx] * (1.0 - dirBlend) + targetX * dirBlend;
                     brushFieldDirY[idx] = brushFieldDirY[idx] * (1.0 - dirBlend) + targetY * dirBlend;
@@ -13929,10 +14456,10 @@
                     brushFieldDirX[idx] /= nLen;
                     brushFieldDirY[idx] /= nLen;
 
-                    if (addStr >= prevStr * 0.45 || prevStr < 0.08) {
+                    if (w >= 0.05 || prevStr < 0.16) {
                         brushFieldPal[idx] = palByte;
                     }
-                    brushFieldStr[idx] = Math.min(1.0, Math.max(prevStr, addStr) + w * 0.12);
+                    brushFieldStr[idx] = Math.min(1.0, Math.max(prevStr, addStr));
                     syncBrushFieldTexel(idx);
                 }
             }
@@ -13944,7 +14471,7 @@
 
         function stampSkyBrushAt(clientX, clientY, isStart) {
             var sc = screenToSkyCoords(clientX, clientY);
-            if (sc.el < -0.14) return false;
+            if (sc.el < -0.28) return false;
             var palByte = BRUSH_PALETTE_CODES[params.skyBrushPalette];
             if (palByte === undefined) palByte = 85;
 
@@ -13953,9 +14480,9 @@
                 var nat = sampleNaturalSkyTangentDiskJS(sc.bx, sc.by);
                 skyBrush.smoothDirX = nat.x;
                 skyBrush.smoothDirY = nat.y;
-                skyBrush.swirlEnergy = 0.22;
+                skyBrush.swirlEnergy = 0.24;
 
-                splatBrushFieldKernel(sc.bx, sc.by, nat.x, nat.y, 0.056, 0.78, 0.34, skyBrush.spinToggle, palByte);
+                splatBrushFieldKernel(sc.bx, sc.by, nat.x, nat.y, 0.027, 1.0, 0.34, skyBrush.spinToggle, palByte);
                 uBrushCursor.value.set(sc.bx, sc.by, 1.0, skyBrush.spinToggle);
 
                 skyBrush.prevBx = sc.bx;
@@ -13971,7 +14498,7 @@
 
             if (moveDist < 0.0018) {
                 skyBrush.swirlEnergy = Math.min(0.95, skyBrush.swirlEnergy + 0.08);
-                splatBrushFieldKernel(sc.bx, sc.by, skyBrush.smoothDirX, skyBrush.smoothDirY, 0.064, 0.88, skyBrush.swirlEnergy, skyBrush.spinToggle, palByte);
+                splatBrushFieldKernel(sc.bx, sc.by, skyBrush.smoothDirX, skyBrush.smoothDirY, 0.031, 1.0, skyBrush.swirlEnergy, skyBrush.spinToggle, palByte);
                 uBrushCursor.value.set(sc.bx, sc.by, 1.0, skyBrush.spinToggle);
                 return true;
             }
@@ -13990,13 +14517,13 @@
                 skyBrush.swirlEnergy = Math.max(0.08, skyBrush.swirlEnergy * 0.82);
             }
 
-            skyBrush.smoothDirX = skyBrush.smoothDirX * 0.28 + rawDx * 0.72;
-            skyBrush.smoothDirY = skyBrush.smoothDirY * 0.28 + rawDy * 0.72;
+            skyBrush.smoothDirX = skyBrush.smoothDirX * 0.22 + rawDx * 0.78;
+            skyBrush.smoothDirY = skyBrush.smoothDirY * 0.22 + rawDy * 0.78;
             var sLen = Math.hypot(skyBrush.smoothDirX, skyBrush.smoothDirY) || 1.0;
             skyBrush.smoothDirX /= sLen;
             skyBrush.smoothDirY /= sLen;
 
-            var steps = Math.max(1, Math.min(28, Math.ceil(moveDist / 0.010)));
+            var steps = Math.max(1, Math.min(56, Math.ceil(moveDist / 0.0042)));
             for (var st = 1; st <= steps; st++) {
                 var t = st / steps;
                 splatBrushFieldKernel(
@@ -14004,8 +14531,8 @@
                     skyBrush.prevBy + dBy * t,
                     skyBrush.smoothDirX,
                     skyBrush.smoothDirY,
-                    0.060,
-                    0.92,
+                    0.028,
+                    1.0,
                     skyBrush.swirlEnergy,
                     skyBrush.spinToggle,
                     palByte
@@ -14082,7 +14609,7 @@
 
             if (skyBrush.fieldHasInk && !params.skyBrushLocked) {
                 // ~9 second gentle lingering melt back into the 1889 sky!
-                var stepDrop = dt * 0.112;
+                var stepDrop = dt * 0.070;
                 var maxRemain = 0.0;
                 var totalCells = BRUSH_MAP_W * BRUSH_MAP_H;
                 for (var i = 0; i < totalCells; i++) {
@@ -14221,7 +14748,7 @@
             var useFrames  = (params.fieldMarkers === 'frames');
             camCtrl.desiredPos.copy(useFrames ? item.frameStandPos : item.standPos);
             camCtrl.desiredTarget.copy(useFrames ? item.frameLookTarget : item.lookTarget);
-            camCtrl.desiredFov = useFrames ? 52.0 : 54.0;
+            camCtrl.desiredFov = useFrames ? (item.frameFov || 52.0) : (item.easelFov || 54.0);
             syncYawPitchFromLook();
             syncModePills();
             updateEaselDiscoveryUI();
@@ -14283,7 +14810,7 @@
                 cite: 'Theo van Gogh to Vincent · July 1889',
                 narration: 'Within his first week in the Saint-Paul monastery garden, Van Gogh painted Irises close to the earth, finding living rhythm in every curving violet petal.',
                 kind: 'easel', easelIdx: 0,
-                fov0: 53.5, fov1: 48.0,
+                fov0: 52.0, fov1: 47.0,
                 day0: 0.90, day1: 0.96,
                 ink0: 0.84, ink1: 0.80,
                 yel0: 1.08, yel1: 1.14,
@@ -14299,7 +14826,7 @@
                 cite: 'Letter to Theo · 25 June 1889',
                 narration: 'Out under the Provençal sun, intense contrasting golds and cobalt blues make the wind-swept wheat fields and flame-like cypresses vibrate with life.',
                 kind: 'easel', easelIdx: 1,
-                fov0: 54.5, fov1: 48.5,
+                fov0: 53.0, fov1: 47.5,
                 day0: 1.00, day1: 0.92,
                 ink0: 0.78, ink1: 0.80,
                 yel0: 1.28, yel1: 1.32,
@@ -14315,7 +14842,7 @@
                 cite: 'Letter to Theo · Saint-Rémy, 1889',
                 narration: 'Among the western olive groves, he painted at least fifteen studies, turning gnarled silver-green boughs into continuous, shimmering waves of paint.',
                 kind: 'easel', easelIdx: 3,
-                fov0: 54.0, fov1: 48.5,
+                fov0: 53.0, fov1: 47.5,
                 day0: 0.78, day1: 0.52,
                 ink0: 0.82, ink1: 0.86,
                 yel0: 1.12, yel1: 1.18,
@@ -14331,7 +14858,7 @@
                 cite: 'Vincent van Gogh · Letters to Theo',
                 narration: 'As twilight settles along Boulevard Mirabeau, warm gaslights kindle beneath towering plane trees, guiding our walk from golden day into starry night.',
                 kind: 'easel', easelIdx: 2,
-                fov0: 55.0, fov1: 49.5,
+                fov0: 53.5, fov1: 48.0,
                 day0: 0.44, day1: 0.14,
                 ink0: 0.84, ink1: 0.82,
                 yel0: 1.18, yel1: 1.26,
@@ -14472,6 +14999,12 @@
             }
         }
 
+        function preventSingleWordOrphan(str) {
+            if (!str) return '';
+            // Glue the final 2 words with non-breaking space so a single trailing word never wraps alone
+            return String(str).replace(/\s+(\S+)\s+(\S+)$/, ' $1\u00A0$2');
+        }
+
         function updateExhibitionOverlayChapter(chIdx) {
             var ch = EXHIBITION_CHAPTERS[chIdx];
             if (!ch) return;
@@ -14482,11 +15015,11 @@
             var subEl = document.getElementById('exh-artwork-sub');
             var capEl = document.getElementById('exh-docent-caption');
             if (pillEl) pillEl.textContent = ch.pill;
-            if (quoteEl) quoteEl.textContent = ch.quote;
-            if (citeEl) citeEl.textContent = '— ' + ch.cite;
-            if (scrEl) scrEl.textContent = ch.script;
+            if (quoteEl) quoteEl.textContent = preventSingleWordOrphan(ch.quote);
+            if (citeEl) citeEl.textContent = ch.cite;
+            if (scrEl) scrEl.textContent = preventSingleWordOrphan(ch.script);
             if (subEl) subEl.textContent = ch.sub;
-            if (capEl) capEl.textContent = ch.narration;
+            if (capEl) capEl.textContent = preventSingleWordOrphan(ch.narration);
         }
 
         function sampleExhibitionChapterCamera(ch, locT) {
@@ -14503,17 +15036,22 @@
                 lz = -32.0 + (-42.0 - (-32.0)) * e;
             } else if (ch.kind === 'easel' && list[ch.easelIdx]) {
                 var em = list[ch.easelIdx];
-                // Approach dead-center toward the floating Yellow Frame so the 3D vista composes cleanly inside the frame!
-                var distStart = (ch.easelIdx === 0) ? 6.0 : 8.6;
-                var distEnd   = 3.15;
+                // Glide along the exact collinear sightline through the center of the Floating Yellow Frame
+                // from wide landscape context (`exhDistStart`) right into the frame-filling Van Gogh Paint View (`exhDistEnd`)!
+                var distStart = em.exhDistStart || 6.80;
+                var distEnd   = em.exhDistEnd   || 2.60;
                 var dNow = distStart + (distEnd - distStart) * e;
                 px = em.frameX + em.ux * dNow;
                 pz = em.frameZ + em.uz * dNow;
-                py = getGroundY(px, pz) + FP_EYE_HEIGHT + 0.22 * (1.0 - e * 0.35);
-                var lookDist = 7.6 + 4.4 * e;
+                var eyeOff = (em.exhEyeStart || 1.56) + ((em.exhEyeEnd || 1.46) - (em.exhEyeStart || 1.56)) * e;
+                py = getGroundY(px, pz) + eyeOff;
+                //Account for subtle live hover bob of floating frames (`Math.sin(uFlowPhase * 1.15 + idx * 1.4) * 0.045`)
+                var fCenterY = em.frameY + (em.frameFloatH || 0.56) + (em.frameApH || 1.78) * 0.5
+                             + ((em.frameBiasY0 || 0.0) + ((em.frameBiasY1 || 0.0) - (em.frameBiasY0 || 0.0)) * e);
+                var lookDist = 9.0;
                 lx = em.frameX - em.ux * lookDist;
                 lz = em.frameZ - em.uz * lookDist;
-                ly = em.frameY + 1.50 + 0.14 * e;
+                ly = py + (fCenterY - py) * ((dNow + lookDist) / Math.max(0.5, dNow));
             } else if (ch.kind === 'studio') {
                 var sfY = (typeof window.__vgStudioFloorY === 'number') ? window.__vgStudioFloorY : 6.2;
                 px = 0.42 + (0.12 - 0.42) * e;
@@ -14549,7 +15087,10 @@
                 window.__vgEaselGroup.visible = (mode === 'easels');
             }
             if (window.__vgExhibitionPortals) {
-                window.__vgExhibitionPortals.visible = (mode === 'frames') && !tourModState.finaleActive;
+                var exhHideFrames = (params.tourActive && params.tourPreset === 'exhibition' &&
+                    exhibitionState.chapterIdx >= 0 && EXHIBITION_CHAPTERS[exhibitionState.chapterIdx] &&
+                    EXHIBITION_CHAPTERS[exhibitionState.chapterIdx].kind !== 'easel');
+                window.__vgExhibitionPortals.visible = (mode === 'frames') && !tourModState.finaleActive && !exhHideFrames;
             }
             var mBtns = document.querySelectorAll('.field-marker-btn');
             for (var i = 0; i < mBtns.length; i++) {
@@ -14751,39 +15292,25 @@
         window.__scrubTourToRatio = scrubTourToRatio;
 
         function syncTourPresetUI() {
-            var isExh = (params.tourPreset === 'exhibition');
-            var isViv = (params.tourPreset === 'vivaldi');
-            var isNoc = (params.tourPreset === 'nocturne');
+            params.tourPreset = 'exhibition';
+            var isExh = true;
 
             var bExh = document.getElementById('btn-tour-exhibition');
-            var bNoc = document.getElementById('btn-tour-nocturne');
-            var bViv = document.getElementById('btn-tour-vivaldi');
-            if (bExh) bExh.classList.toggle('active', isExh);
-            if (bNoc) bNoc.classList.toggle('active', isNoc);
-            if (bViv) bViv.classList.toggle('active', isViv);
+            if (bExh) bExh.classList.toggle('active', params.tourActive);
 
             var hExh = document.getElementById('btn-hud-tour-exhibition');
-            var hNoc = document.getElementById('btn-hud-tour-nocturne');
-            var hViv = document.getElementById('btn-hud-tour-vivaldi');
-            if (hExh) hExh.classList.toggle('active', isExh);
-            if (hNoc) hNoc.classList.toggle('active', isNoc);
-            if (hViv) hViv.classList.toggle('active', isViv);
-
-            var hJump = document.getElementById('btn-hud-finale-jump');
-            if (hJump) {
-                hJump.classList.toggle('hidden', !isViv);
-            }
+            if (hExh) hExh.classList.toggle('active', true);
 
             var hPrev = document.getElementById('btn-hud-exh-prev');
             var hNext = document.getElementById('btn-hud-exh-next');
             var hVoice = document.getElementById('btn-hud-exh-voice');
             var dVoice = document.getElementById('btn-drawer-exh-voice');
             var hTicks = document.getElementById('tour-hud-ticks');
-            if (hPrev) hPrev.classList.toggle('hidden', !isExh);
-            if (hNext) hNext.classList.toggle('hidden', !isExh);
-            if (hTicks) hTicks.classList.toggle('hidden', !isExh);
+            if (hPrev) hPrev.classList.remove('hidden');
+            if (hNext) hNext.classList.remove('hidden');
+            if (hTicks) hTicks.classList.remove('hidden');
             if (hVoice) {
-                hVoice.classList.toggle('hidden', !isExh);
+                hVoice.classList.remove('hidden');
                 hVoice.classList.toggle('active', params.exhibitionVoice);
                 hVoice.textContent = params.exhibitionVoice ? 'Voice: On' : 'Voice: Off';
             }
@@ -14794,9 +15321,7 @@
 
             var stLbl = document.getElementById('tour-drawer-status');
             if (stLbl) {
-                stLbl.textContent = params.tourActive
-                    ? (isExh ? 'Playing · Exhibition' : (isViv ? 'Playing · Vivaldi' : 'Playing · Nocturne'))
-                    : '3 Presets';
+                stLbl.textContent = params.tourActive ? 'Playing · Exhibition' : '7 Chapters';
             }
 
             var hud = document.getElementById('tour-director-hud');
@@ -14926,9 +15451,7 @@
 
         function startTourPreset(presetName, forceRestart) {
             exitPointerLockSafe();
-            var targetPreset = (presetName === 'nocturne' || presetName === 'vivaldi' || presetName === 'exhibition')
-                ? presetName
-                : 'exhibition';
+            var targetPreset = 'exhibition';
             var wasSameRunning = (params.tourActive && params.tourPreset === targetPreset && !forceRestart);
             if (wasSameRunning) {
                 params.tourActive = false;
@@ -15396,6 +15919,7 @@
                             window.__vgEasels[chObj.easelIdx].discovered = true;
                             updateEaselDiscoveryUI();
                         }
+                        syncFieldMarkersUI();
                         skyCacheState.dirty = true;
                     }
 
@@ -15409,10 +15933,11 @@
                     if (veilEl) veilEl.style.opacity = veilAlpha.toFixed(3);
 
                     var textHidden = (chSec < 0.45) || (chSec > EXHIBITION_CHAPTER_DUR - 0.55);
+                    var quoteClearForPaintZoom = (chObj.kind === 'easel' && chSec > 9.2);
                     var qCard = document.getElementById('exh-quote-card');
                     var sWrap = document.getElementById('exh-artwork-script-wrap');
                     var dBar  = document.getElementById('exh-docent-bar');
-                    if (qCard) qCard.classList.toggle('exh-stage-hidden', textHidden);
+                    if (qCard) qCard.classList.toggle('exh-stage-hidden', textHidden || quoteClearForPaintZoom);
                     if (sWrap) sWrap.classList.toggle('exh-stage-hidden', textHidden);
                     if (dBar)  dBar.classList.toggle('exh-stage-hidden', textHidden);
 
@@ -15757,11 +16282,7 @@
             document.getElementById('btn-wall-snap').addEventListener('click', function () { selectPreset(0); });
             document.getElementById('btn-tour').addEventListener('click', toggleTourMode);
             document.getElementById('btn-tour-exhibition').addEventListener('click', function () { startTourPreset('exhibition', false); });
-            document.getElementById('btn-tour-nocturne').addEventListener('click', function () { startTourPreset('nocturne', false); });
-            document.getElementById('btn-tour-vivaldi').addEventListener('click', function () { startTourPreset('vivaldi', false); });
             document.getElementById('btn-hud-tour-exhibition').addEventListener('click', function () { startTourPreset('exhibition', true); });
-            document.getElementById('btn-hud-tour-nocturne').addEventListener('click', function () { startTourPreset('nocturne', true); });
-            document.getElementById('btn-hud-tour-vivaldi').addEventListener('click', function () { startTourPreset('vivaldi', true); });
             document.getElementById('btn-hud-exh-prev').addEventListener('click', function () { stepExhibitionChapter(-1); });
             document.getElementById('btn-hud-exh-next').addEventListener('click', function () { stepExhibitionChapter(1); });
             document.getElementById('btn-drawer-exh-prev').addEventListener('click', function () { stepExhibitionChapter(-1); });
@@ -15774,8 +16295,6 @@
                 restoreTourSceneModulation();
                 syncModePills();
             });
-            document.getElementById('btn-drawer-finale-jump').addEventListener('click', jumpToVivaldiFinalePreview);
-            document.getElementById('btn-hud-finale-jump').addEventListener('click', jumpToVivaldiFinalePreview);
 
             document.querySelectorAll('.field-marker-btn').forEach(function (btn) {
                 btn.addEventListener('click', function () {
@@ -16358,12 +16877,50 @@
             }
         };
 
+        var __bootPctCurrent = 0;
+        function updateBootLoadingProgress(pct, stageMsg) {
+            var clamped = Math.max(__bootPctCurrent, Math.min(100, Math.round(pct)));
+            __bootPctCurrent = clamped;
+            var pctStr = clamped + '%';
+
+            var vBar   = document.getElementById('vincent-loader-bar');
+            var vPct   = document.getElementById('vincent-loader-pct');
+            var vStage = document.getElementById('vincent-loader-stage');
+            var vText  = document.getElementById('vincent-loader-text');
+            if (vBar)   vBar.style.width = Math.max(3, clamped) + '%';
+            if (vPct)   vPct.textContent = pctStr;
+            if (vStage && stageMsg) vStage.textContent = stageMsg;
+            if (vText)  vText.textContent = (clamped >= 100) ? 'Shaders ready' : 'Optimising shaders';
+
+            var pBar = document.getElementById('boot-loading-bar');
+            var pPct = document.getElementById('boot-loading-pct');
+            var pSub = document.getElementById('boot-loading-sub');
+            if (pBar) pBar.style.width = Math.max(3, clamped) + '%';
+            if (pPct) pPct.textContent = pctStr;
+            if (pSub && stageMsg) pSub.textContent = stageMsg;
+        }
+        window.__updateBootProgress = updateBootLoadingProgress;
+        updateBootLoadingProgress(4, initialSafeShaders
+            ? ('Safe Shaders (' + detectedGpuLabel + ') — preparing lightweight GLSL')
+            : 'Initialising WebGL impasto pipeline & brush textures');
+
         function hideBootLoadingPill() {
+            updateBootLoadingProgress(100, '1889 Saint-Rémy Starry Night ready');
             window.__vgWorldReady = true;
+            var vBoot = document.getElementById('vincent-boot-loader');
+            if (vBoot) {
+                setTimeout(function () {
+                    vBoot.style.opacity = '0';
+                    setTimeout(function () { vBoot.classList.add('hidden'); }, 480);
+                }, 180);
+            }
             var pill = document.getElementById('boot-loading-pill');
             if (pill) {
                 pill.style.opacity = '0';
-                setTimeout(function () { pill.classList.add('hidden'); }, 320);
+                setTimeout(function () {
+                    pill.classList.remove('force-visible-after-skip');
+                    pill.classList.add('hidden');
+                }, 320);
             }
         }
 
@@ -16536,6 +17093,7 @@
                     renderer.render(scene, camera);
                     for (var ri = 0; ri < tmpSceneVis.length; ri++) tmpSceneVis[ri].visible = true;
                 }
+                updateBootLoadingProgress(88, 'Compiling terrain & cypress relief programs');
                 warmupStage = 1;
                 clock.getDelta();
                 return;
@@ -16566,6 +17124,7 @@
                     renderer.render(scene, camera);
                 }
                 for (var hbi = 0; hbi < hiddenBatch.length; hbi++) hiddenBatch[hbi].visible = true;
+                updateBootLoadingProgress(95, 'Linking village, lantern & foliage brushwork');
                 warmupStage = 2;
                 clock.getDelta();
                 return;
@@ -16646,48 +17205,78 @@
             }
         }
 
-        // Yield 1 animation frame so the browser paints the UI shell immediately before building geometry!
+        // Yield between deterministic build stages so "Vincent" calligraphy & the shader progress bar animate smoothly!
+        var bootStages = [
+            { pct: 12, msg: 'Baking Saint-Rémy valley elevation grid', fn: function () {
+                bakeTerrainGrid();
+            }},
+            { pct: 24, msg: 'Weaving 360° swirling Starry Night sky dome', fn: function () {
+                buildOrganicOverlappingSkyDome();
+            }},
+            { pct: 36, msg: 'Sculpting Alpilles hills & cobblestone paths', fn: function () {
+                buildOrganicMountainsFieldsAndPaths();
+            }},
+            { pct: 50, msg: 'Building village, street lamps & cloister garden', fn: function () {
+                buildSaintRemyVillageCourtyardAndAsylum();
+            }},
+            { pct: 62, msg: 'Painting flame cypresses & olive orchards', fn: function () {
+                buildCypressMonolithAndSurroundGuardians();
+                buildTurbulentOliveGroves();
+            }},
+            { pct: 72, msg: 'Batching Provençal stone & foliage brushwork', fn: function () {
+                if (window.__placeCountrysideShrubsAfterTrees) window.__placeCountrysideShrubsAfterTrees();
+                batchStaticWorldMeshes();
+            }},
+            { pct: 80, msg: 'Compiling 360° sky & starlight programs', fn: function () {
+                buildInstancedBristleStampCloud();
+                syncYawPitchFromLook();
+                bindControls();
+                syncClassicalMusicUI();
+                if (urlForcesSafe) {
+                    document.querySelectorAll('.qual-btn').forEach(function (b) {
+                        b.classList.toggle('active', b.getAttribute('data-qual') === 'low');
+                    });
+                }
+                syncSafeShadersUI();
+                if (window.__applyQualityProfile) window.__applyQualityProfile(params.activeTier);
+                if (params.drawerCollapsed) {
+                    document.getElementById('lab-drawer').classList.add('drawer-collapsed');
+                    document.getElementById('drawer-toggle-label').textContent = 'Controls';
+                }
+                updateBrushLockUI();
+                updateMoMAMatteLayout();
+                if (window.__vincentCutscene && window.__vincentCutscene.isActive()) {
+                    window.__primeIntro3DCameraStart();
+                } else {
+                    camera.position.copy(camCtrl.pos);
+                    camera.lookAt(camCtrl.target);
+                }
+                syncModePills();
+                clock.start();
+                scheduleNextAnimationFrame();
+            }}
+        ];
+
+        function runNextBootStage(idx) {
+            if (idx >= bootStages.length) return;
+            var st = bootStages[idx];
+            updateBootLoadingProgress(st.pct, st.msg);
+            requestAnimationFrame(function () {
+                setTimeout(function () {
+                    try {
+                        st.fn();
+                        runNextBootStage(idx + 1);
+                    } catch (err) {
+                        hideBootLoadingPill();
+                        reportError('World build error: ' + (err && err.stack ? err.stack : String(err)));
+                    }
+                }, 0);
+            });
+        }
+
         requestAnimationFrame(function () {
             setTimeout(function () {
-                try {
-                    bakeTerrainGrid();
-                    buildOrganicOverlappingSkyDome();
-                    buildOrganicMountainsFieldsAndPaths();
-                    buildSaintRemyVillageCourtyardAndAsylum();
-                    buildCypressMonolithAndSurroundGuardians();
-                    buildTurbulentOliveGroves();
-                    batchStaticWorldMeshes();
-                    buildInstancedBristleStampCloud();
-
-                    syncYawPitchFromLook();
-                    bindControls();
-                    syncClassicalMusicUI();
-                    if (urlForcesSafe) {
-                        document.querySelectorAll('.qual-btn').forEach(function (b) {
-                            b.classList.toggle('active', b.getAttribute('data-qual') === 'low');
-                        });
-                    }
-                    syncSafeShadersUI();
-                    if (window.__applyQualityProfile) window.__applyQualityProfile(params.activeTier);
-                    if (params.drawerCollapsed) {
-                        document.getElementById('lab-drawer').classList.add('drawer-collapsed');
-                        document.getElementById('drawer-toggle-label').textContent = 'Controls';
-                    }
-                    updateBrushLockUI();
-                    updateMoMAMatteLayout();
-                    if (window.__vincentCutscene && window.__vincentCutscene.isActive()) {
-                        window.__primeIntro3DCameraStart();
-                    } else {
-                        camera.position.copy(camCtrl.pos);
-                        camera.lookAt(camCtrl.target);
-                    }
-                    syncModePills();
-                    clock.start();
-                    scheduleNextAnimationFrame();
-                } catch (err) {
-                    hideBootLoadingPill();
-                    reportError('World build error: ' + (err && err.stack ? err.stack : String(err)));
-                }
+                runNextBootStage(0);
             }, 16);
         });
     }
