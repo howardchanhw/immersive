@@ -166,13 +166,66 @@
             border: none;
             box-shadow: none;
             overflow: visible;
+            isolation: isolate;
+        }
+        /* Compact, snug frameless feathered nocturnal aura hugging the text closely (no wide dark spread) */
+        .exh-quote-bubble::before {
+            content: '';
+            position: absolute;
+            inset: 4px 2px 4px 2px;
+            z-index: -1;
+            pointer-events: none;
+            border-radius: 999px;
+            background: radial-gradient(
+                ellipse at 45% 50%,
+                rgba(2, 7, 22, 0.62) 0%,
+                rgba(3, 9, 28, 0.38) 44%,
+                rgba(4, 11, 32, 0.12) 72%,
+                rgba(4, 11, 32, 0.0) 100%
+            );
+            filter: blur(9px);
+        }
+        .exh-script-aura::before {
+            content: '';
+            position: absolute;
+            inset: 4px 2px 4px 4px;
+            z-index: -1;
+            pointer-events: none;
+            border-radius: 999px;
+            background: radial-gradient(
+                ellipse at 58% 52%,
+                rgba(2, 7, 22, 0.58) 0%,
+                rgba(3, 9, 28, 0.34) 44%,
+                rgba(4, 11, 32, 0.10) 72%,
+                rgba(4, 11, 32, 0.0) 100%
+            );
+            filter: blur(8px);
+        }
+        #exh-docent-bar {
+            isolation: isolate;
+        }
+        #exh-docent-bar::before {
+            content: '';
+            position: absolute;
+            inset: -2px -6px -3px -6px;
+            z-index: -1;
+            pointer-events: none;
+            border-radius: 999px;
+            background: radial-gradient(
+                ellipse at 50% 52%,
+                rgba(2, 7, 22, 0.50) 0%,
+                rgba(3, 9, 28, 0.24) 50%,
+                rgba(4, 11, 32, 0.0) 100%
+            );
+            filter: blur(8px);
         }
         .exh-meta-shadow {
+            paint-order: stroke fill;
+            -webkit-text-stroke: 1.8px rgba(1, 4, 15, 0.88);
             text-shadow:
-                0 1px 2px rgba(1, 4, 14, 1.0),
-                0 2px 6px rgba(2, 6, 20, 0.96),
-                0 4px 14px rgba(3, 9, 26, 0.88),
-                0 0 26px rgba(4, 11, 32, 0.76);
+                0 1px 2px rgba(0, 2, 10, 0.98),
+                0 2px 6px rgba(1, 5, 16, 0.90),
+                0 0 14px rgba(2, 7, 22, 0.62);
         }
         .font-exh-quote {
             font-family: 'Caveat', 'Dancing Script', 'Segoe Script', 'Bradley Hand', cursive;
@@ -180,12 +233,13 @@
             font-weight: 700;
             letter-spacing: 0.015em;
             text-wrap: balance;
+            paint-order: stroke fill;
+            -webkit-text-stroke: 2.5px rgba(1, 4, 15, 0.90);
             text-shadow:
-                0 1px 2px rgba(1, 4, 14, 1.0),
-                0 2px 7px rgba(2, 6, 20, 0.98),
-                0 5px 16px rgba(3, 9, 26, 0.92),
-                0 8px 30px rgba(4, 11, 32, 0.82),
-                0 0 46px rgba(4, 11, 32, 0.64);
+                0 1px 2px rgba(0, 2, 10, 0.98),
+                0 2px 6px rgba(1, 5, 16, 0.92),
+                0 4px 12px rgba(2, 7, 22, 0.72),
+                0 0 20px rgba(3, 9, 28, 0.48);
         }
         .font-exh-subtitle {
             font-family: 'Cormorant Garamond', Georgia, serif;
@@ -193,21 +247,24 @@
             font-weight: 600;
             letter-spacing: 0.015em;
             text-wrap: balance;
+            paint-order: stroke fill;
+            -webkit-text-stroke: 2.0px rgba(1, 4, 15, 0.88);
             text-shadow:
-                0 2px 6px rgba(2, 6, 18, 0.99),
-                0 4px 18px rgba(3, 8, 24, 0.96),
-                0 0 32px rgba(6, 15, 42, 0.92);
+                0 1px 2px rgba(0, 2, 10, 0.98),
+                0 2px 7px rgba(1, 5, 16, 0.92),
+                0 4px 14px rgba(2, 7, 22, 0.74);
         }
         .font-exh-script {
             font-family: 'Dancing Script', 'Cormorant Garamond', Georgia, cursive;
             font-weight: 700;
+            paint-order: stroke fill;
+            -webkit-text-stroke: 2.7px rgba(1, 4, 15, 0.90);
             text-shadow:
-                0 1px 2px rgba(1, 4, 14, 1.0),
-                0 3px 8px rgba(2, 6, 20, 0.98),
-                0 6px 18px rgba(3, 9, 26, 0.92),
-                0 10px 34px rgba(4, 11, 32, 0.82),
-                0 0 48px rgba(4, 11, 32, 0.64),
-                0 0 24px rgba(248, 220, 59, 0.28);
+                0 1px 2px rgba(0, 2, 10, 0.98),
+                0 2px 7px rgba(1, 5, 16, 0.92),
+                0 5px 14px rgba(2, 7, 22, 0.72),
+                0 0 22px rgba(3, 9, 28, 0.48),
+                0 0 16px rgba(248, 220, 59, 0.24);
         }
         #exh-dissolve-veil {
             background: radial-gradient(ellipse at center, rgba(11, 25, 62, 0.90) 0%, rgba(4, 9, 24, 0.98) 100%);
@@ -516,7 +573,7 @@
             </div>
             <div class="flex items-center justify-between gap-2 text-[10px] px-0.5">
                 <span id="tour-hud-chapter" class="text-amber-200/95 font-medium truncate">I. Ink Sketch to Living Colour &mdash; Saint-R&eacute;my 1889</span>
-                <span id="tour-hud-time" class="font-mono text-cyan-200/85 shrink-0">0:00 / 1:38</span>
+                <span id="tour-hud-time" class="font-mono text-cyan-200/85 shrink-0">0:00 / 1:52</span>
             </div>
             <!-- Interactive Drag-to-Seek Tour Timeline Scrubber -->
             <div id="tour-timeline-track" role="slider" aria-label="Tour Timeline Scrubber" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" title="Click or drag to scrub Tour time" class="relative w-full py-1.5 cursor-pointer touch-none select-none group">
@@ -606,7 +663,8 @@
         <p id="easel-card-body" class="text-[11px] text-cyan-50/90 leading-relaxed mb-2.5"></p>
         <div class="flex items-center justify-between gap-2 text-[11px]">
             <span id="easel-card-progress" class="font-mono text-amber-300/90">Easels: 1 / 4</span>
-            <div class="flex items-center gap-1.5">
+            <div class="flex items-center gap-1.5 flex-wrap justify-end">
+                <button id="btn-easel-toggle-paint" type="button" class="hidden rounded-lg px-2.5 py-1 font-semibold bg-cyan-400/20 border border-cyan-300/45 text-cyan-100 hover:bg-cyan-400/30 transition">Reveal Painting</button>
                 <button id="btn-easel-next" class="rounded-lg px-2.5 py-1 font-semibold bg-amber-400/20 border border-amber-300/45 text-amber-100 hover:bg-amber-400/30 transition">Next Easel</button>
                 <button id="btn-easel-exit-studio" class="hidden rounded-lg px-2.5 py-1 font-semibold bg-cyan-400/15 border border-cyan-300/40 text-cyan-100 hover:bg-cyan-400/25 transition">Step to Cloister</button>
             </div>
@@ -9170,8 +9228,253 @@
                 addThickLoadedOutlineStroke(stGrp, [-1.24, studioFloorY + 0.91, winZ], [-1.24, studioFloorY + 2.63, winZ], 0.032, ironMat, 718.5, true);
                 addThickLoadedOutlineStroke(stGrp, [ 1.24, studioFloorY + 0.91, winZ], [ 1.24, studioFloorY + 2.63, winZ], 0.032, ironMat, 718.7, true);
 
+                // Public-Domain 1889 Saint-Rémy Van Gogh Masterpiece Loader
+                // Dual-resolution CanvasTextures:
+                //   - `frameTex` (1024x800): High-clarity gallery canvas revealed inside Floating Yellow Frames
+                //   - `easelTex` (256x200): Matched lower-resolution plein-air oil study with woven linen grain on 3D Wooden Easels
+                var MASTERPIECE_PAINTING_URLS = {
+                    irises: [
+                        'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Irises-Vincent_van_Gogh.jpg/1280px-Irises-Vincent_van_Gogh.jpg',
+                        'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Irises-Vincent_van_Gogh.jpg/960px-Irises-Vincent_van_Gogh.jpg',
+                        'https://upload.wikimedia.org/wikipedia/commons/1/17/Irises_by_Vincent_Van_Gogh_in_GettyCenter.jpg'
+                    ],
+                    wheat: [
+                        'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Wheat-Field-with-Cypresses-%281889%29-Vincent-van-Gogh-Met.jpg/1280px-Wheat-Field-with-Cypresses-%281889%29-Vincent-van-Gogh-Met.jpg',
+                        'https://upload.wikimedia.org/wikipedia/commons/c/ce/Wheat-Field-with-Cypresses-%281889%29-Vincent-van-Gogh-Met.jpg',
+                        'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Vincent_van_Gogh_-_Wheat_Field_with_Cypresses_-_Google_Art_Project.jpg/1280px-Vincent_van_Gogh_-_Wheat_Field_with_Cypresses_-_Google_Art_Project.jpg'
+                    ],
+                    menders: [
+                        'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/The_Large_Plane_Trees_%28Road_Menders_at_Saint-R%C3%A9my%29%2C_by_Vincent_van_Gogh%2C_Cleveland_Museum_of_Art%2C_1947.209.jpg/1280px-The_Large_Plane_Trees_%28Road_Menders_at_Saint-R%C3%A9my%29%2C_by_Vincent_van_Gogh%2C_Cleveland_Museum_of_Art%2C_1947.209.jpg',
+                        'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/The_Large_Plane_Trees_%28Road_Menders_at_Saint-R%C3%A9my%29%2C_by_Vincent_van_Gogh%2C_Cleveland_Museum_of_Art%2C_1947.209.jpg/960px-The_Large_Plane_Trees_%28Road_Menders_at_Saint-R%C3%A9my%29%2C_by_Vincent_van_Gogh%2C_Cleveland_Museum_of_Art%2C_1947.209.jpg',
+                        'https://upload.wikimedia.org/wikipedia/commons/7/78/Van_Gogh_The_Road_Menders-1889-Phillips.jpg'
+                    ],
+                    olives: [
+                        'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Van_Gogh_The_Olive_Trees..jpg/1280px-Van_Gogh_The_Olive_Trees..jpg',
+                        'https://upload.wikimedia.org/wikipedia/commons/e/e8/Van_Gogh_The_Olive_Trees..jpg',
+                        'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Vincent_van_Gogh_-_Olive_Trees_-_Google_Art_Project_%28Minneapolis_Institute_of_Arts%29.jpg/960px-Vincent_van_Gogh_-_Olive_Trees_-_Google_Art_Project_%28Minneapolis_Institute_of_Arts%29.jpg'
+                    ],
+                    starry: [
+                        'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg',
+                        'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/960px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg'
+                    ]
+                };
+
+                var __vgMasterpieceBank = {};
+                window.__vgEaselCanvasMats = [];
+
+                function drawLinenAndImpastoOverlay(ctx, W, H, strength) {
+                    ctx.save();
+                    ctx.globalAlpha = 0.12 * strength;
+                    ctx.strokeStyle = '#f8efd8';
+                    ctx.lineWidth = Math.max(1, W * 0.004);
+                    var step = Math.max(4, Math.round(W / 42));
+                    for (var y = 0; y < H; y += step) {
+                        ctx.beginPath();
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(W, y);
+                        ctx.stroke();
+                    }
+                    ctx.globalAlpha = 0.09 * strength;
+                    ctx.strokeStyle = '#241a0d';
+                    for (var x = 0; x < W; x += step) {
+                        ctx.beginPath();
+                        ctx.moveTo(x, 0);
+                        ctx.lineTo(x, H);
+                        ctx.stroke();
+                    }
+                    // Subtle gallery inner edge vignette so canvas seats into frame rebate
+                    var edgeGrad = ctx.createRadialGradient(W * 0.5, H * 0.5, Math.min(W, H) * 0.36, W * 0.5, H * 0.5, Math.max(W, H) * 0.68);
+                    edgeGrad.addColorStop(0.0, 'rgba(10, 14, 26, 0.0)');
+                    edgeGrad.addColorStop(1.0, 'rgba(10, 14, 26, ' + (0.20 * strength).toFixed(3) + ')');
+                    ctx.globalAlpha = 1.0;
+                    ctx.fillStyle = edgeGrad;
+                    ctx.fillRect(0, 0, W, H);
+                    ctx.restore();
+                }
+
+                // Faithful procedural oil-impasto fallback painted synchronously before network scan arrives (or when offline)
+                function drawProceduralMasterpieceFallback(ctx, W, H, pid) {
+                    ctx.save();
+                    var dab = function (cx, cy, len, wid, ang, col) {
+                        ctx.save();
+                        ctx.translate(cx * W, cy * H);
+                        ctx.rotate(ang);
+                        ctx.fillStyle = col;
+                        ctx.beginPath();
+                        ctx.ellipse(0, 0, len * W * 0.5, wid * H * 0.5, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+                    };
+                    var seed = 137;
+                    var srnd = function () {
+                        seed = (seed * 16807) % 2147483647;
+                        return (seed - 1) / 2147483646;
+                    };
+
+                    if (pid === 'irises') {
+                        ctx.fillStyle = '#8d9b58';
+                        ctx.fillRect(0, 0, W, H);
+                        // Red-ochre soil bottom-left & orange marigolds top-left
+                        ctx.fillStyle = '#a85a32';
+                        ctx.beginPath();
+                        ctx.moveTo(0, H * 0.66); ctx.lineTo(W * 0.58, H); ctx.lineTo(0, H); ctx.closePath();
+                        ctx.fill();
+                        for (var i = 0; i < 85; i++) {
+                            dab(srnd() * 0.52, srnd() * 0.28, 0.045, 0.022, (srnd() - 0.5) * 0.7, (i % 3 === 0) ? '#e88b25' : ((i % 3 === 1) ? '#d9a72e' : '#537338'));
+                        }
+                        // Celadon-green sword leaves
+                        for (var l = 0; l < 110; l++) {
+                            var lx = 0.04 + srnd() * 0.92;
+                            var ly = 0.34 + srnd() * 0.60;
+                            dab(lx, ly, 0.032, 0.24, (srnd() - 0.5) * 0.65, (l % 2 === 0) ? '#6f9c76' : '#4b7858');
+                        }
+                        // Violet-ultramarine iris blossoms + lone white iris on left
+                        var blooms = [[0.72,0.16],[0.86,0.14],[0.62,0.28],[0.78,0.34],[0.52,0.34],[0.30,0.40],[0.38,0.47],[0.68,0.72],[0.84,0.76],[0.56,0.82]];
+                        for (var b = 0; b < blooms.length; b++) {
+                            dab(blooms[b][0], blooms[b][1], 0.11, 0.08, -0.3, '#2d3f9e');
+                            dab(blooms[b][0] + 0.015, blooms[b][1] - 0.02, 0.085, 0.065, 0.4, '#4e63c4');
+                            dab(blooms[b][0], blooms[b][1] + 0.01, 0.035, 0.02, 0.1, '#e8cb4a');
+                        }
+                        dab(0.18, 0.29, 0.10, 0.09, -0.15, '#f5f4eb');
+                        dab(0.19, 0.31, 0.07, 0.06, 0.25, '#dfe6dc');
+                    } else if (pid === 'wheat') {
+                        var skyG = ctx.createLinearGradient(0, 0, 0, H * 0.66);
+                        skyG.addColorStop(0, '#7ea5cf'); skyG.addColorStop(1, '#cbe0dc');
+                        ctx.fillStyle = skyG; ctx.fillRect(0, 0, W, H * 0.68);
+                        // Swirling white-lavender cumulus clouds
+                        for (var wc = 0; wc < 75; wc++) {
+                            dab(srnd() * 0.95, 0.06 + srnd() * 0.44, 0.16, 0.055, Math.sin(wc) * 0.45, (wc % 2 === 0) ? '#eef2f5' : '#b7c7e2');
+                        }
+                        // Cobalt Alpilles hills
+                        ctx.fillStyle = '#4c6fa8';
+                        ctx.beginPath(); ctx.moveTo(0, H * 0.68); ctx.quadraticCurveTo(W * 0.48, H * 0.46, W, H * 0.56); ctx.lineTo(W, H * 0.72); ctx.closePath(); ctx.fill();
+                        // Golden wind-rippled wheat field
+                        ctx.fillStyle = '#d9a72c'; ctx.fillRect(0, H * 0.66, W, H * 0.34);
+                        for (var wf = 0; wf < 120; wf++) {
+                            dab(srnd(), 0.67 + srnd() * 0.31, 0.08, 0.022, -0.18 + (srnd() - 0.5) * 0.25, (wf % 3 === 0) ? '#ecc846' : ((wf % 3 === 1) ? '#c48620' : '#658548'));
+                        }
+                        // Wind-tossed olive bush left + twin flame cypresses right
+                        for (var ob = 0; ob < 34; ob++) dab(0.16 + srnd() * 0.22, 0.56 + srnd() * 0.20, 0.07, 0.045, -0.35, (ob % 2 === 0) ? '#4b6e46' : '#85a676');
+                        ctx.fillStyle = '#152920';
+                        ctx.beginPath(); ctx.moveTo(W * 0.73, H * 0.68); ctx.quadraticCurveTo(W * 0.84, H * 0.05, W * 0.86, H * 0.04); ctx.quadraticCurveTo(W * 0.93, H * 0.38, W * 0.91, H * 0.69); ctx.closePath(); ctx.fill();
+                        ctx.beginPath(); ctx.moveTo(W * 0.69, H * 0.68); ctx.quadraticCurveTo(W * 0.76, H * 0.32, W * 0.79, H * 0.35); ctx.lineTo(W * 0.81, H * 0.68); ctx.closePath(); ctx.fill();
+                    } else if (pid === 'menders') {
+                        ctx.fillStyle = '#e2be4a'; ctx.fillRect(0, 0, W, H * 0.52);
+                        ctx.fillStyle = '#cbb98b'; ctx.fillRect(0, H * 0.48, W, H * 0.52);
+                        for (var ml = 0; ml < 90; ml++) {
+                            dab(srnd(), srnd() * 0.46, 0.09, 0.036, (srnd() - 0.5) * 0.9, (ml % 2 === 0) ? '#eab935' : '#c98824');
+                        }
+                        for (var rd = 0; rd < 85; rd++) {
+                            dab(srnd(), 0.52 + srnd() * 0.46, 0.08, 0.026, -0.32, (rd % 2 === 0) ? '#a69e7e' : '#7b8768');
+                        }
+                        // Massive gnarled plane tree trunks
+                        var trunks = [[0.32, 0.76, 0.18], [0.64, 0.64, 0.12], [0.81, 0.58, 0.09]];
+                        for (var tr = 0; tr < trunks.length; tr++) {
+                            ctx.strokeStyle = '#364531'; ctx.lineWidth = W * (trunks[tr][2] + 0.02);
+                            ctx.beginPath(); ctx.moveTo(W * (trunks[tr][0] + 0.04), H * trunks[tr][1]); ctx.quadraticCurveTo(W * (trunks[tr][0] - 0.04), H * 0.32, W * (trunks[tr][0] - 0.14), 0); ctx.stroke();
+                            ctx.strokeStyle = '#9aa87c'; ctx.lineWidth = W * trunks[tr][2] * 0.72; ctx.stroke();
+                        }
+                    } else if (pid === 'olives') {
+                        ctx.fillStyle = '#6f96c9'; ctx.fillRect(0, 0, W, H * 0.44);
+                        // Swirling white cloud
+                        dab(0.50, 0.13, 0.42, 0.15, 0.08, '#f4f5df');
+                        dab(0.56, 0.14, 0.28, 0.11, -0.14, '#fffef0');
+                        // Deep blue craggy Alpilles
+                        ctx.fillStyle = '#25427a';
+                        ctx.beginPath(); ctx.moveTo(0, H * 0.42); ctx.lineTo(W * 0.26, H * 0.19); ctx.lineTo(W * 0.55, H * 0.31); ctx.lineTo(W * 0.86, H * 0.17); ctx.lineTo(W, H * 0.34); ctx.lineTo(W, H * 0.52); ctx.lineTo(0, H * 0.52); ctx.closePath(); ctx.fill();
+                        // Undulating green-ochre ground & gnarled olive trees
+                        ctx.fillStyle = '#9ab065'; ctx.fillRect(0, H * 0.48, W, H * 0.52);
+                        for (var og = 0; og < 85; og++) dab(srnd(), 0.56 + srnd() * 0.42, 0.12, 0.032, Math.sin(og * 0.5) * 0.35, (og % 2 === 0) ? '#557d3e' : '#c6c46a');
+                        for (var ot = 0; ot < 95; ot++) dab(0.06 + srnd() * 0.88, 0.34 + srnd() * 0.30, 0.08, 0.05, (srnd() - 0.5) * 1.1, (ot % 2 === 0) ? '#3f5f3c' : '#7a9866');
+                    } else {
+                        ctx.fillStyle = '#142c69'; ctx.fillRect(0, 0, W, H);
+                        for (var sn = 0; sn < 80; sn++) dab(srnd(), srnd() * 0.68, 0.11, 0.032, Math.sin(sn * 0.4) * 0.5, (sn % 3 === 0) ? '#3b6cb5' : '#1d3f85');
+                        dab(0.85, 0.18, 0.16, 0.16, 0, '#f7d93e');
+                        ctx.fillStyle = '#121f1c';
+                        ctx.beginPath(); ctx.moveTo(W * 0.14, H); ctx.quadraticCurveTo(W * 0.20, H * 0.08, W * 0.22, H * 0.06); ctx.lineTo(W * 0.30, H); ctx.closePath(); ctx.fill();
+                    }
+                    ctx.restore();
+                    drawLinenAndImpastoOverlay(ctx, W, H, 1.0);
+                }
+
+                function drawLoadedPaintingCover(ctx, W, H, img, linenStrength) {
+                    var iw = img.naturalWidth || img.width || W;
+                    var ih = img.naturalHeight || img.height || H;
+                    var scale = Math.max(W / iw, H / ih);
+                    var dw = iw * scale;
+                    var dh = ih * scale;
+                    var dx = (W - dw) * 0.5;
+                    var dy = (H - dh) * 0.5;
+                    ctx.clearRect(0, 0, W, H);
+                    ctx.imageSmoothingEnabled = true;
+                    if (typeof ctx.imageSmoothingQuality === 'string') ctx.imageSmoothingQuality = 'high';
+                    ctx.drawImage(img, dx, dy, dw, dh);
+                    drawLinenAndImpastoOverlay(ctx, W, H, linenStrength);
+                }
+
+                function getMasterpieceTexturePair(pid) {
+                    var key = pid || 'starry';
+                    if (__vgMasterpieceBank[key]) return __vgMasterpieceBank[key];
+
+                    // 1. Full gallery canvas for Floating Yellow Frame reveal (1024 x 800)
+                    var fCan = document.createElement('canvas');
+                    fCan.width = 1024;
+                    fCan.height = 800;
+                    var fCtx = fCan.getContext('2d');
+                    drawProceduralMasterpieceFallback(fCtx, fCan.width, fCan.height, key);
+                    var frameTex = new THREE.CanvasTexture(fCan);
+                    frameTex.minFilter = THREE.LinearFilter;
+                    frameTex.magFilter = THREE.LinearFilter;
+                    trackRecoverableTexture(frameTex);
+
+                    // 2. Matched lower-resolution plein-air canvas for 3D Wooden Easels (256 x 200)
+                    var eCan = document.createElement('canvas');
+                    eCan.width = 256;
+                    eCan.height = 200;
+                    var eCtx = eCan.getContext('2d');
+                    drawProceduralMasterpieceFallback(eCtx, eCan.width, eCan.height, key);
+                    var easelTex = new THREE.CanvasTexture(eCan);
+                    easelTex.minFilter = THREE.LinearFilter;
+                    easelTex.magFilter = THREE.LinearFilter;
+                    trackRecoverableTexture(easelTex);
+
+                    var entry = {
+                        id: key,
+                        fCan: fCan, fCtx: fCtx, frameTex: frameTex,
+                        eCan: eCan, eCtx: eCtx, easelTex: easelTex,
+                        loadedReal: false
+                    };
+                    __vgMasterpieceBank[key] = entry;
+
+                    // Load authentic public-domain museum scan asynchronously with CORS pixel safety check
+                    var urls = MASTERPIECE_PAINTING_URLS[key] || [];
+                    var tryUrlAt = function (uIdx) {
+                        if (uIdx >= urls.length) return;
+                        var img = new Image();
+                        img.crossOrigin = 'anonymous';
+                        img.onload = function () {
+                            try {
+                                drawLoadedPaintingCover(fCtx, fCan.width, fCan.height, img, 0.55);
+                                drawLoadedPaintingCover(eCtx, eCan.width, eCan.height, img, 1.35);
+                                frameTex.needsUpdate = true;
+                                easelTex.needsUpdate = true;
+                                entry.loadedReal = true;
+                            } catch (corsErr) {
+                                tryUrlAt(uIdx + 1);
+                            }
+                        };
+                        img.onerror = function () {
+                            tryUrlAt(uIdx + 1);
+                        };
+                        img.src = urls[uIdx];
+                    };
+                    if (urls.length) tryUrlAt(0);
+
+                    return entry;
+                }
+
                 // Plein-Air & Studio Easel Builder: Front painted impasto canvas faces local `+Z`!
-                function buildImpastoEasel(px, py, pz, rotY, canvasColorA, canvasColorB, canvasColorC, seedBase) {
+                function buildImpastoEasel(px, py, pz, rotY, canvasColorA, canvasColorB, canvasColorC, seedBase, paintingId) {
                     var eGrp = new THREE.Group();
                     eGrp.position.set(px, py, pz);
                     eGrp.rotation.y = rotY;
@@ -9188,36 +9491,30 @@
                     clampMesh.position.set(0.0, 1.58, 0.05);
                     eGrp.add(clampMesh);
 
-                    // Tilted canvas group facing `+Z` (front = vibrant multi-band Van Gogh study, back = raw linen stretcher!)
+                    // Tilted canvas group facing `+Z` (front = real Van Gogh painting in matched lower-res plein-air grain, back = raw linen stretcher!)
                     var cHolder = new THREE.Group();
                     cHolder.position.set(0.0, 1.22, 0.10);
                     cHolder.rotation.x = -0.14;
 
                     var linenBackMat = createPainterlyArchMaterial(0x382b1e, 0x8c7858, 0xd4c39c, 0.04, 2.4, false, false);
-                    var stretcher = new THREE.Mesh(makeWobblyBoxGeometry(0.88, 0.68, 0.042, 3, 2, 1, 0.010, seedBase + 5.1), linenBackMat);
+                    var stretcher = new THREE.Mesh(makeWobblyBoxGeometry(0.88, 0.70, 0.042, 3, 2, 1, 0.010, seedBase + 5.1), linenBackMat);
                     cHolder.add(stretcher);
 
-                    // Rich front `+Z` painted impasto study (swirling sky band + horizon hills + foreground impasto strokes)
-                    var skyBandMat = createPainterlyArchMaterial(0x0b1d4d, canvasColorB, 0xf7de4a, 0.18, 3.2, false, false);
-                    var fgBandMat  = createPainterlyArchMaterial(canvasColorA, canvasColorB, canvasColorC, -0.14, 3.0, false, false);
-                    var skyArt = new THREE.Mesh(new THREE.PlaneGeometry(0.82, 0.34), skyBandMat);
-                    skyArt.position.set(0.0, 0.14, 0.026);
-                    cHolder.add(skyArt);
-                    var fgArt = new THREE.Mesh(new THREE.PlaneGeometry(0.82, 0.34), fgBandMat);
-                    fgArt.position.set(0.0, -0.15, 0.026);
-                    cHolder.add(fgArt);
-
-                    // Expressive miniature sun/moon dab & dark cypress vertical accent on the front `+Z` canvas!
-                    var sunDab = new THREE.Mesh(new THREE.CircleGeometry(0.068, 10), winDabMat);
-                    sunDab.position.set(0.24, 0.19, 0.030);
-                    cHolder.add(sunDab);
-                    addThickLoadedOutlineStroke(cHolder, [-0.24, -0.28, 0.031], [-0.21, 0.24, 0.031], 0.036, sketchInkMat, seedBase + 5.9, true);
+                    var mpPair = getMasterpieceTexturePair(paintingId || 'starry');
+                    var easelPaintMat = new THREE.MeshBasicMaterial({
+                        map: mpPair.easelTex,
+                        color: 0xeae3cf
+                    });
+                    window.__vgEaselCanvasMats.push(easelPaintMat);
+                    var easelArtPlane = new THREE.Mesh(new THREE.PlaneGeometry(0.82, 0.64), easelPaintMat);
+                    easelArtPlane.position.set(0.0, 0.0, 0.025);
+                    cHolder.add(easelArtPlane);
 
                     // 4-sided charcoal frame border on front `+Z`
-                    addThickLoadedOutlineStroke(cHolder, [-0.43, -0.33, 0.028], [ 0.43, -0.33, 0.028], 0.022, sketchInkMat, seedBase + 6.2, true);
-                    addThickLoadedOutlineStroke(cHolder, [-0.43,  0.33, 0.028], [ 0.43,  0.33, 0.028], 0.022, sketchInkMat, seedBase + 6.5, true);
-                    addThickLoadedOutlineStroke(cHolder, [-0.43, -0.33, 0.028], [-0.43,  0.33, 0.028], 0.022, sketchInkMat, seedBase + 6.8, true);
-                    addThickLoadedOutlineStroke(cHolder, [ 0.43, -0.33, 0.028], [ 0.43,  0.33, 0.028], 0.022, sketchInkMat, seedBase + 7.1, true);
+                    addThickLoadedOutlineStroke(cHolder, [-0.42, -0.33, 0.028], [ 0.42, -0.33, 0.028], 0.020, sketchInkMat, seedBase + 6.2, true);
+                    addThickLoadedOutlineStroke(cHolder, [-0.42,  0.33, 0.028], [ 0.42,  0.33, 0.028], 0.020, sketchInkMat, seedBase + 6.5, true);
+                    addThickLoadedOutlineStroke(cHolder, [-0.42, -0.33, 0.028], [-0.42,  0.33, 0.028], 0.020, sketchInkMat, seedBase + 6.8, true);
+                    addThickLoadedOutlineStroke(cHolder, [ 0.42, -0.33, 0.028], [ 0.42,  0.33, 0.028], 0.020, sketchInkMat, seedBase + 7.1, true);
                     eGrp.add(cHolder);
 
                     // Mini pigment-spotted palette resting on the front shelf (`+Z`)
@@ -9233,7 +9530,9 @@
                 }
 
                 // Angle Vincent's studio easel (`rotY = 0.88`) so its painted `+Z` front faces the viewer at `(0.35, ..., 121.75)`!
-                stGrp.add(buildImpastoEasel(-1.05, studioFloorY, 120.75, 0.88, 0x0b1f54, 0x2f7596, 0xf8dc3b, 720.0));
+                var studioEaselMesh = buildImpastoEasel(-1.05, studioFloorY, 120.75, 0.88, 0x0b1f54, 0x2f7596, 0xf8dc3b, 720.0, 'starry');
+                window.__vgStudioEasel = studioEaselMesh;
+                stGrp.add(studioEaselMesh);
 
                 // Paint-daubed worktable (right side) + glowing candle/lamp + pigment dabs
                 var tblTop = new THREE.Mesh(makeWobblyBoxGeometry(1.15, 0.08, 0.68, 2, 1, 2, 0.02, 730.1), woodMat);
@@ -9273,7 +9572,7 @@
                         standDist: 1.45, standLat: 0.48,
                         frameFloatH: 0.22, frameStandDist: 3.05,
                         focusYOff: 0.36,
-                        exhDistStart: 5.80, exhDistEnd: 2.56,
+                        exhDistStart: 5.95, exhDistEnd: 3.30,
                         exhEyeStart: 1.84, exhEyeEnd: 1.74,
                         frameBiasY0: -0.04, frameBiasY1: 0.02,
                         easelFov: 48.5, frameFov: 49.0,
@@ -9289,7 +9588,7 @@
                         standDist: 1.52, standLat: 0.52,
                         frameFloatH: 0.80, frameStandDist: 3.18,
                         focusYOff: 1.55,
-                        exhDistStart: 6.80, exhDistEnd: 2.60,
+                        exhDistStart: 7.10, exhDistEnd: 3.38,
                         exhEyeStart: 1.54, exhEyeEnd: 1.45,
                         frameBiasY0: 0.00, frameBiasY1: -0.02,
                         easelFov: 51.5, frameFov: 49.5,
@@ -9305,7 +9604,7 @@
                         standDist: 1.52, standLat: 0.50,
                         frameFloatH: 0.64, frameStandDist: 3.18,
                         focusYOff: 1.42,
-                        exhDistStart: 6.40, exhDistEnd: 2.60,
+                        exhDistStart: 6.75, exhDistEnd: 3.38,
                         exhEyeStart: 1.56, exhEyeEnd: 1.46,
                         frameBiasY0: 0.00, frameBiasY1: -0.02,
                         easelFov: 52.0, frameFov: 50.0,
@@ -9321,7 +9620,7 @@
                         standDist: 1.52, standLat: 0.52,
                         frameFloatH: 1.04, frameStandDist: 3.18,
                         focusYOff: 1.92,
-                        exhDistStart: 7.40, exhDistEnd: 2.60,
+                        exhDistStart: 7.60, exhDistEnd: 3.38,
                         exhEyeStart: 1.48, exhEyeEnd: 1.40,
                         frameBiasY0: 0.03, frameBiasY1: 0.04,
                         easelFov: 52.0, frameFov: 49.5,
@@ -9638,8 +9937,10 @@
                     }).catch(function () {});
                 }
 
-                // Sculpted Van Gogh Impasto Gilded Gallery Frame floating in mid-air + frameless wordings above it
-                function buildFloatingYellowFrame(px, py, pz, rotY, apW, apH, floatH, titleText, subText, seedBase) {
+                window.__vgFrameHitMeshes = [];
+
+                // Sculpted Van Gogh Impasto Gilded Gallery Frame floating in mid-air + real Van Gogh canvas reveal plane inside rebate
+                function buildFloatingYellowFrame(px, py, pz, rotY, apW, apH, floatH, titleText, subText, seedBase, paintingId, easelIdx) {
                     var g = new THREE.Group();
                     g.position.set(px, py, pz);
                     g.rotation.y = rotY;
@@ -9786,6 +10087,62 @@
                     addThickLoadedOutlineStroke(g, [-ox, oyB,  iz], [-ox, oyT,  iz], 0.014, sketchInkMat, seedBase + 24.7, true);
                     addThickLoadedOutlineStroke(g, [ ox, oyB,  iz], [ ox, oyT,  iz], 0.014, sketchInkMat, seedBase + 25.0, true);
 
+                    // 7. Recessed Masterpiece Reveal Canvas inside the Prussian-blue sight-edge liner (`opacity = 0` when open!)
+                    var mpPairF = getMasterpieceTexturePair(paintingId || 'starry');
+                    var paintFrontMat = new THREE.MeshBasicMaterial({
+                        map: mpPairF.frameTex,
+                        transparent: true,
+                        opacity: 0.0,
+                        depthWrite: false
+                    });
+                    var paintFrontMesh = new THREE.Mesh(
+                        new THREE.PlaneGeometry(apW + 0.014, apH + 0.014),
+                        paintFrontMat
+                    );
+                    paintFrontMesh.position.set(0.0, yMid, 0.003);
+                    paintFrontMesh.visible = false;
+                    paintFrontMesh.renderOrder = 4;
+                    g.add(paintFrontMesh);
+
+                    // Warm woven raw-linen canvas back when viewed from behind (`-Z`) while revealed
+                    var paintBackMat = new THREE.MeshBasicMaterial({
+                        color: 0xbba982,
+                        transparent: true,
+                        opacity: 0.0,
+                        depthWrite: false
+                    });
+                    var paintBackMesh = new THREE.Mesh(
+                        new THREE.PlaneGeometry(apW + 0.014, apH + 0.014),
+                        paintBackMat
+                    );
+                    paintBackMesh.rotation.y = Math.PI;
+                    paintBackMesh.position.set(0.0, yMid, -0.003);
+                    paintBackMesh.visible = false;
+                    paintBackMesh.renderOrder = 4;
+                    g.add(paintBackMesh);
+
+                    // Invisible full-frame raycast target so tapping/clicking the Floating Yellow Frame toggles the real painting
+                    var hitMat = new THREE.MeshBasicMaterial({
+                        transparent: true,
+                        opacity: 0.0,
+                        depthWrite: false,
+                        colorWrite: false,
+                        side: THREE.DoubleSide
+                    });
+                    var hitMesh = new THREE.Mesh(
+                        new THREE.PlaneGeometry(apW + border * 2.1, apH + border * 2.1),
+                        hitMat
+                    );
+                    hitMesh.position.set(0.0, yMid, 0.0);
+                    hitMesh.userData = { isFloatingFrameHit: true, easelIdx: (typeof easelIdx === 'number' ? easelIdx : 0) };
+                    g.add(hitMesh);
+                    window.__vgFrameHitMeshes.push(hitMesh);
+
+                    g.userData.paintFrontMesh = paintFrontMesh;
+                    g.userData.paintFrontMat  = paintFrontMat;
+                    g.userData.paintBackMesh  = paintBackMesh;
+                    g.userData.paintBackMat   = paintBackMat;
+
                     return g;
                 }
 
@@ -9801,13 +10158,8 @@
                     var rx = -uz, rz = ux;
 
                     var easelRotY = Math.atan2(ux, uz);
-                    var eMesh = buildImpastoEasel(sp.x, ey, sp.z, easelRotY, sp.cA, sp.cB, sp.cC, 760.0 + idx * 10.0);
+                    var eMesh = buildImpastoEasel(sp.x, ey, sp.z, easelRotY, sp.cA, sp.cB, sp.cC, 760.0 + idx * 10.0, sp.id);
                     easelGroup.add(eMesh);
-
-                    var halo = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 6), winDabMat);
-                    halo.position.set(sp.x, ey + 1.94, sp.z);
-                    easelGroup.add(halo);
-                    easelHaloOrbs.push(halo);
 
                     var eStandDist = sp.standDist || 1.52;
                     var eStandLat  = (typeof sp.standLat === 'number') ? sp.standLat : 0.48;
@@ -9818,18 +10170,27 @@
                     var focusZ = sp.z - uz * 6.8;
                     var focusY = ey + (typeof sp.focusYOff === 'number' ? sp.focusYOff : 1.15);
 
-                    // Centered mid-air Floating Gilded Frame along the painting vista sightline (zero easels in 'frames' mode!)
-                    var frameApW = 2.48, frameApH = 1.78;
+                    // Centered mid-air Floating Gilded Frame matched to Van Gogh's ~92x73 cm canvas proportion (1.28:1)
+                    var frameApW = 2.36, frameApH = 1.84;
                     var frameFloatH = (typeof sp.frameFloatH === 'number') ? sp.frameFloatH : 0.56;
                     var frameX = sp.x - ux * 0.25;
                     var frameZ = sp.z - uz * 0.25;
                     var frameY = getGroundY(frameX, frameZ);
                     var fMesh = buildFloatingYellowFrame(
                         frameX, frameY, frameZ, easelRotY, frameApW, frameApH, frameFloatH,
-                        sp.title, sp.date.toUpperCase(), 910.0 + idx * 30.0
+                        sp.title, sp.date.toUpperCase(), 910.0 + idx * 30.0, sp.id, idx
                     );
                     portalGroup.add(fMesh);
-                    window.__vgFloatingFrameList.push({ group: fMesh, baseY: frameY });
+                    window.__vgFloatingFrameList.push({
+                        group: fMesh,
+                        baseY: frameY,
+                        easelIdx: idx,
+                        revealAlpha: 0.0,
+                        paintFrontMesh: fMesh.userData.paintFrontMesh,
+                        paintFrontMat: fMesh.userData.paintFrontMat,
+                        paintBackMesh: fMesh.userData.paintBackMesh,
+                        paintBackMat: fMesh.userData.paintBackMat
+                    });
 
                     var fStandDist = sp.frameStandDist || 3.18;
                     var fStandX = frameX + ux * fStandDist;
@@ -11186,6 +11547,7 @@
             if (typeof cypressMainGroup !== 'undefined' && cypressMainGroup) protectedRoots.push(cypressMainGroup);
             if (typeof studioLanternOrb !== 'undefined' && studioLanternOrb) protectedRoots.push(studioLanternOrb);
             if (typeof window.__vgEaselGroup !== 'undefined' && window.__vgEaselGroup) protectedRoots.push(window.__vgEaselGroup);
+            if (typeof window.__vgStudioEasel !== 'undefined' && window.__vgStudioEasel) protectedRoots.push(window.__vgStudioEasel);
             if (typeof window.__vgExhibitionPortals !== 'undefined' && window.__vgExhibitionPortals) protectedRoots.push(window.__vgExhibitionPortals);
             if (typeof easelHaloOrbs !== 'undefined' && easelHaloOrbs.length) {
                 for (var ehi = 0; ehi < easelHaloOrbs.length; ehi++) protectedRoots.push(easelHaloOrbs[ehi]);
@@ -14631,6 +14993,60 @@
         }
 
         var stage4InteractTarget = null; // { type: 'studio' } | { type: 'easel', idx: number }
+        var walkRevealedFrameIdx = -1; // -1 = all Floating Yellow Frames stay open in Walk/Explore mode
+
+        function syncWalkFrameToggleButtons() {
+            var btn = document.getElementById('btn-easel-toggle-paint');
+            if (!btn) return;
+            var showBtn = (!params.inStudio && params.fieldMarkers === 'frames' && params.activeEaselIdx >= 0);
+            btn.classList.toggle('hidden', !showBtn);
+            if (showBtn) {
+                var isRev = (walkRevealedFrameIdx === params.activeEaselIdx);
+                btn.textContent = isRev ? 'Open 3D View (E)' : 'Reveal Painting (E)';
+            }
+        }
+
+        function setFloatingFrameRevealImmediate(easelIdx, alphaVal) {
+            var fList = window.__vgFloatingFrameList || [];
+            for (var i = 0; i < fList.length; i++) {
+                var fItem = fList[i];
+                var a = (i === easelIdx) ? THREE.MathUtils.clamp(alphaVal, 0.0, 1.0) : 0.0;
+                fItem.revealAlpha = a;
+                applyFloatingFrameAlpha(fItem, a);
+            }
+        }
+
+        function applyFloatingFrameAlpha(fItem, alpha) {
+            if (!fItem || !fItem.paintFrontMesh || !fItem.paintFrontMat) return;
+            var vis = (alpha > 0.004);
+            fItem.paintFrontMesh.visible = vis;
+            if (fItem.paintBackMesh) fItem.paintBackMesh.visible = vis;
+            if (!vis) return;
+            fItem.paintFrontMat.opacity = alpha;
+            fItem.paintFrontMat.depthWrite = (alpha > 0.96);
+            // Subtle warm museum illumination bloom during cross-fade transition
+            var bloom = Math.sin(alpha * Math.PI) * 0.12;
+            fItem.paintFrontMat.color.setRGB(Math.min(1.0, 0.98 + bloom), Math.min(1.0, 0.97 + bloom * 0.9), Math.min(1.0, 0.95 + bloom * 0.6));
+            if (fItem.paintBackMat) {
+                fItem.paintBackMat.opacity = alpha;
+                fItem.paintBackMat.depthWrite = (alpha > 0.96);
+            }
+        }
+
+        function toggleWalkFramePainting(idx) {
+            var list = window.__vgEasels || [];
+            if (idx < 0 || idx >= list.length) return;
+            if (walkRevealedFrameIdx === idx) {
+                walkRevealedFrameIdx = -1;
+            } else {
+                walkRevealedFrameIdx = idx;
+                list[idx].discovered = true;
+                params.activeEaselIdx = idx;
+                updateEaselDiscoveryUI();
+                showEaselStoryCard(list[idx].title, list[idx].date, list[idx].note, false);
+            }
+            syncWalkFrameToggleButtons();
+        }
 
         function updateEaselDiscoveryUI() {
             var list = window.__vgEasels || [];
@@ -14668,6 +15084,7 @@
                 nextBtn.classList.toggle('hidden', !!isStudio);
             }
             document.getElementById('btn-easel-exit-studio').classList.toggle('hidden', !isStudio);
+            syncWalkFrameToggleButtons();
             card.classList.remove('hidden');
         }
 
@@ -14675,6 +15092,8 @@
             var card = document.getElementById('easel-story-card');
             if (card) card.classList.add('hidden');
             params.activeEaselIdx = -1;
+            walkRevealedFrameIdx = -1;
+            syncWalkFrameToggleButtons();
             updateEaselDiscoveryUI();
         }
 
@@ -14719,7 +15138,7 @@
             syncModePills();
         }
 
-        function visitPleinAirEasel(idx) {
+        function visitPleinAirEasel(idx, revealFrameOnArrive) {
             var list = window.__vgEasels || [];
             if (idx < 0 || idx >= list.length) return;
             var wasExhRunning = (params.tourActive && params.tourPreset === 'exhibition');
@@ -14738,6 +15157,7 @@
             }
             var isNoneMode = (params.fieldMarkers === 'none');
             var useFrames  = (params.fieldMarkers === 'frames');
+            walkRevealedFrameIdx = (useFrames && revealFrameOnArrive) ? idx : -1;
             camCtrl.desiredPos.copy(useFrames ? item.frameStandPos : item.standPos);
             camCtrl.desiredTarget.copy(useFrames ? item.frameLookTarget : item.lookTarget);
             camCtrl.desiredFov = useFrames ? (item.frameFov || 52.0) : (item.easelFov || 54.0);
@@ -14774,7 +15194,7 @@
         // ========================================================================
         // 13A-2. IMMERSIVE EXHIBITION TOUR + FLOATING YELLOW FRAMES + TIMELINE SCRUBBER
         // ========================================================================
-        var EXHIBITION_CHAPTER_DUR = 14.0;
+        var EXHIBITION_CHAPTER_DUR = 16.0;
         var EXHIBITION_CHAPTERS = [
             {
                 roman: 'I',
@@ -14798,6 +15218,7 @@
                 pill: 'GALLERY II / VII · ASYLUM GARDEN',
                 script: 'Irises, May 1889',
                 sub: 'Saint-Paul-de-Mausole Monastery Garden',
+                museumSub: '✦ Original 1889 Oil on Canvas · J. Paul Getty Museum',
                 quote: '“It strikes the eye from afar. The Irises are a beautiful study full of air and life.”',
                 cite: 'Letter 799 · Theo to Vincent · September 1889',
                 narration: 'Within his first week in the Saint-Paul monastery garden, Van Gogh painted Irises close to the earth, finding living rhythm in every curving violet petal.',
@@ -14814,6 +15235,7 @@
                 pill: 'GALLERY III / VII · ENCLOSED WHEAT FIELD',
                 script: 'Wheat Field with Cypresses, June 1889',
                 sub: 'Floating Frame · Provençal Countryside',
+                museumSub: '✦ Original 1889 Oil on Canvas · The Met, New York',
                 quote: '“The cypresses are always occupying my thoughts… It is a splash of black in a sunny landscape.”',
                 cite: 'Letter 783 · Vincent to Theo · June 1889',
                 narration: 'Out under the Provençal sun, intense contrasting golds and cobalt blues make the wind-swept wheat fields and flame-like cypresses vibrate with life.',
@@ -14830,6 +15252,7 @@
                 pill: 'GALLERY IV / VII · ANCIENT OLIVE GROVES',
                 script: 'The Olive Trees, 1889',
                 sub: 'Daylight Complement to The Starry Night',
+                museumSub: '✦ Original 1889 Oil on Canvas · MoMA, New York',
                 quote: '“The rustle of the olive grove has something very secret in it, and immensely old.”',
                 cite: 'Letter 763 · Vincent to Theo · April 1889',
                 narration: 'Among the western olive groves, he painted at least fifteen studies, turning gnarled silver-green boughs into continuous, shimmering waves of paint.',
@@ -14846,6 +15269,7 @@
                 pill: 'GALLERY V / VII · TWILIGHT BOULEVARD',
                 script: 'The Road Menders, December 1889',
                 sub: 'Gaslit Cobblestones & Plane Trees',
+                museumSub: '✦ Original 1889 Oil on Canvas · Cleveland Museum of Art',
                 quote: '“In spite of everything, I shall rise again; I will take up my pencil, which I have forsaken in my great discouragement.”',
                 cite: 'Letter 158 · Vincent to Theo · September 1880',
                 narration: 'As twilight settles along Boulevard Mirabeau, warm gaslights kindle beneath towering plane trees, guiding our walk from golden day into starry night.',
@@ -15028,18 +15452,21 @@
                 lz = -32.0 + (-42.0 - (-32.0)) * e;
             } else if (ch.kind === 'easel' && list[ch.easelIdx]) {
                 var em = list[ch.easelIdx];
-                // Glide along the exact collinear sightline through the center of the Floating Yellow Frame
-                // from wide landscape context (`exhDistStart`) right into the frame-filling Van Gogh Paint View (`exhDistEnd`)!
+                // Glide smoothly over the first 60% (`0s -> 9.6s`) from wide landscape context (`exhDistStart`)
+                // to the gallery framing distance (`exhDistEnd`), then hold steady with a subtle contemplation drift (`9.6s -> 16s`)
+                // while Van Gogh's real 1889 oil painting materializes inside the Floating Yellow Frame!
+                var tApproach = Math.min(1.0, locT / 0.60);
+                var eApp = tApproach * tApproach * (3.0 - 2.0 * tApproach);
+                var tHold = Math.max(0.0, (locT - 0.60) / 0.40);
                 var distStart = em.exhDistStart || 6.80;
-                var distEnd   = em.exhDistEnd   || 2.60;
-                var dNow = distStart + (distEnd - distStart) * e;
+                var distEnd   = em.exhDistEnd   || 3.38;
+                var dNow = distStart + (distEnd - distStart) * eApp - tHold * 0.10;
                 px = em.frameX + em.ux * dNow;
                 pz = em.frameZ + em.uz * dNow;
-                var eyeOff = (em.exhEyeStart || 1.56) + ((em.exhEyeEnd || 1.46) - (em.exhEyeStart || 1.56)) * e;
+                var eyeOff = (em.exhEyeStart || 1.56) + ((em.exhEyeEnd || 1.46) - (em.exhEyeStart || 1.56)) * eApp;
                 py = getGroundY(px, pz) + eyeOff;
-                //Account for subtle live hover bob of floating frames (`Math.sin(uFlowPhase * 1.15 + idx * 1.4) * 0.045`)
-                var fCenterY = em.frameY + (em.frameFloatH || 0.56) + (em.frameApH || 1.78) * 0.5
-                             + ((em.frameBiasY0 || 0.0) + ((em.frameBiasY1 || 0.0) - (em.frameBiasY0 || 0.0)) * e);
+                var fCenterY = em.frameY + (em.frameFloatH || 0.56) + (em.frameApH || 1.84) * 0.5
+                             + ((em.frameBiasY0 || 0.0) + ((em.frameBiasY1 || 0.0) - (em.frameBiasY0 || 0.0)) * eApp);
                 var lookDist = 9.0;
                 lx = em.frameX - em.ux * lookDist;
                 lz = em.frameZ - em.uz * lookDist;
@@ -15117,10 +15544,30 @@
             }
         }
 
+        function computeExhibitionFrameReveal(chObj, chSec) {
+            if (!chObj || chObj.kind !== 'easel') return 0.0;
+            // Open yellow frame for 0.0s -> 8.8s; smooth 1.75s cross-fade (8.8s -> 10.55s); ~4.85s full hold before dissolve!
+            if (chSec <= 8.80) return 0.0;
+            if (chSec >= 10.55) return 1.0;
+            var u = (chSec - 8.80) / (10.55 - 8.80);
+            return u * u * (3.0 - 2.0 * u);
+        }
+
+        function syncExhibitionArtworkSubForReveal(chObj, revealAlpha) {
+            if (!chObj) return;
+            var subEl = document.getElementById('exh-artwork-sub');
+            if (!subEl) return;
+            var desired = (chObj.kind === 'easel' && chObj.museumSub && revealAlpha > 0.52) ? chObj.museumSub : chObj.sub;
+            if (subEl.textContent !== desired) subEl.textContent = desired;
+        }
+
         function setFieldMarkersMode(mode) {
             if (mode !== 'none' && mode !== 'easels' && mode !== 'frames') return;
             params.fieldMarkers = mode;
             exhibitionState.autoSwitchedFrames = false;
+            walkRevealedFrameIdx = -1;
+            setFloatingFrameRevealImmediate(-1, 0.0);
+            syncWalkFrameToggleButtons();
             syncFieldMarkersUI();
         }
         window.__setFieldMarkersMode = setFieldMarkersMode;
@@ -15171,10 +15618,14 @@
                 updateExhibitionOverlayChapter(chIdx);
                 var veilEl = document.getElementById('exh-dissolve-veil');
                 if (veilEl) veilEl.style.opacity = '0';
+                var scrubRev = computeExhibitionFrameReveal(chObj, chSec);
+                setFloatingFrameRevealImmediate((chObj && chObj.kind === 'easel') ? chObj.easelIdx : -1, scrubRev);
+                syncExhibitionArtworkSubForReveal(chObj, scrubRev);
+
                 var qCard = document.getElementById('exh-quote-card');
                 var sWrap = document.getElementById('exh-artwork-script-wrap');
                 var dBar  = document.getElementById('exh-docent-bar');
-                if (qCard) qCard.classList.remove('exh-stage-hidden');
+                if (qCard) qCard.classList.toggle('exh-stage-hidden', chObj.kind === 'easel' && chSec > 8.8);
                 if (sWrap) sWrap.classList.remove('exh-stage-hidden');
                 if (dBar)  dBar.classList.remove('exh-stage-hidden');
 
@@ -15337,6 +15788,7 @@
             var nowExhActive = Boolean(params.tourActive && params.tourPreset === 'exhibition');
             if (exhibitionState.wasExhibitionActive && !nowExhActive) {
                 stopExhibitionNarration();
+                setFloatingFrameRevealImmediate(-1, 0.0);
                 if (exhibitionState.autoSwitchedFrames) {
                     params.fieldMarkers = 'easels';
                     exhibitionState.autoSwitchedFrames = false;
@@ -15924,8 +16376,12 @@
                     var veilEl = document.getElementById('exh-dissolve-veil');
                     if (veilEl) veilEl.style.opacity = veilAlpha.toFixed(3);
 
+                    var liveExhRev = computeExhibitionFrameReveal(chObj, chSec);
+                    setFloatingFrameRevealImmediate((chObj.kind === 'easel') ? chObj.easelIdx : -1, liveExhRev);
+                    syncExhibitionArtworkSubForReveal(chObj, liveExhRev);
+
                     var textHidden = (chSec < 0.45) || (chSec > EXHIBITION_CHAPTER_DUR - 0.55);
-                    var quoteClearForPaintZoom = (chObj.kind === 'easel' && chSec > 9.2);
+                    var quoteClearForPaintZoom = (chObj.kind === 'easel' && chSec > 8.8);
                     var qCard = document.getElementById('exh-quote-card');
                     var sWrap = document.getElementById('exh-artwork-script-wrap');
                     var dBar  = document.getElementById('exh-docent-bar');
@@ -16331,11 +16787,31 @@
             }
             document.getElementById('btn-walk').addEventListener('click', function () { toggleWalkMode(true); });
             document.getElementById('btn-studio-window').addEventListener('click', enterVincentsStudioWindow);
+            function handleEaselOrFrameInteract(idx) {
+                if (params.fieldMarkers === 'frames') {
+                    if (walkRevealedFrameIdx === idx) {
+                        toggleWalkFramePainting(idx);
+                    } else {
+                        visitPleinAirEasel(idx, true);
+                    }
+                } else {
+                    visitPleinAirEasel(idx, false);
+                }
+            }
+
             document.getElementById('btn-interact-landmark').addEventListener('click', function () {
                 if (!stage4InteractTarget) return;
                 if (stage4InteractTarget.type === 'studio') enterVincentsStudioWindow();
-                else if (stage4InteractTarget.type === 'easel') visitPleinAirEasel(stage4InteractTarget.idx);
+                else if (stage4InteractTarget.type === 'easel') handleEaselOrFrameInteract(stage4InteractTarget.idx);
             });
+            var togglePaintBtn = document.getElementById('btn-easel-toggle-paint');
+            if (togglePaintBtn) {
+                togglePaintBtn.addEventListener('click', function () {
+                    if (params.activeEaselIdx >= 0 && params.fieldMarkers === 'frames') {
+                        toggleWalkFramePainting(params.activeEaselIdx);
+                    }
+                });
+            }
             document.getElementById('btn-close-easel-card').addEventListener('click', hideEaselStoryCard);
             document.getElementById('btn-easel-exit-studio').addEventListener('click', exitStudioToCloister);
             document.getElementById('btn-easel-next').addEventListener('click', function () {
@@ -16615,6 +17091,62 @@
             joyZone.addEventListener('pointercancel', resetJoy);
 
             viewportEl.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+            var frameTapRaycaster = new THREE.Raycaster();
+            var frameTapNdc = new THREE.Vector2();
+            var frameTapDown = { x: 0, y: 0, t: 0, active: false };
+
+            function pickFloatingFrameAtClient(clientX, clientY) {
+                if (params.tourActive || params.skyBrushMode || params.fieldMarkers !== 'frames') return -1;
+                if (!window.__vgExhibitionPortals || !window.__vgExhibitionPortals.visible) return -1;
+                var hitsList = window.__vgFrameHitMeshes || [];
+                if (!hitsList.length) return -1;
+                var rect = viewportEl.getBoundingClientRect();
+                if (rect.width < 4 || rect.height < 4) return -1;
+                frameTapNdc.x = ((clientX - rect.left) / rect.width) * 2.0 - 1.0;
+                frameTapNdc.y = -((clientY - rect.top) / rect.height) * 2.0 + 1.0;
+                frameTapRaycaster.setFromCamera(frameTapNdc, camera);
+                var hits = frameTapRaycaster.intersectObjects(hitsList, false);
+                if (hits && hits.length > 0 && hits[0].distance < 28.0 && hits[0].object && hits[0].object.userData) {
+                    return (typeof hits[0].object.userData.easelIdx === 'number') ? hits[0].object.userData.easelIdx : -1;
+                }
+                return -1;
+            }
+
+            function triggerTappedFloatingFrame(hitIdx) {
+                var list = window.__vgEasels || [];
+                if (hitIdx < 0 || hitIdx >= list.length) return;
+                var em = list[hitIdx];
+                var dCam = Math.hypot(camCtrl.pos.x - em.frameX, camCtrl.pos.z - em.frameZ);
+                if (dCam > 6.8) {
+                    visitPleinAirEasel(hitIdx, true);
+                } else {
+                    toggleWalkFramePainting(hitIdx);
+                }
+            }
+
+            viewportEl.addEventListener('pointerdown', function (e) {
+                if (e.button !== undefined && e.button !== 0) return;
+                frameTapDown.x = e.clientX;
+                frameTapDown.y = e.clientY;
+                frameTapDown.t = performance.now();
+                frameTapDown.active = true;
+            });
+
+            viewportEl.addEventListener('pointerup', function (e) {
+                if (!frameTapDown.active) return;
+                frameTapDown.active = false;
+                var moved = Math.hypot(e.clientX - frameTapDown.x, e.clientY - frameTapDown.y);
+                var dtMs = performance.now() - frameTapDown.t;
+                if (moved < 8.0 && dtMs < 460) {
+                    var cx = camCtrl.pointerLocked ? (window.innerWidth * 0.5) : e.clientX;
+                    var cy = camCtrl.pointerLocked ? (window.innerHeight * 0.5) : e.clientY;
+                    var hitIdx = pickFloatingFrameAtClient(cx, cy);
+                    if (hitIdx >= 0) {
+                        triggerTappedFloatingFrame(hitIdx);
+                    }
+                }
+            });
+
             viewportEl.addEventListener('mousedown', function (e) {
                 autoStartAudioOnFirstStep();
                 // Right-click OR Sky Brush (B) mode conducts the Living Sky Brush!
@@ -16627,7 +17159,7 @@
                         return;
                     }
                 }
-                if (params.walkActive && !params.skyBrushMode && !camCtrl.pointerLocked && e.button === 0 && viewportEl.requestPointerLock) {
+                if (params.walkActive && !params.skyBrushMode && !camCtrl.pointerLocked && e.button === 0 && pickFloatingFrameAtClient(e.clientX, e.clientY) < 0 && viewportEl.requestPointerLock) {
                     try {
                         var pl = viewportEl.requestPointerLock();
                         if (pl && typeof pl.catch === 'function') pl.catch(function () {});
@@ -16753,9 +17285,12 @@
                     case 'KeyD': case 'ArrowRight': autoStartAudioOnFirstStep(); keys.d = true; break;
                     case 'KeyQ': keys.q = true; break;
                     case 'KeyE':
-                        if (params.walkActive && stage4InteractTarget) {
+                        if (!params.tourActive && params.fieldMarkers === 'frames' && params.activeEaselIdx >= 0 && (!stage4InteractTarget || stage4InteractTarget.type === 'easel')) {
+                            var targetIdxE = stage4InteractTarget ? stage4InteractTarget.idx : params.activeEaselIdx;
+                            handleEaselOrFrameInteract(targetIdxE);
+                        } else if (params.walkActive && stage4InteractTarget) {
                             if (stage4InteractTarget.type === 'studio') enterVincentsStudioWindow();
-                            else if (stage4InteractTarget.type === 'easel') visitPleinAirEasel(stage4InteractTarget.idx);
+                            else if (stage4InteractTarget.type === 'easel') handleEaselOrFrameInteract(stage4InteractTarget.idx);
                         } else {
                             keys.e = true;
                         }
@@ -16949,10 +17484,35 @@
                     var sc = 0.85 + 0.25 * Math.sin(tNow + oi * 1.4);
                     easelHaloOrbs[oi].scale.set(sc, sc, sc);
                 }
+                if (window.__vgEaselCanvasMats && window.__vgEaselCanvasMats.length) {
+                    var dayL = THREE.MathUtils.clamp(uDaylight.value, 0.0, 1.0);
+                    var cR = 0.86 + 0.14 * dayL;
+                    var cG = 0.84 + 0.16 * dayL;
+                    var cB = 0.77 + 0.23 * dayL;
+                    for (var emi = 0; emi < window.__vgEaselCanvasMats.length; emi++) {
+                        window.__vgEaselCanvasMats[emi].color.setRGB(cR, cG, cB);
+                    }
+                }
                 if (window.__vgExhibitionPortals && window.__vgExhibitionPortals.visible && window.__vgFloatingFrameList) {
+                    var isLiveExh = (params.tourActive && params.tourPreset === 'exhibition');
+                    if (!isLiveExh && walkRevealedFrameIdx >= 0 && list[walkRevealedFrameIdx]) {
+                        var dRev = Math.hypot(camCtrl.pos.x - list[walkRevealedFrameIdx].frameX, camCtrl.pos.z - list[walkRevealedFrameIdx].frameZ);
+                        if (dRev > 6.8) {
+                            walkRevealedFrameIdx = -1;
+                            syncWalkFrameToggleButtons();
+                        }
+                    }
                     for (var fi = 0; fi < window.__vgFloatingFrameList.length; fi++) {
                         var fEntry = window.__vgFloatingFrameList[fi];
                         fEntry.group.position.y = fEntry.baseY + Math.sin(tNow * 0.42 + fi * 1.55) * 0.024;
+                        if (!isLiveExh) {
+                            var tgtAlpha = (params.fieldMarkers === 'frames' && walkRevealedFrameIdx === fi) ? 1.0 : 0.0;
+                            if (Math.abs(fEntry.revealAlpha - tgtAlpha) > 0.001) {
+                                fEntry.revealAlpha += (tgtAlpha - fEntry.revealAlpha) * Math.min(1.0, dt * 5.2);
+                                if (Math.abs(fEntry.revealAlpha - tgtAlpha) < 0.004) fEntry.revealAlpha = tgtAlpha;
+                                applyFloatingFrameAlpha(fEntry, fEntry.revealAlpha);
+                            }
+                        }
                     }
                 }
                 if (studioLanternOrb) {
@@ -16983,7 +17543,9 @@
                                     list[ei].discovered = true;
                                     updateEaselDiscoveryUI();
                                 }
-                                var actionPrefix = isFrameMode ? 'Step Into Frame: ' : 'Step Into Canvas: ';
+                                var actionPrefix = isFrameMode
+                                    ? ((walkRevealedFrameIdx === ei) ? 'Open 3D Frame View: ' : 'Reveal 1889 Painting: ')
+                                    : 'Step Into Canvas: ';
                                 best = { type: 'easel', idx: ei, label: actionPrefix + list[ei].title + ' (E / Tap)' };
                                 break;
                             }
