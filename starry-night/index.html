@@ -127,9 +127,19 @@
             opacity: 0 !important;
             pointer-events: none !important;
         }
-        body.cutscene-playing #boot-loading-pill:not(.force-visible-after-skip) {
-            opacity: 0 !important;
-            pointer-events: none !important;
+        #vincent-cutscene-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 45;
+        }
+        #vincent-boot-loader {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: clamp(42px, 9.2vh, 84px);
+            z-index: 46;
+            width: min(88vw, 360px);
+            pointer-events: none;
         }
         @keyframes vgBarShimmer {
             0%   { background-position: 200% 0; }
@@ -362,22 +372,6 @@
         <canvas id="vincent-cutscene-canvas" class="w-full h-full block"></canvas>
         <div id="cutscene-bar-bottom" class="cutscene-letterbox"></div>
 
-        <!-- Vincent Opening Shader & World Progress Bar (centered above bottom letterbox bar during initial load) -->
-        <div id="vincent-boot-loader" class="absolute left-1/2 -translate-x-1/2 z-20 pointer-events-none w-[min(88vw,360px)] transition-opacity duration-500" style="bottom: clamp(42px, 9.2vh, 84px);">
-            <div class="studio-glass rounded-2xl px-4 py-2.5 border-amber-300/45 shadow-2xl">
-                <div class="flex items-center justify-between gap-3 text-[11px] sm:text-xs font-semibold tracking-wide">
-                    <span class="text-cyan-100/95 truncate">
-                        <span id="vincent-loader-text">Optimising shaders</span><span class="inline-block w-4 text-left text-amber-300"><span class="vg-dot-1">.</span><span class="vg-dot-2">.</span><span class="vg-dot-3">.</span></span>
-                    </span>
-                    <span id="vincent-loader-pct" class="font-mono text-amber-300 tabular-nums shrink-0">0%</span>
-                </div>
-                <div class="mt-1.5 w-full h-1.5 rounded-full bg-[#06102a]/90 border border-cyan-200/25 overflow-hidden">
-                    <div id="vincent-loader-bar" class="h-full rounded-full vg-progress-fill" style="width: 2%;"></div>
-                </div>
-                <div id="vincent-loader-stage" class="mt-1 text-[10px] text-cyan-200/75 truncate">Preparing 1889 Saint-R&eacute;my impasto canvas</div>
-            </div>
-        </div>
-
         <!-- Discrete Sound Unlock Hint (bottom-left) -->
         <div id="cutscene-sound-hint" class="absolute bottom-3 sm:bottom-4 left-3.5 sm:left-5 z-10 pointer-events-none flex items-center gap-2 text-[10px] sm:text-[11px] text-amber-200/75 tracking-wider uppercase font-semibold transition-opacity duration-500">
             <span class="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse"></span>
@@ -468,7 +462,7 @@
             <div class="mt-1.5 flex items-center gap-2">
                 <span class="inline-block w-6 h-[2px] rounded-full bg-gradient-to-r from-amber-300/95 to-amber-300/0 shadow-[0_0_6px_rgba(248,220,59,0.7)]"></span>
                 <span id="exh-letter-cite" class="exh-meta-shadow text-[10px] sm:text-[11px] uppercase tracking-[0.15em] text-amber-200 font-semibold">
-                    Vincent van Gogh &middot; Letters to Theo
+                    Letter 676 &middot; Vincent to Theo &middot; September 1888
                 </span>
             </div>
         </div>
@@ -555,17 +549,19 @@
         </div>
     </div>
 
-    <!-- Non-Blocking Progressive Boot Pill (shown if Intro Cutscene is skipped before shader compilation finishes) -->
-    <div id="boot-loading-pill" class="fixed inset-0 z-40 flex items-center justify-center bg-[#0b1942]/80 backdrop-blur-sm transition-opacity duration-300 pointer-events-none">
-        <div class="studio-glass rounded-2xl px-5 py-3.5 text-center shadow-2xl border-amber-300/60 w-[min(88vw,360px)]">
-            <div class="flex items-center justify-between gap-3">
-                <div class="font-serif-title text-xs sm:text-sm font-bold text-amber-200 truncate">Optimising shaders&hellip;</div>
-                <div id="boot-loading-pct" class="font-mono text-xs font-bold text-amber-300 tabular-nums">0%</div>
+    <!-- Single Bottom Shader & World Progress Bar (never duplicated behind the Vincent signature) -->
+    <div id="vincent-boot-loader" class="transition-opacity duration-500">
+        <div class="studio-glass rounded-2xl px-4 py-2.5 border-amber-300/45 shadow-2xl">
+            <div class="flex items-center justify-between gap-3 text-[11px] sm:text-xs font-semibold tracking-wide">
+                <span class="text-cyan-100/95 truncate">
+                    <span id="vincent-loader-text">Optimising shaders</span><span class="inline-block w-4 text-left text-amber-300"><span class="vg-dot-1">.</span><span class="vg-dot-2">.</span><span class="vg-dot-3">.</span></span>
+                </span>
+                <span id="vincent-loader-pct" class="font-mono text-amber-300 tabular-nums shrink-0">0%</span>
             </div>
-            <div class="mt-2 w-full h-1.5 rounded-full bg-[#06102a]/90 border border-cyan-200/25 overflow-hidden">
-                <div id="boot-loading-bar" class="h-full rounded-full vg-progress-fill" style="width: 2%;"></div>
+            <div class="mt-1.5 w-full h-1.5 rounded-full bg-[#06102a]/90 border border-cyan-200/25 overflow-hidden">
+                <div id="vincent-loader-bar" class="h-full rounded-full vg-progress-fill" style="width: 2%;"></div>
             </div>
-            <div id="boot-loading-sub" class="text-[11px] text-cyan-200/85 mt-1.5 truncate">Preparing 1889 Saint-R&eacute;my impasto brushwork</div>
+            <div id="vincent-loader-stage" class="mt-1 text-[10px] text-cyan-200/75 truncate">Preparing 1889 Saint-R&eacute;my impasto canvas</div>
         </div>
     </div>
 
@@ -1490,10 +1486,6 @@
             hideFinaleControlsBar();
             overlay.classList.add('bars-open');
             document.body.classList.remove('cutscene-playing');
-            if (!window.__vgWorldReady) {
-                var bPill = document.getElementById('boot-loading-pill');
-                if (bPill) bPill.classList.add('force-visible-after-skip');
-            }
             if (state.mode !== 'finale' && window.__finishIntro3DCameraSweep) {
                 window.__finishIntro3DCameraSweep();
             }
@@ -2238,7 +2230,7 @@
         var initialSafeShaders = preCompileProfile.safeShaders;
 
         (function updateBootBannerForGpu() {
-            var bootSub = document.getElementById('boot-loading-sub');
+            var bootSub = document.getElementById('vincent-loader-stage');
             if (bootSub && initialSafeShaders) {
                 bootSub.textContent = 'Safe Shaders active (' + detectedGpuLabel + ') — compiling lightweight shaders';
             }
@@ -14791,7 +14783,7 @@
                 script: 'Saint-Rémy-de-Provence, May 1889',
                 sub: 'Charcoal Contours Awakening into Impasto',
                 quote: '“I often think that the night is more alive and more richly colored than the day.”',
-                cite: 'Vincent van Gogh · Letters to Theo',
+                cite: 'Letter 676 · Vincent to Theo · September 1888',
                 narration: 'Saint-Rémy-de-Provence, eighteen eighty-nine. Step inside Vincent van Gogh’s living canvas, as bold ink contours awaken into radiant Provençal colour and morning light.',
                 kind: 'hill_sketch',
                 fov0: 47.5, fov1: 44.5,
@@ -14807,7 +14799,7 @@
                 script: 'Irises, May 1889',
                 sub: 'Saint-Paul-de-Mausole Monastery Garden',
                 quote: '“It strikes the eye from afar. The Irises are a beautiful study full of air and life.”',
-                cite: 'Theo van Gogh to Vincent · July 1889',
+                cite: 'Letter 799 · Theo to Vincent · September 1889',
                 narration: 'Within his first week in the Saint-Paul monastery garden, Van Gogh painted Irises close to the earth, finding living rhythm in every curving violet petal.',
                 kind: 'easel', easelIdx: 0,
                 fov0: 52.0, fov1: 47.0,
@@ -14823,7 +14815,7 @@
                 script: 'Wheat Field with Cypresses, June 1889',
                 sub: 'Floating Frame · Provençal Countryside',
                 quote: '“The cypresses are always occupying my thoughts… It is a splash of black in a sunny landscape.”',
-                cite: 'Letter to Theo · 25 June 1889',
+                cite: 'Letter 783 · Vincent to Theo · June 1889',
                 narration: 'Out under the Provençal sun, intense contrasting golds and cobalt blues make the wind-swept wheat fields and flame-like cypresses vibrate with life.',
                 kind: 'easel', easelIdx: 1,
                 fov0: 53.0, fov1: 47.5,
@@ -14839,7 +14831,7 @@
                 script: 'The Olive Trees, 1889',
                 sub: 'Daylight Complement to The Starry Night',
                 quote: '“The rustle of the olive grove has something very secret in it, and immensely old.”',
-                cite: 'Letter to Theo · Saint-Rémy, 1889',
+                cite: 'Letter 763 · Vincent to Theo · April 1889',
                 narration: 'Among the western olive groves, he painted at least fifteen studies, turning gnarled silver-green boughs into continuous, shimmering waves of paint.',
                 kind: 'easel', easelIdx: 3,
                 fov0: 53.0, fov1: 47.5,
@@ -14855,7 +14847,7 @@
                 script: 'The Road Menders, December 1889',
                 sub: 'Gaslit Cobblestones & Plane Trees',
                 quote: '“In spite of everything, I shall rise again; I will take up my pencil, which I have forsaken in my great discouragement.”',
-                cite: 'Vincent van Gogh · Letters to Theo',
+                cite: 'Letter 158 · Vincent to Theo · September 1880',
                 narration: 'As twilight settles along Boulevard Mirabeau, warm gaslights kindle beneath towering plane trees, guiding our walk from golden day into starry night.',
                 kind: 'easel', easelIdx: 2,
                 fov0: 53.5, fov1: 48.0,
@@ -14871,7 +14863,7 @@
                 script: 'Saint-Paul-de-Mausole, June 1889',
                 sub: 'East-Facing Iron-Barred Window Before Sunrise',
                 quote: '“This morning I saw the countryside from my window a long time before sunrise, with nothing but the morning star, which looked very big.”',
-                cite: 'Letter 777 to Theo · Early June 1889',
+                cite: 'Letter 777 · Vincent to Theo · June 1889',
                 narration: 'Inside his austere upstairs room before dawn, Van Gogh gazed through iron bars at the blazing morning star, uniting keen observation with soaring imagination.',
                 kind: 'studio',
                 fov0: 57.5, fov1: 52.0,
@@ -14887,7 +14879,7 @@
                 script: 'The Starry Night, June 1889',
                 sub: 'Museum of Modern Art · 73.7 × 92.1 cm',
                 quote: '“Looking at the stars always makes me dream.”',
-                cite: 'Vincent van Gogh · Letter to Theo',
+                cite: 'Letter 638 · Vincent to Theo · July 1888',
                 narration: 'Out of solitude emerged The Starry Night: swirling cobalt skies, eleven luminous stars, and a vision of nature that proved Van Gogh truly ahead of his time.',
                 kind: 'finale_wall',
                 fov0: 48.5, fov1: 43.0,
@@ -16891,13 +16883,6 @@
             if (vPct)   vPct.textContent = pctStr;
             if (vStage && stageMsg) vStage.textContent = stageMsg;
             if (vText)  vText.textContent = (clamped >= 100) ? 'Shaders ready' : 'Optimising shaders';
-
-            var pBar = document.getElementById('boot-loading-bar');
-            var pPct = document.getElementById('boot-loading-pct');
-            var pSub = document.getElementById('boot-loading-sub');
-            if (pBar) pBar.style.width = Math.max(3, clamped) + '%';
-            if (pPct) pPct.textContent = pctStr;
-            if (pSub && stageMsg) pSub.textContent = stageMsg;
         }
         window.__updateBootProgress = updateBootLoadingProgress;
         updateBootLoadingProgress(4, initialSafeShaders
@@ -16913,14 +16898,6 @@
                     vBoot.style.opacity = '0';
                     setTimeout(function () { vBoot.classList.add('hidden'); }, 480);
                 }, 180);
-            }
-            var pill = document.getElementById('boot-loading-pill');
-            if (pill) {
-                pill.style.opacity = '0';
-                setTimeout(function () {
-                    pill.classList.remove('force-visible-after-skip');
-                    pill.classList.add('hidden');
-                }, 320);
             }
         }
 
